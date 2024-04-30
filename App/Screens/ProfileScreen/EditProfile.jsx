@@ -1,15 +1,23 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Image, TextInput, Alert } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import IconAntDesign from 'react-native-vector-icons/AntDesign';
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  TextInput,
+  Alert,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import IconAntDesign from "react-native-vector-icons/AntDesign";
 
 const EditProfile = () => {
   const navigation = useNavigation();
 
-  const [email, setEmail] = useState('shahd.kitany@gmail.com');
-  const [phoneNumber, setPhoneNumber] = useState('+970 59-364-7582');
-  const [password, setPassword] = useState('shahd');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [email, setEmail] = useState("shahd.kitany@gmail.com");
+  const [phoneNumber, setPhoneNumber] = useState("+970 59-364-7582");
+  const [password, setPassword] = useState("shahd");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isEditMode, setIsEditMode] = useState(false);
 
   const handleToggleEditMode = () => {
@@ -19,38 +27,45 @@ const EditProfile = () => {
   const handleSaveProfile = () => {
     // Save logic here
     if (!validateEmail(email)) {
-      Alert.alert('Invalid email address');
+      Alert.alert("Invalid email address");
       return;
     }
     if (password.length < 8) {
-      Alert.alert('Password must be at least 8 characters long');
+      Alert.alert("Password must be at least 8 characters long");
       return;
     }
     if (password !== confirmPassword) {
-      Alert.alert('Passwords do not match');
+      Alert.alert("Passwords do not match");
       return;
     }
 
     // Implement logic to update user profile on the backend server securely
 
     // Alert user on success or failure
-    Alert.alert('Profile updated successfully!');
+    Alert.alert("Profile updated successfully!");
     setIsEditMode(false);
   };
 
   const validateEmail = (email) => {
-    const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    const re =
+      /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email);
   };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.header} onPress={() => navigation.navigate('Profile')}>
+      <TouchableOpacity
+        style={styles.header}
+        onPress={() => navigation.navigate("Profile")}
+      >
         <IconAntDesign name="arrowleft" size={25} color="black" />
       </TouchableOpacity>
 
       <View style={styles.logoContainer}>
-        <Image source={require('../../../assets/logo/logo.jpg')} style={styles.logo} />
+        <Image
+          source={require("../../../assets/logo/logo.jpg")}
+          style={styles.logo}
+        />
       </View>
 
       <Text style={styles.title}>تعديل الملف الشخصي</Text>
@@ -71,7 +86,7 @@ const EditProfile = () => {
           keyboardType="phone-pad"
           maxLength={13}
           value={phoneNumber}
-          onChangeText={(text) => setPhoneNumber(text.replace(/[^0-9]/g, ''))}
+          onChangeText={(text) => setPhoneNumber(text.replace(/[^0-9]/g, ""))}
           editable={isEditMode}
         />
         <TextInput
@@ -92,8 +107,11 @@ const EditProfile = () => {
         />
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={isEditMode ? handleSaveProfile : handleToggleEditMode}>
-        <Text style={styles.buttonText}>{isEditMode ? 'حفظ' : 'تعديل'}</Text>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={isEditMode ? handleSaveProfile : handleToggleEditMode}
+      >
+        <Text style={styles.buttonText}>{isEditMode ? "حفظ" : "تعديل"}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -101,34 +119,34 @@ const EditProfile = () => {
 
 const styles = StyleSheet.create({
   header: {
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     marginTop: 30,
     marginBottom: 10,
     padding: 16,
   },
   container: {
     flex: 1,
-    backgroundColor: 'white',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
+    backgroundColor: "white",
+    alignItems: "center",
+    justifyContent: "flex-start",
     padding: 16,
   },
   logoContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginVertical: 20,
   },
   logo: {
     width: 150,
     height: 150,
     borderRadius: 100,
-    resizeMode: 'contain',
+    resizeMode: "contain",
     borderWidth: 1,
-    borderColor: '#FFA000',
+    borderColor: "#FFA000",
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#ffa500',
+    fontWeight: "bold",
+    color: "#ffa500",
     margin: 10,
     marginBottom: 50,
   },
@@ -138,24 +156,24 @@ const styles = StyleSheet.create({
     margin: 10,
     padding: 10,
     borderWidth: 1,
-    borderColor: '#0abae4',
+    borderColor: "#0abae4",
     borderRadius: 10,
-    textAlign: 'right',
+    textAlign: "right",
   },
   button: {
-    width: '80%',
+    width: "80%",
     height: 40,
-    backgroundColor: '#ffa500',
+    backgroundColor: "#ffa500",
     borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     margin: 10,
     marginTop: 60,
   },
   buttonText: {
     fontSize: 18,
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
   },
 });
 

@@ -1,15 +1,15 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Footer from '../../Common/Footer/Footer';
 import Header from '../../Common/Header/Header';
+import Footer from '../../Common/Footer/Footer';
 import Colors from '../../Common/Utils/Colors';
 
-const From0To2 = () => {
+const YoungAdults = () => {
   return (
     <View style={{ flex: 1 }}>
       <Header />
-      <Text style={styles.title}>من الولادة إلى 2 سنة</Text>
-      <Text style={styles.text}>هذا التصنيف للأطفال من الولادة إلى 2 سنة</Text>
+      <Text style={styles.title}>الفئة العمرية الشابة</Text>
+      <Text style={styles.text}>هذا التصنيف مخصص للكتب الموجهة للفئة العمرية الشابة</Text>
       <Footer />
     </View>
   );
@@ -31,4 +31,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default From0To2;
+export default YoungAdults;

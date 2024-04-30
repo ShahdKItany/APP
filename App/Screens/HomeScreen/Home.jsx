@@ -189,7 +189,7 @@ const Home = () => {
       <Header showBackButton={true} />
       <Navbar />
 
-      <View style={{ flex: 1, paddingHorizontal: 10 }}>
+      <View style={{ flex: 1, paddingHorizontal: 10, marginBottom:50 }}>
         <FlatList
           data={books}
           renderItem={({ item }) => (
@@ -226,6 +226,7 @@ const styles = StyleSheet.create({
     shadowOffset: {
       width: 0,
       height: 2,
+      
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,

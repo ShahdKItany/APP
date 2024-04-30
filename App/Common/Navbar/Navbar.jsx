@@ -1,27 +1,24 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
-import { useNavigation } from '@react-navigation/native'; // Import useNavigation hook
+import { useNavigation } from '@react-navigation/native'; 
 import Colors from '../Utils/Colors';
 
 const Navbar = () => {
-  const [activeTab, setActiveTab] = useState('New'); // State to track the active tab
-  const navigation = useNavigation(); // Get navigation object
+  const [activeTab, setActiveTab] = useState('New'); 
+  const navigation = useNavigation(); 
 
-  // Define tab data
   const tabs = [
     { id: 'New', title: 'جديد', screen: 'New' },
     { id: 'Discount', title: 'خصومات', screen: 'Discount' },
     { id: 'Home', title: 'الكل', screen: 'Home' },
   ];
 
-  // Function to handle tab press
   const handleTabPress = (tabId) => {
-    setActiveTab(tabId); // Set the active tab based on tabId
+    setActiveTab(tabId); 
 
-    // Determine the screen to navigate to based on tabId
     const selectedTab = tabs.find((tab) => tab.id === tabId);
     if (selectedTab) {
-      navigation.navigate(selectedTab.screen); // Navigate to the corresponding screen
+      navigation.navigate(selectedTab.screen); 
     }
   };
 

@@ -1,4 +1,5 @@
-//App.js
+// App.js
+
 import React from "react";
 import { Provider } from "react-redux";
 import { NavigationContainer } from "@react-navigation/native";
@@ -18,9 +19,14 @@ import Profile from "./App/Screens/ProfileScreen/Profile";
 import EditProfile from "./App/Screens/ProfileScreen/EditProfile";
 import WishList from "./App/Screens/WishList/WishList";
 import BookDetails from "./App/Screens/BookDetails/BookDetails";
-import From0To2 from "./App/Screens/CategoriesScreen/From0To2.jsx";
-import store, { persistor } from "./App/redux/store.jsx";
-//import store from './App/Redux/store'; // استيراد المتجر Redux
+import From0To2 from "./App/Screens/CategoriesScreen/From0To2";
+import From9To12 from "./App/Screens/CategoriesScreen/From9To12";
+import From2To4 from "./App/Screens/CategoriesScreen/From2To4";
+import From3To6 from "./App/Screens/CategoriesScreen/From3To6";
+import InteractiveBooks from "./App/Screens/CategoriesScreen/InteractiveBooks";
+import YoungAdults from "./App/Screens/CategoriesScreen/YoungAdults";
+
+import store, { persistor } from "./App/redux/store";
 import { PersistGate } from "redux-persist/integration/react";
 
 const Stack = createStackNavigator();
@@ -78,11 +84,12 @@ const App = () => {
               component={BookDetails}
               options={{ footer: () => <Footer /> }}
             />
-            <Stack.Screen
-              name="From0To2"
-              component={From0To2}
-              options={{ footer: () => <Footer /> }}
-            />
+            <Stack.Screen name="From0To2" component={From0To2} />
+            <Stack.Screen name="From2To4" component={From2To4} />
+            <Stack.Screen name="From3To6" component={From3To6} />
+            <Stack.Screen name="From9To12" component={From9To12} />
+            <Stack.Screen name="InteractiveBooks" component={InteractiveBooks} />
+            <Stack.Screen name="YoungAdults" component={YoungAdults} />
             <Stack.Screen
               name="Cart"
               component={Cart}
@@ -98,3 +105,4 @@ const App = () => {
 };
 
 export default App;
+

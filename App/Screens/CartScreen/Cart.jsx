@@ -35,7 +35,7 @@ const Cart = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <Header title="Cart" color="#f93a8f" />
+        <Header title="عربة التسوق" color="#f93a8f" />
 
         {books?.map((item, index) => (
           <View key={index} style={styles.bookDetails}>

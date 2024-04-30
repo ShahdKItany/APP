@@ -71,19 +71,16 @@ const BookDetails = ({ route, navigation }) => {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.container}>
-        {/* Display Book Image */}
+       
         <Image source={image} style={styles.bookImage} />
 
-        {/* Display Book Title */}
+       
         <Text style={styles.title}>{title}</Text>
 
-        {/* Display Book Price */}
         <Text style={styles.price}>السعر: ₪{price}</Text>
 
-        {/* Display Book Details */}
         <Text style={styles.details}>{details}</Text>
 
-        {/* Add to Cart and Add to Favorites Buttons */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={handleAddToCart}>
             <FontAwesomeIcon icon={faShoppingCart} style={styles.buttonIcon} />
@@ -100,6 +97,7 @@ const BookDetails = ({ route, navigation }) => {
 
         {/* Comments Section */}
         <View style={styles.commentsContainer}>
+          
           <Text style={styles.commentsTitle}>التعليقات</Text>
           {comments.map((comment, index) => (
             <Text key={index} style={styles.commentText}>

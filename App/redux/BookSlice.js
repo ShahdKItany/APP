@@ -1,5 +1,5 @@
+// BookSlice.js
 import { createSlice } from "@reduxjs/toolkit";
-import { Alert } from "react-native";
 
 const initialState = {
   books: [],
@@ -14,12 +14,6 @@ export const BookSlice = createSlice({
       const { id } = action.payload;
       const existingBook = state.books.find((book) => book.id === id);
       if (existingBook) {
-        // Item already exists in the cart, you can update its quantity here if needed
-        // For example: existingBook.quantity += 1;
-        // Alternatively, you can return early without adding it again
-        Alert.alert("Duplicate Item", "This item is already in your cart.", [
-          { text: "OK", onPress: () => {} },
-        ]);
         return;
       }
       state.books.push(action.payload);
@@ -71,7 +65,6 @@ export const {
 } = BookSlice.actions;
 
 export const selectTotalPrice = (state) => state.books.totalPrice;
-
-export const selectBooksInCart = (state) => state.book.books;
+export const selectBooksInCart = (state) => state.books.books;
 
 export default BookSlice.reducer;

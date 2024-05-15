@@ -1,89 +1,54 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { removeFromWishlist } from '../../redux/actions/wishlistActions';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-const wishlistItems = useSelector((state) => state.wishlistReducer?.wishlistItems ?? []);
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { useDispatch } from 'react-redux';
+import { addToWishlist } from './WishlistActions';
 
-
-const WishlistItems = () => {
-  //const wishlistItems = useSelector((state) => state.wishlistReducer.wishlistItems);
+const WishlistItems = ({ book }) => {
   const dispatch = useDispatch();
 
-  const handleRemoveFromWishlist = (item) => {
-    dispatch(removeFromWishlist(item));
-    // You can display a confirmation message here
-    alert('تمت إزالة الكتاب من المفضلة!');
+  const handleAddToWishlist = () => {
+    dispatch(addToWishlist(book));
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>قائمة المفضلة</Text>
-      {wishlistItems.map((item, index) => (
-        <View key={index} style={styles.bookItem}>
-          <Image source={item.image} style={styles.bookImage} />
-          <View style={styles.bookDetails}>
-            <Text style={styles.bookTitle}>{item.title}</Text>
-            <Text style={styles.bookPrice}>السعر: ₪{item.price}</Text>
-          </View>
-          <TouchableOpacity
-            style={styles.removeButton}
-            onPress={() => handleRemoveFromWishlist(item)}
-          >
-            <Text style={styles.removeButtonText}>إزالة</Text>
-          </TouchableOpacity>
-         
-        </View>
-      ))}
-      
-    </View>
+    <TouchableOpacity style={styles.bookContainer}>
+      <Image source={book.image} style={styles.bookImage} />
+      <Text style={styles.title}>{book.title}</Text>
+      <Text style={styles.price}>₪{book.price}</Text>
+      <TouchableOpacity style={styles.addButton} onPress={handleAddToWishlist}>
+        <Text style={styles.buttonText}>Add to Wishlist</Text>
+      </TouchableOpacity>
+    </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
+  bookContainer: {
     alignItems: 'center',
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
     marginBottom: 20,
   },
-  bookItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'gray',
-    padding: 10,
-    marginBottom: 10,
-  },
   bookImage: {
-    width: 80,
-    height: 120,
-    resizeMode: 'cover',
-    marginRight: 10,
+    width: 120,
+    height: 160,
+    borderRadius: 10,
   },
-  bookDetails: {
-    flex: 1,
-  },
-  bookTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  bookPrice: {
+  title: {
     fontSize: 16,
-    color: 'blue',
-    marginBottom: 5,
+    fontWeight: 'bold',
+    marginTop: 10,
   },
-  removeButton: {
-    backgroundColor: 'red',
-    padding: 8,
+  price: {
+    fontSize: 14,
+    color: 'gray',
+  },
+  addButton: {
+    marginTop: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    backgroundColor: 'blue',
     borderRadius: 5,
   },
-  removeButtonText: {
+  buttonText: {
     color: 'white',
     fontWeight: 'bold',
   },

@@ -28,8 +28,10 @@ import YoungAdults from "./App/Screens/CategoriesScreen/YoungAdults";
 
 import store, { persistor } from "./App/redux/store";
 import { PersistGate } from "redux-persist/integration/react";
+import CheckoutScreen from "./App/Screens/CheckoutScreen/CheckoutScreen";
 
 const Stack = createStackNavigator();
+
 
 const App = () => {
   return (
@@ -97,6 +99,8 @@ const App = () => {
                 footer: () => <Footer navigation={navigation} />,
               })}
             />
+            <Stack.Screen name="CheckoutScreen" component={CheckoutScreen} />
+
           </Stack.Navigator>
         </NavigationContainer>
       </PersistGate>

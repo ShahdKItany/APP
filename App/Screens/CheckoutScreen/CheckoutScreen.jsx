@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, ScrollView, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, ScrollView, Text, TextInput, TouchableOpacity, Alert, Image } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { removeFromCart, selectBooksInCart, clearCart } from '../../redux/BookSlice';
 import Colors from '../../Common/Utils/Colors';
@@ -13,7 +13,47 @@ const CheckoutScreen = ({ navigation }) => {
   const [street, setStreet] = useState('');
   const [discountCode, setDiscountCode] = useState('');
 
-  // Define delivery charges based on the selected region
+  const handlePurchase = () => {
+    if (!region || !city || !street) {
+      Alert.alert('خطأ', 'يرجى اختيار المنطقة والمدينة وإدخال الشارع لإكمال الشراء');
+      return;
+    }
+
+    Alert.alert(
+      'تأكيد الشراء',
+      'هل ترغب في إكمال عملية الشراء؟',
+      [
+        {
+          text: 'إلغاء',
+          style: 'cancel',
+        },
+        {
+          text: 'موافق',
+          onPress: () => completePurchase(),
+        },
+      ]
+    );
+  };
+
+  const completePurchase = () => {
+    dispatch(clearCart());
+    Alert.alert('تمت العملية بنجاح', 'تمت عملية الشراء بنجاح!');
+    navigation.goBack();
+  };
+
+  const getCityOptions = () => {
+    switch (region) {
+      case 'The West Bank':
+        return ['Tulkarm', 'Qalqilya', 'Nablus', 'Jericho', 'Jenin', 'Salfit', 'Ramallah'];
+      case 'The occupied interior':
+        return ['Jaffa', 'Haifa', 'Lod', 'Acre'];
+      case 'Jerusalem':
+        return ['Abu Dis', 'Sheikh Jarrah', 'Mount of Olives'];
+      default:
+        return [];
+    }
+  };
+
   const getDeliveryCharge = () => {
     switch (region) {
       case 'The West Bank':
@@ -27,36 +67,30 @@ const CheckoutScreen = ({ navigation }) => {
     }
   };
 
-  // Calculate total price including delivery charges
-  const totalPrice = books.reduce((total, item) => total + parseFloat(item.price) * item.quantity, 0) + getDeliveryCharge();
-
-  const handlePurchase = () => {
-    // Process purchase logic here
-    // For example, call an API to complete the order
-
-    // Clear cart after purchase
-    dispatch(clearCart());
-
-    // Show success message
-    Alert.alert('تمت العملية بنجاح', 'تمت عملية الشراء بنجاح!');
-
-    navigation.goBack(); // Navigate back to previous screen
-  };
+  const deliveryCharge = getDeliveryCharge();
+  const totalPriceBeforeDiscount = books.reduce((total, item) => total + parseFloat(item.price) * item.quantity, 0) + deliveryCharge;
+  let totalPriceAfterDiscount = totalPriceBeforeDiscount;
+  if (discountCode === 'shahd1') {
+    totalPriceAfterDiscount *= 0.25;
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: 'white', padding: 20 }}>
       <ScrollView>
-        {/* Display book details if books array is defined */}
+     
+        {/* Display books with images */}
         {books && books.map((item, index) => (
-          <View key={index}>
-            <Text>{item.title}</Text>
-            <Text>الكمية: {item.quantity}</Text>
-            {/* Display more book details as needed */}
+          <View key={index} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+            <Image source={{ uri: item.image }} style={{ width: 50, height: 50, marginRight: 10 }} />
+            <View>
+              <Text>{item.title}</Text>
+              <Text>الكمية: {item.quantity}</Text>
+            </View>
           </View>
         ))}
 
-        {/* Region selection using Picker */}
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        {/* Region selection */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 20 }}>
           <Text>اختر المنطقة:</Text>
           <Picker
             selectedValue={region}
@@ -70,18 +104,20 @@ const CheckoutScreen = ({ navigation }) => {
         </View>
 
         {/* City selection */}
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
           <Text>اختر المدينة:</Text>
           <Picker
             selectedValue={city}
             onValueChange={(itemValue, itemIndex) => setCity(itemValue)}
             style={{ width: 200 }}
           >
-            {/* City options will be dynamically populated based on the selected region */}
+            {getCityOptions().map((cityOption, index) => (
+              <Picker.Item key={index} label={cityOption} value={cityOption} />
+            ))}
           </Picker>
         </View>
 
-        {/* Street */}
+        {/* Street input */}
         <Text>الحي أو الشارع:</Text>
         <TextInput
           placeholder="الحي أو الشارع"
@@ -90,7 +126,7 @@ const CheckoutScreen = ({ navigation }) => {
           style={{ borderWidth: 1, borderColor: Colors.GRAY, padding: 10, marginBottom: 10 }}
         />
 
-        {/* Discount code */}
+        {/* Discount code input */}
         <Text>أدخل كود الخصم:</Text>
         <TextInput
           placeholder="كود الخصم"
@@ -99,11 +135,15 @@ const CheckoutScreen = ({ navigation }) => {
           style={{ borderWidth: 1, borderColor: Colors.GRAY, padding: 10, marginBottom: 10 }}
         />
 
-        {/* Display delivery charge */}
-        <Text>تكلفة التوصيل: {getDeliveryCharge()}</Text>
-
-        {/* Display total price including delivery */}
-        <Text>المجموع النهائي: {totalPrice}</Text>
+        {/* Display prices */}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
+          <Text>السعر قبل الخصم:</Text>
+          <Text>{totalPriceBeforeDiscount}</Text>
+        </View>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 }}>
+          <Text>السعر بعد الخصم:</Text>
+          <Text>{totalPriceAfterDiscount}</Text>
+        </View>
 
         {/* Purchase button */}
         <TouchableOpacity
@@ -118,5 +158,3 @@ const CheckoutScreen = ({ navigation }) => {
 };
 
 export default CheckoutScreen;
-
-

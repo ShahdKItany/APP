@@ -36,7 +36,7 @@ const Signup = () => {
     >
       <ScrollView contentContainerStyle={styles.scrollView}>
         <View style={styles.header}>
-          <TouchableOpacity style={styles.header} onPress={() => navigation.navigate('Login')}>
+          <TouchableOpacity style={styles.header} onPress={() => navigation.navigate('Signin')}>
             <IconAntDesign name="arrowleft" size={25} color="black" />
           </TouchableOpacity>
         </View>

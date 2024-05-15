@@ -1,24 +1,13 @@
-// WishlistReducer.jsx
-
-
-
-import { ADD_TO_WISHLIST } from '../../redux/Actions';
-import WishList from './WishList';
-
 const initialState = {
-  cartItems: [],
+  WishlistItems: [],
 };
 
-const WishlistReduce = (state = initialState, action) => {
+const WishlistReducer = (state = initialState, action) => {
   switch (action.type) {
-    case ADD_TO_WISHLIST:
-      return {
-        ...state,
-        cartItems: [...state.cartItems, action.payload],
-      };
+    // Handle ADD_TO_WISHLIST and REMOVE_FROM_WISHLIST actions
     default:
       return state;
   }
 };
 
-export default WishlistReduce;
+export default WishlistReducer;

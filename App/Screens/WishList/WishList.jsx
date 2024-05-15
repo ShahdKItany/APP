@@ -1,9 +1,15 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { View, Text, StyleSheet } from 'react-native';
+import { useSelector } from 'react-redux';
+
+
 
 const WishList = () => {
-  const wishlistItems = useSelector((state) => state.wishlistReducer.wishlistItems);
+  const wishlistItems = useSelector(state => state.wishlistReducer?.wishlistItems ?? []);
+
+  if (wishlistItems.length === 0) {
+    return <Text style={styles.title}>قائمة المفضلة فارغة</Text>;
+  }
 
   return (
     <View style={styles.container}>
@@ -12,12 +18,13 @@ const WishList = () => {
         <View key={index} style={styles.bookItem}>
           <Text>{item.title}</Text>
           <Text>{item.price}</Text>
-          {/* يمكنك عرض صورة الكتاب هنا */}
-        </View>
-      ))}
-    </View>
-  );
-};
+          </View>
+        ))}
+      </View>
+    );
+  };
+  
+
 
 const styles = StyleSheet.create({
   container: {

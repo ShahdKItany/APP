@@ -31,44 +31,32 @@ const Home = () => {
   const books = [
     {
       id: "1",
-      title: "اكتشف وتلمس الحيوانات",
-      price: 10.99,
+      title: "  بعيداً عن العالم",
+      price: 30,
       details: "Details of Book 1",
       image: require("../../../assets/Book Images/34.jpg"),
     },
     {
       id: "2",
-      title: "الرسوم المتحركة",
+      title: "أول 100 كلمة",
       price: 12.99,
       details:
-        "يعد هذا الكتاب رفيقًا مثاليًا لتعليم الأطفال فوائد الصيام وأهمية شهر رمضان المبارك بطريقة ممتعة وتفاعلية. يعيش الطفل تجربة رمضان مع الشخصيات الرائعة أحمد وزهراء من خلال الصور الجميلة والأنشطة المسلية.  صف لكتاب أول 100 كلمة",
+        "يعد هذا الكتاب رفيقًا مثاليًا لتعليم الأطفال فوائد الصيام وأهمية شهر رمضان المبارك بطريقة ممتعة وتفاعلية. يعيش الطفل تجربة رمضان مع الشخصيات الرائعة أحمد وزهراء من خلال الصور الجميلة والأنشطة المسلية",
       image: require("../../../assets/Book Images/1.jpeg"),
     },
     {
       id: "3",
-      title: "الرؤية, الإحساس, الألوان",
+      title: "القطة ",
       price: 9.99,
       details: "Details of Book 3",
       image: require("../../../assets/Book Images/40.jpg"),
     },
-    {
-      id: "4",
-      title: "التعليم أولا( الكلمات الاولى)",
-      price: 10.99,
-      details: "Details of Book 1",
-      image: require("../../../assets/Book Images/38.jpg"),
-    },
-    {
-      id: "5",
-      title: "وقت النوم ",
-      price: 12.99,
-      details: "Details of Book 2",
-      image: require("../../../assets/Book Images/1.jpeg"),
-    },
+    
+  
     {
       id: "6",
-      title: "أول 100 كلمة",
-      price: 9.99,
+      title: "أبيض فقط!",
+      price: 40,
       details: "Details of Book 3",
       image: require("../../../assets/Book Images/4.jpeg"),
     },
@@ -78,6 +66,13 @@ const Home = () => {
       price: 10.99,
       details: "Details of Book 1",
       image: require("../../../assets/Book Images/16.jpg"),
+    },
+    {
+      id: "4",
+      title: "الرؤية, الإحساس, الألوان",
+      price: 10.99,
+      details: "Details of Book 1",
+      image: require("../../../assets/Book Images/38.jpg"),
     },
     {
       id: "8",
@@ -106,6 +101,13 @@ const Home = () => {
       price: 12.99,
       details: "Details of Book 2",
       image: require("../../../assets/Book Images/37.jpg"),
+    },
+    {
+      id: "5",
+      title: "وقت النوم ",
+      price: 12.99,
+      details: "Details of Book 2",
+      image: require("../../../assets/Book Images/1.jpeg"),
     },
     {
       id: "12",

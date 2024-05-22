@@ -5,5 +5,7 @@ export default{
     ORANGE:'#FFA500',
     //GRAY:'#F1EBEA'
    // GRAY:'#F5CBA7'
-   GRAY:'#D6DBDF'
+   GRAY:'#D6DBDF',
+   //YELLOW:'#FFD700'
+   YELLOW:'#F6C324'
 }

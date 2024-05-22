@@ -7,7 +7,7 @@ const menuItems = [
   { id: '1', title: 'تعديل الملف الشخصي', icon: 'edit' },
   { id: '2', title: 'قائمة المفضلة', icon: 'heart' },
   { id: '3', title: 'عربة التسوق', icon: 'shopping-cart' },
-  { id: '4', title: 'الوضع المظلم', icon: 'moon-o' },
+  // { id: '4', title: 'الوضع المظلم', icon: 'moon-o' },
   { id: '5', title: 'تواصل معنا', icon: 'phone' },
 ];
 
@@ -59,8 +59,8 @@ const Profile = ({ navigation }) => {
                  openEditProfilePage();
               } else if (item.title === 'عربة التسوق') {
                 openCartPage();
-              } else if (item.title === 'الوضع المظلم') {
-                toggleDarkMode();
+              // } else if (item.title === 'الوضع المظلم') {
+              //   toggleDarkMode();
               } else if (item.title === 'قائمة المفضلة') {
                 openWishListPage();              }
             }}
@@ -107,7 +107,11 @@ const Profile = ({ navigation }) => {
             );
           }}
         >
+
+
           <Text style={styles.buttonText}>تسجيل الخروج</Text>
+
+          
         </TouchableOpacity>
       </View>
     </View>
@@ -117,19 +121,21 @@ const Profile = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.LIGHT_GRAY,
+   // backgroundColor: Colors.LIGHT_GRAY,
+   backgroundColor:Colors.WHITE,
     alignItems: 'center',
     justifyContent: 'center',
   },
   logoContainer: {
     alignItems: 'center',
-    marginTop: 50,
   },
   logo: {
     width: 150,
     height: 150,
-    borderRadius: 75,
-    resizeMode: 'cover',
+    borderRadius: 100,
+    resizeMode: "contain",
+    borderWidth: 1,
+    borderColor:Colors.PINK,
   },
   title: {
     fontSize: 24,
@@ -161,16 +167,7 @@ const styles = StyleSheet.create({
   icon: {
     marginRight: 10,
   },
-  button: {
-    backgroundColor: Colors.ORANGE,
-    borderRadius: 10,
-    paddingVertical: 16,
-    paddingHorizontal: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginVertical: 20,
-    width: '100%',
-  },
+
   buttonText: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -198,21 +195,24 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: Colors.WHITE,
   },
-  logoutButton: {
-    backgroundColor: Colors.RED,
-    borderRadius: 10,
-    paddingVertical: 16,
-    paddingHorizontal: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginVertical: 20,
-    width: '100%',
-  },
+
+  
   cancelButtonText: {
 fontSize:20,
 fontWeight: 'bold',
 
   },
+  logoutButton: {
+    backgroundColor: Colors.PINK,
+    borderRadius: 20, // Adjust the value to your preference
+    paddingVertical: 5,
+//paddingHorizontal: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 20,
+    width: '70%',
+    marginTop:40
+  }
  
 });
 

@@ -1,22 +1,22 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { useNavigation } from '@react-navigation/native'; // Import useNavigation hook
+import { useNavigation } from '@react-navigation/native';
 import Colors from '../Utils/Colors';
 
 const Footer = () => {
-  const navigation = useNavigation(); // Get navigation object
+  const navigation = useNavigation();
 
   const goToHome = () => {
-    navigation.navigate('Home'); // Navigate to Home screen
+    navigation.navigate('Home');
   };
 
   const goToCart = () => {
-    navigation.navigate('Cart'); // Navigate to Cart screen
+    navigation.navigate('Cart');
   };
 
   const goToCategories = () => {
-    navigation.navigate('Categories'); // Navigate to Categories screen
+    navigation.navigate('Categories');
   };
 
   return (
@@ -42,23 +42,21 @@ const Footer = () => {
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    bottom: 1,
-    width: '90%',
+    bottom: 0,
+    width: '100%',
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: Colors.BLUE,
-    paddingVertical: 10,
+    height: 60, // Adjust the height as needed
     paddingHorizontal: 20,
-    borderRadius:70,
-    paddingBottom:25,
-    marginLeft:20,
-    marginRight:5
-    
   },
   iconContainer: {
+    flex: 1,
     alignItems: 'center',
+    paddingBottom: 10, // Add paddingTop to move icons up
+
   },
 });
 
-export default Footer;   
+export default Footer;

@@ -1,21 +1,45 @@
-// App Screens SigninScreen Signin.jsx
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useDispatch, useSelector } from 'react-redux';
+import { saveToken } from '../../redux/BookSlice'; // Import the saveToken function from BookSlice
+import axios from 'axios';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import Home from '../../Screens/HomeScreen/Home'
+import { useNavigation } from '@react-navigation/native';
+import { selectToken } from '../../redux/BookSlice'; // Import the selectToken selector from BookSlice
+
 const Signin = () => {
+  const dispatch = useDispatch();
   const navigation = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleLogin = () => {
-    if (email === '' || password === '') {
-      setError('يرجى التأكد من إدخال معلوماتك بشكل صحيح');
-    } else {
-      setError('');
-      navigation.navigate('Home');
+  const token = useSelector(selectToken); // Retrieve token from Redux state
+
+  const handleLogin = async () => {
+    try {
+      if (email === '' || password === '') {
+        setError('يرجى التأكد من إدخال معلوماتك بشكل صحيح');
+      } else {
+        setError('');
+        const response = await axios.post('https://ecommercebackend-jzct.onrender.com/auth/login', {
+          email,
+          password
+        });
+
+        const { token, message } = response.data;
+
+        if (token) {
+          dispatch(saveToken(token)); // Save token to Redux state
+          navigation.navigate('Home'); // Navigate to Home screen after successful login
+       console.log(token);
+        } else {
+          setError(message || 'حدث خطأ أثناء عملية تسجيل الدخول');
+        }
+      }
+    } catch (error) {
+      console.error('Error logging in:', error);
+      setError('حدث خطأ أثناء عملية تسجيل الدخول');
     }
   };
 
@@ -73,8 +97,14 @@ const Signin = () => {
   );
 };
 
-
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'white',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    padding: 50,
+  },
   logoContainer: {
     alignItems: 'center',
     marginVertical: 20,
@@ -86,16 +116,6 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     borderWidth: 1,
     borderColor: '#FFA000',
-  },
-  content: {
-    marginTop: 50,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: 'white',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    padding: 50,
   },
   title: {
     fontSize: 24,
@@ -109,6 +129,9 @@ const styles = StyleSheet.create({
     color: '#f93a8f',
     marginTop: 10,
     marginBottom: 20,
+  },
+  content: {
+    marginTop: 50,
   },
   inputContainer: {
     flexDirection: 'row',

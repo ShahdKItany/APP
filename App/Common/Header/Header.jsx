@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Colors from '../Utils/Colors';
-import Profile from '../../Screens/ProfileScreen/Profile';
 
 const Header = ({ title }) => {
   const navigation = useNavigation();
@@ -17,7 +16,7 @@ const Header = ({ title }) => {
     <View style={styles.header}>
       {/* Right side with profile icon */}
       <TouchableOpacity style={styles.profileContainer} onPress={handleProfilePress}>
-        <Icon name="user" size={35} color={Colors.WHITE} />
+        <Icon name="user" size={40} color={Colors.WHITE} />
       </TouchableOpacity>
 
       {/* Left side with logo and title */}
@@ -38,13 +37,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    height: 140,
+    height: 130,
     paddingHorizontal: 20,
     backgroundColor: Colors.BLUE,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
-    borderEndStartRadius: 60,
-    borderEndEndRadius: 60,
+    borderBottomStartRadius: 60,
+    borderBottomEndRadius: 60,
   },
   leftContainer: {
     flexDirection: 'row',
@@ -54,7 +53,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 50,
-    marginTop:22
+    marginTop: 22,
   },
   title: {
     fontSize: 20,
@@ -64,8 +63,7 @@ const styles = StyleSheet.create({
   profileContainer: {
     padding: 10,
     borderRadius: 20,
-    marginTop:22
-
+    marginTop: 22,
   },
 });
 

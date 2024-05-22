@@ -1,3 +1,9 @@
+
+//git add .
+//git commit -m "changes" 
+//git push -u origin main
+//______________________________________________
+
 // App.js
 
 import React from "react";
@@ -28,7 +34,7 @@ import YoungAdults from "./App/Screens/CategoriesScreen/YoungAdults";
 
 import store, { persistor } from "./App/redux/store";
 import { PersistGate } from "redux-persist/integration/react";
-import CheckoutScreen from "./App/Screens/CheckoutScreen/CheckoutScreen";
+import OrderScreen from "./App/Screens/OrderScreen/OrderScreen";
 
 const Stack = createStackNavigator();
 
@@ -39,7 +45,7 @@ const App = () => {
       <PersistGate loading={null} persistor={persistor}>
         <NavigationContainer>
           <Stack.Navigator
-            initialRouteName="Home"
+            initialRouteName="Login"
             screenOptions={{ headerShown: false }}
           >
             <Stack.Screen name="Login" component={Login} />
@@ -99,7 +105,7 @@ const App = () => {
                 footer: () => <Footer navigation={navigation} />,
               })}
             />
-            <Stack.Screen name="CheckoutScreen" component={CheckoutScreen} />
+            <Stack.Screen name="OrderScreen" component={OrderScreen} />
 
           </Stack.Navigator>
         </NavigationContainer>

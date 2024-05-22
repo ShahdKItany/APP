@@ -10,7 +10,7 @@ const CheckoutScreen = ({ navigation }) => {
 
   const [region, setRegion] = useState('');
   const [city, setCity] = useState('');
-  const [notes, setNotes] = useState('');
+ // const [notes, setNotes] = useState('');
   const [discountCode, setDiscountCode] = useState('');
   const [totalPrice, setTotalPrice] = useState(0);
 
@@ -68,7 +68,8 @@ const CheckoutScreen = ({ navigation }) => {
           style={{ borderWidth: 1, borderColor: Colors.GRAY, padding: 10, marginBottom: 10 }}
         />
 
-        {/* Notes */}
+       {/*
+        Notes
         <Text>ملاحظات:</Text>
         <TextInput
           placeholder="ملاحظات"
@@ -76,6 +77,7 @@ const CheckoutScreen = ({ navigation }) => {
           onChangeText={(text) => setNotes(text)}
           style={{ borderWidth: 1, borderColor: Colors.GRAY, padding: 10, marginBottom: 10 }}
         />
+      */}
 
         {/* Discount code */}
         <Text>أدخل كود الخصم:</Text>

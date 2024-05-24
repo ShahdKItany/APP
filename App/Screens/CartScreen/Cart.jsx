@@ -19,6 +19,20 @@ const Cart = ({ navigation }) => {
   const books = useSelector(selectBooksInCart);
   const totalPrice = useSelector(selectTotalPrice);
 
+
+  const handleDelete = (itemId) => {
+    Alert.alert(
+      'تأكيد الحذف',
+      'هل أنت متأكد أنك تريد حذف هذا الكتاب من عربة التسوق؟',
+      [
+        { text: 'إلغاء', onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
+        { text: 'حذف', onPress: () => dispatch(removeFromCart(itemId)) },
+      ],
+      { cancelable: false }
+    );
+  };
+
+
   const handleOrder = () => {
     if (books.length === 0) {
       Alert.alert('العربة فارغة', 'الرجاء إضافة كتب إلى عربة التسوق قبل إتمام عملية الشراء.');
@@ -35,7 +49,7 @@ const Cart = ({ navigation }) => {
           <Text style={styles.bookTitle}>{item.title}</Text>
           <View style={styles.bookInfo}>
             <View style={styles.buttonsContainer}>
-              <TouchableOpacity style={styles.removeButton} onPress={() => dispatch(removeFromCart(item.id))}>
+              <TouchableOpacity style={styles.removeButton} onPress={() => handleDelete(item.id)}>
                 <Text style={styles.buttonText}>حذف</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.quantityButton} onPress={() => dispatch(incrementQuantity(item.id))}>

@@ -19,11 +19,16 @@ export default function Login() {
         style={styles.loginImage}
       />
       <View style={styles.subContainer}>
+        
+        {/* <Text style={styles.headerText}>
+        Kids Skills 
+        </Text> */}
         <Text style={styles.headerText}>
-          اجعل قراءة الكتب هو أفضل هدية لأطفالك
-        </Text>
+        حب التعلم هو أفضل هدية يمكننا تقديمها لأطفالنا .      
+                    </Text>
         <Text style={styles.subHeaderText}>
-          ستجد في هذا التطبيق كل ما يلزم لتعليم أطفالك منذ الولادة إلى سن السادسة عشر
+          {/* ستجد في هذا التطبيق كل ما يلزم لتعليم أطفالك منذ الولادة إلى سن السادسة عشر */}
+          نفتح أبواب المعرفة بحب ونغرسها في قلوب أطفالكم من عمر سنة إلى 16 سنة!
         </Text>
         <TouchableOpacity style={styles.button} onPress={handleNavigate}>
           <Text style={styles.buttonText}>

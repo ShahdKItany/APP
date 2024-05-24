@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
   },
   price: {
     fontSize: 18,
-    color: Colors.BLUE,
+    color: Colors.ORANGE,
     textAlign: "center",
     marginBottom: 10,
     fontWeight: "bold",

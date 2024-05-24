@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { saveToken } from '../../redux/BookSlice'; // Import the saveToken function from BookSlice
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform, ActivityIndicator, Alert } from 'react-native';
+import { useDispatch } from 'react-redux';
+import { saveToken } from '../../redux/BookSlice';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
-import { selectToken } from '../../redux/BookSlice'; // Import the selectToken selector from BookSlice
 
 const Signin = () => {
   const dispatch = useDispatch();
@@ -13,33 +12,43 @@ const Signin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-
-  const token = useSelector(selectToken); // Retrieve token from Redux state
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    try {
-      if (email === '' || password === '') {
-        setError('يرجى التأكد من إدخال معلوماتك بشكل صحيح');
-      } else {
-        setError('');
+    if (email === '' || password === '') {
+      setError('الرجاء تعبئة جميع الحقول');
+    } else {
+      setError('');
+      setLoading(true);
+      try {
         const response = await axios.post('https://ecommercebackend-jzct.onrender.com/auth/login', {
           email,
           password
         });
 
-        const { token, message } = response.data;
+        const { token } = response.data;
 
-        if (token) {
-          dispatch(saveToken(token)); // Save token to Redux state
-          navigation.navigate('Home'); // Navigate to Home screen after successful login
-       console.log(token);
+        // حفظ token في Redux state
+        dispatch(saveToken(token));
+
+        Alert.alert('Login successful', 'تم تسجيل الدخول بنجاح', [
+          { text: 'OK', onPress: () => navigation.navigate('Home') }
+        ]);
+      } catch (error) {
+        console.error('Error signing in:', error);
+        if (error.response) {
+          console.error('Response data:', error.response.data);
+          console.error('Response status:', error.response.status);
+          console.error('Response headers:', error.response.headers);
+        } else if (error.request) {
+          console.error('Request data:', error.request);
         } else {
-          setError(message || 'حدث خطأ أثناء عملية تسجيل الدخول');
+          console.error('Error message:', error.message);
         }
+        setError('حدث خطأ أثناء تسجيل الدخول');
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Error logging in:', error);
-      setError('حدث خطأ أثناء عملية تسجيل الدخول');
     }
   };
 
@@ -80,8 +89,8 @@ const Signin = () => {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}> تسجيل الدخول  <Icon name="sign-in" size={20} color="white" /></Text>
+      <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
+        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>تسجيل الدخول  <Icon name="sign-in" size={20} color="white" /></Text>}
       </TouchableOpacity>
 
       <View style={styles.bottomButtonsContainer}>
@@ -129,9 +138,11 @@ const styles = StyleSheet.create({
     color: '#f93a8f',
     marginTop: 10,
     marginBottom: 20,
+    textAlign: 'center',
   },
   content: {
     marginTop: 50,
+    
   },
   inputContainer: {
     flexDirection: 'row',

@@ -1,49 +1,98 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
-import Colors from '../../Common/Utils/Colors';
+// تحديث BookItem.js
 
-const BookItem = ({ title, price, details, image, onPress }) => {
+import React, { useState, useEffect } from "react";
+import { View, Text, Image, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import Colors from "../../Common/Utils/Colors";
+
+const BookItem = ({ title, price, description, mainImage, onPress }) => {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (loading) {
+        setLoading(false);
+        setError(true);
+        console.error("Error loading image: Timed out after 10 seconds");
+      }
+    }, 10000); // 10 seconds
+
+    return () => clearTimeout(timeoutId);
+  }, [loading]);
+
+  const handleLoad = () => {
+    setLoading(false);
+  };
+
+  const handleError = () => {
+    setLoading(false);
+    setError(true);
+    console.error("تعذر تحميل الصورة");
+  };
+
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress}>
-      <Image source={image} style={styles.image} />
+    <TouchableOpacity style={styles.bookContainer} onPress={onPress}>
+      {loading && <ActivityIndicator size="small" color={Colors.ORANGE} />}
+      {error && <Text> تعذر تحميل الصورة </Text>}
+      {!loading && !error && mainImage.secure_url ? (
+        <Image
+          source={{ uri: mainImage.secure_url }}
+          style={styles.bookImage}
+          onLoad={handleLoad}
+          onError={handleError}
+        />
+      ) : (
+        !loading && !error && <Text>No Image Available</Text>
+      )}
+
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.price}>₪{price}</Text>
-      {/* Uncomment below line to show book details */}
-      {/* <Text style={styles.details}>{details}</Text> */}
+      <Text style={styles.description}>{description}</Text>
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  bookContainer: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.WHITE,
-    margin: 5,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+    margin: 10,
     padding: 10,
     borderRadius: 10,
-    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
-  image: {
+  bookImage: {
     width: 120,
     height: 160,
     borderRadius: 10,
+    marginBottom: 10,
+    borderColor: Colors.PINK,
+    borderWidth: 2,
   },
   title: {
     fontSize: 16,
-    fontWeight: 'bold',
-    marginTop: 5,
+    fontWeight: "bold",
+    marginBottom: 5,
   },
   price: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    fontSize: 15,
+    marginTop: 8,
+    marginBottom: 2,
+    fontWeight: "bold",
     color: Colors.ORANGE,
-    marginTop: 5,
   },
-  details: {
+  description: {
     fontSize: 12,
-    textAlign: 'center',
+    textAlign: "center",
   },
 });
 

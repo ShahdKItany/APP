@@ -10,9 +10,10 @@ const CheckoutScreen = ({ navigation }) => {
 
   const [region, setRegion] = useState('');
   const [city, setCity] = useState('');
- // const [notes, setNotes] = useState('');
+  const [notes, setNotes] = useState('');
   const [discountCode, setDiscountCode] = useState('');
   const [totalPrice, setTotalPrice] = useState(0);
+  const [discountedPrice, setDiscountedPrice] = useState(0);
 
   // Calculate total price
   const calculateTotalPrice = () => {
@@ -21,6 +22,21 @@ const CheckoutScreen = ({ navigation }) => {
       total += parseFloat(item.price) * item.quantity;
     });
     setTotalPrice(total);
+    applyDiscount(total);
+  };
+
+  // Apply discount
+  const applyDiscount = (total) => {
+    // Apply your discount logic here based on the discount code
+    // For example:
+    // if (discountCode === 'DISCOUNT10') {
+    //   setDiscountedPrice(total * 0.9); // Apply 10% discount
+    // } else {
+    //   setDiscountedPrice(total);
+    // }
+
+    // For demonstration purposes, let's assume no discount
+    setDiscountedPrice(total);
   };
 
   // Handle purchase completion
@@ -68,8 +84,7 @@ const CheckoutScreen = ({ navigation }) => {
           style={{ borderWidth: 1, borderColor: Colors.GRAY, padding: 10, marginBottom: 10 }}
         />
 
-       {/*
-        Notes
+        {/* Notes */}
         <Text>ملاحظات:</Text>
         <TextInput
           placeholder="ملاحظات"
@@ -77,7 +92,6 @@ const CheckoutScreen = ({ navigation }) => {
           onChangeText={(text) => setNotes(text)}
           style={{ borderWidth: 1, borderColor: Colors.GRAY, padding: 10, marginBottom: 10 }}
         />
-      */}
 
         {/* Discount code */}
         <Text>أدخل كود الخصم:</Text>
@@ -90,8 +104,7 @@ const CheckoutScreen = ({ navigation }) => {
 
         {/* Display calculated price */}
         <Text>السعر قبل الخصم: {totalPrice}</Text>
-        {/* Apply discount logic here based on discountCode */}
-        {/* Display discounted price */}
+        <Text>السعر بعد الخصم: {discountedPrice}</Text>
 
         {/* Purchase button */}
         <TouchableOpacity

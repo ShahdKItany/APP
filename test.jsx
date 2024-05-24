@@ -118,6 +118,7 @@ const CheckoutScreen = ({ navigation }) => {
 
         </View>
 
+
         {/* Street input */}
         <Text style={styles.label}>الحي أو الشارع:</Text>
         <TextInput

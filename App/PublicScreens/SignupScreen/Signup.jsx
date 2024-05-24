@@ -1,52 +1,111 @@
-
-
-// SignUp.jsx
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert, Image, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { useDispatch } from 'react-redux';
+import { saveToken } from '../../redux/BookSlice';
+import axios from 'axios';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import IconAntDesign from 'react-native-vector-icons/AntDesign';
+import { useNavigation } from '@react-navigation/native';
 
 const Signup = () => {
+  const dispatch = useDispatch();
   const navigation = useNavigation();
+  const [username, setUserName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
 
-  const handleSignUp = () => {
-    if (email === '' || phone === '' || password === '' || confirmPassword === '') {
-      setError('يرجى التأكد من إدخال معلوماتك بشكل صحيح');
-    } else if (password !== confirmPassword) {
-      setError('كلمة المرور وتأكيد كلمة المرور غير متطابقين');
+  //const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSignUp = async () => {
+    if (username === '' || email === '' || phone === '' || password === '' ) {
+      setError('الرجاء تعبئة جميع الحقول');
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      setError('الرجاء إدخال عنوان بريد إلكتروني صحيح');
+    // } else if (password !== confirmPassword) {
+    //   setError('كلمة المرور وتأكيد كلمة المرور غير متطابقين');
+    } else if (!/(?=.*\d)(?=.*[a-zA-Z]).{8,}/.test(password)) {
+      setError('يجب أن تحتوي كلمة المرور على الأقل 8 أحرف وأرقام');
+    } else if (!/^\d{10}$/.test(phone)) {
+      setError('الرجاء إدخال رقم هاتف صحيح');
     } else {
       setError('');
-      Alert.alert('Sign up successful', 'تم إنشاء الحساب بنجاح', [
-        { text: 'OK', onPress: () => navigation.navigate('Home') }
-      ]);
+      setLoading(true);
+      try {
+        const response = await axios.post('https://ecommercebackend-jzct.onrender.com/auth/register', {
+          username,
+          email,
+          phone,
+          password
+        });
+
+        const { message, token } = response.data;
+
+        // حفظ token في Redux state
+        dispatch(saveToken(token));
+
+        Alert.alert('Sign up successful', message, [
+          { text: 'OK', onPress: () => navigation.navigate('Home') }
+        ]);
+      } catch (error) {
+        console.error('Error signing up:', error);
+        if (error.response) {
+          console.error('Response data:', error.response.data);
+          console.error('______________________________________________________');
+          console.error('Response status:', error.response.status);
+          console.error('Response headers:', error.response.headers);
+        } else if (error.request) {
+          console.error('Request data:', error.request);
+        } else {
+          console.error('Error message:', error.message);
+        }
+        setError('حدث خطأ أثناء إنشاء الحساب');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : null}
-      style={styles.container}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0} // تغيير القيمة حسب الحاجة
-    >
-      <ScrollView contentContainerStyle={styles.scrollView}>
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.header} onPress={() => navigation.navigate('Signin')}>
-            <IconAntDesign name="arrowleft" size={25} color="black" />
-          </TouchableOpacity>
+    //   behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    //   style={styles.container}
+    // >
+
+    behavior={Platform.OS === 'ios' ? 'padding' : null}
+    style={styles.container}
+    keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0} // تغيير القيمة حسب الحاجة
+  >
+    <ScrollView contentContainerStyle={styles.scrollView}>
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.header} onPress={() => navigation.navigate('Signin')}>
+          <IconAntDesign name="arrowleft" size={25} color="black" />
+        </TouchableOpacity>
+      </View>
+
+
+      <View style={styles.logoContainer}>
+        <Image source={require('../../../assets/logo/logo.jpg')} style={styles.logo} />
+      </View>
+
+      <Text style={styles.title}>إنشاء حساب</Text>
+      {error !== '' && <Text style={styles.error}>{error}</Text>}
+      <View style={styles.content}>
+
+
+
+        <View style={styles.inputContainer}>
+          <Icon name="user" size={20} color="#0abae4" style={styles.icon} />
+          <TextInput
+            style={styles.input}
+            placeholder="الاسم"
+            value={username}
+            onChangeText={setUserName}
+          />
         </View>
 
-        <View style={styles.logoContainer}>
-          <Image source={require('../../../assets/logo/logo.jpg')} style={styles.logo} />
-        </View>
-
-        <Text style={styles.title}>إنشاء الحساب </Text>
-        {error !== '' && <Text style={styles.error}>{error}</Text>}
 
         <View style={styles.inputContainer}>
           <Icon name="envelope" size={20} color="#0abae4" style={styles.icon} />
@@ -57,6 +116,8 @@ const Signup = () => {
             onChangeText={setEmail}
           />
         </View>
+
+
 
         <View style={styles.inputContainer}>
           <Icon name="phone" size={20} color="#0abae4" style={styles.icon} />
@@ -69,6 +130,8 @@ const Signup = () => {
           />
         </View>
 
+
+
         <View style={styles.inputContainer}>
           <Icon name="lock" size={20} color="#0abae4" style={styles.icon} />
           <TextInput
@@ -80,7 +143,7 @@ const Signup = () => {
           />
         </View>
 
-        <View style={styles.inputContainer}>
+        {/* <View style={styles.inputContainer}>
           <Icon name="lock" size={20} color="#0abae4" style={styles.icon} />
           <TextInput
             style={styles.input}
@@ -89,27 +152,46 @@ const Signup = () => {
             onChangeText={setConfirmPassword}
             secureTextEntry
           />
-        </View>
+        </View> */}
 
-        <TouchableOpacity style={styles.button} onPress={handleSignUp}>
-          <Text style={styles.buttonText}>إنشاء حساب</Text>
+
+
+        {/* <TouchableOpacity style={styles.button} onPress={handleSignUp} disabled={loading}>
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>إنشاء حساب</Text>
+          )}
+        </TouchableOpacity> */}
+
+<TouchableOpacity style={styles.button} onPress={handleSignUp} disabled={loading}>
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>
+               إنشاء حساب    <Icon name="user-plus" size={20} color="white" />
+            </Text>
+          )}
         </TouchableOpacity>
+
 
         <View style={styles.bottomButtonsContainer}>
           <TouchableOpacity onPress={() => navigation.navigate('Signin')}>
-            <Text>
-              <Text style={{ color: '#0abae4' }}>  هل لديك حساب ؟</Text>
+            <Text style={styles.bottomCreateAccount}>
+              <Text style={{ color: '#0abae4' }}>هل لديك حساب؟</Text>
               <Text> </Text>
-              <Text style={{ color: '#f93a8f' }}>دخول </Text>
+              <Text style={{ color: '#f93a8f' }}>تسجيل الدخول</Text>
             </Text>
           </TouchableOpacity>
         </View>
+      </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
+
   scrollView: {
     flexGrow: 1,
     justifyContent: 'center',
@@ -119,11 +201,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignSelf: 'stretch',
-    marginBottom: 20,
+    //marginBottom: 1,
   },
   backButton: {
     color: '#0abae4',
     fontSize: 18,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: 'white',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    padding: 50,
   },
   logoContainer: {
     alignItems: 'center',
@@ -137,25 +226,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#FFA000',
   },
-  container: {
-    flex: 1,
-    backgroundColor: 'white',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    padding: 20,
-  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#ffa500',
     margin: 10,
-    marginBottom: 20,
+   marginBottom: 1,
   },
   error: {
     fontSize: 16,
     color: '#f93a8f',
     marginTop: 10,
     marginBottom: 20,
+    textAlign: 'center',
+  },
+  content: {
+    marginTop: 50,
   },
   inputContainer: {
     flexDirection: 'row',
@@ -175,22 +261,39 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'right',
   },
+  link: {
+    color: '#f93a8f',
+    textAlign: 'center',
+    margin: 10,
+  },
   button: {
-    width: '80%',
+    width: '90%',
     height: 40,
     backgroundColor: '#ffa500',
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
     margin: 10,
+    alignSelf: 'center', // Center the button
+     padding:10,
+     paddingLeft:40,
+     paddingRight:40
   },
   buttonText: {
     fontSize: 18,
     color: '#fff',
     fontWeight: 'bold',
+    
   },
+
   bottomButtonsContainer: {
-    marginTop: 50,
+    marginTop: 1,
+    alignItems: 'center', // Center the bottom button container
+
+    
+  },
+  bottomCreateAccount: {
+    marginTop: 70,
   },
 });
 

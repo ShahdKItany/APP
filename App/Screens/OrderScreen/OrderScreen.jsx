@@ -83,7 +83,7 @@ const OrderScreen = ({ navigation }) => {
 
   const completePurchase = () => {
     dispatch(clearCart());
-    Alert.alert('تمت العملية بنجاح', 'تمت عملية الشراء بنجاح!');
+    Alert.alert( 'تمت ارسال طلبك بنجاح!');
     //navigation.goBack();
     navigation.navigate('Home'); 
 

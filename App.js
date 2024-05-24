@@ -1,7 +1,7 @@
 
-//git add .
-//git commit -m "changes" 
-//git push -u origin main
+//   git add .
+//  git commit -m "changes" 
+//  git push -u origin main
 //______________________________________________
 
 // App.js
@@ -25,17 +25,12 @@ import Profile from "./App/Screens/ProfileScreen/Profile";
 import EditProfile from "./App/Screens/ProfileScreen/EditProfile";
 import WishList from "./App/Screens/WishList/WishList";
 import BookDetails from "./App/Screens/BookDetails/BookDetails";
-import From0To2 from "./App/Screens/CategoriesScreen/From0To2";
-import From9To12 from "./App/Screens/CategoriesScreen/From9To12";
-import From2To4 from "./App/Screens/CategoriesScreen/From2To4";
-import From3To6 from "./App/Screens/CategoriesScreen/From3To6";
-import InteractiveBooks from "./App/Screens/CategoriesScreen/InteractiveBooks";
-import YoungAdults from "./App/Screens/CategoriesScreen/YoungAdults";
 
 import store, { persistor } from "./App/redux/store";
 import { PersistGate } from "redux-persist/integration/react";
 import OrderScreen from "./App/Screens/OrderScreen/OrderScreen";
-
+import BooksByCategory from "./App/Screens/CategoriesScreen/BooksByCategory";
+import BookItem from "./App/Screens/CategoriesScreen/BookItem";
 const Stack = createStackNavigator();
 
 
@@ -62,6 +57,18 @@ const App = () => {
               component={Categories}
               options={{ footer: () => <Footer /> }}
             />
+             <Stack.Screen 
+             name="BooksByCategory" 
+             component={BooksByCategory}
+             options={{ footer: () => <Footer /> }}
+             />
+
+              <Stack.Screen 
+             name="BookItem" 
+             component={BookItem}
+             options={{ footer: () => <Footer /> }}
+             />
+
             <Stack.Screen
               name="New"
               component={New}
@@ -92,12 +99,7 @@ const App = () => {
               component={BookDetails}
               options={{ footer: () => <Footer /> }}
             />
-            <Stack.Screen name="From0To2" component={From0To2} />
-            <Stack.Screen name="From2To4" component={From2To4} />
-            <Stack.Screen name="From3To6" component={From3To6} />
-            <Stack.Screen name="From9To12" component={From9To12} />
-            <Stack.Screen name="InteractiveBooks" component={InteractiveBooks} />
-            <Stack.Screen name="YoungAdults" component={YoungAdults} />
+          
             <Stack.Screen
               name="Cart"
               component={Cart}

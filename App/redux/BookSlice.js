@@ -17,9 +17,10 @@ export const BookSlice = createSlice({
       const { id } = action.payload;
       const existingBook = state.books.find((book) => book.id === id);
       if (existingBook) {
-        return; // If book already exists in the cart, do nothing
+        existingBook.quantity += 1; // If book already exists in the cart, increment its quantity
+      } else {
+        state.books.push({ ...action.payload, quantity: 1 }); // Add the new book to the cart with quantity 1
       }
-      state.books.push(action.payload); // Add the new book to the cart
       // Recalculate total price based on updated cart
       state.totalPrice = state.books.reduce(
         (total, book) => total + book.price * book.quantity,

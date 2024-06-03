@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import {
   View,
@@ -38,7 +37,7 @@ const BookDetails = ({ route, navigation }) => {
   }, [title, finalPrice, description, mainImage, subImages]);
 
   const addToCarts = () => {
-    const newItem = { title, price: finalPrice, image: mainImage?.secure_url, quantity: 1 };
+    const newItem = { title, price: finalPrice, image: mainImage, quantity: 1 };
     dispatch(addToCart(newItem));
     navigation.navigate("Cart");
     Alert.alert(
@@ -108,9 +107,9 @@ const BookDetails = ({ route, navigation }) => {
         <Swiper style={styles.wrapper} showsButtons={true}>
           {/* Main Image */}
           <View style={styles.slide}>
-            {mainImage && mainImage.secure_url ? (
+            {mainImage ? (
               <Image
-                source={{ uri: mainImage.secure_url }}
+                source={{ uri: mainImage }}
                 style={styles.image}
               />
             ) : (
@@ -122,9 +121,9 @@ const BookDetails = ({ route, navigation }) => {
           {subImages && subImages.length > 0 ? (
             subImages.map((img, index) => (
               <View style={styles.slide} key={index}>
-                {img && img.secure_url ? (
+                {img ? (
                   <Image
-                    source={{ uri: img.secure_url }}
+                    source={{ uri: img }}
                     style={styles.image}
                   />
                 ) : (

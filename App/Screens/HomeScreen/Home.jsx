@@ -336,20 +336,18 @@ const Home = () => {
     const { _id, title, price, description, mainImage, subImages } = item;
     const mainImageUrl = mainImage && mainImage.secure_url ? mainImage.secure_url : null;
     const subImagesUrls = subImages.map(image => image.secure_url);
-
-    
-
-
-  navigation.navigate("BookDetails", {
-    id: _id,
-    title,
-    description,
-    mainImage: mainImageUrl,
-    subImages: subImagesUrls,
-    price,
-    finalPrice: price, // إضافة السعر هنا
-  });
-};
+  
+    navigation.navigate("BookDetails", {
+      id: _id,
+      title,
+      description,
+      mainImage: mainImageUrl,
+      subImages: subImagesUrls,
+      price,
+      finalPrice: price,
+    });
+  };
+  
 
   return (
     <View style={{ flex: 1 }}>

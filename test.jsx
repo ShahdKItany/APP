@@ -1,512 +1,342 @@
-import React, { useState } from 'react';
-import { View, ScrollView, Text, TextInput, TouchableOpacity, Alert, Image, StyleSheet } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { removeFromCart, selectBooksInCart, clearCart } from '../../redux/BookSlice';
-import Colors from '../../Common/Utils/Colors';
-import { Picker } from '@react-native-picker/picker';
+import React, { useState, useRef, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  TextInput,
+  KeyboardAvoidingView,
+  Alert,
+} from "react-native";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faShoppingCart, faHeart, faStar, faUser, faComment } from "@fortawesome/free-solid-svg-icons";
+import Colors from "../../Common/Utils/Colors";
+import Footer from "../../Common/Footer/Footer";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../../redux/BookSlice";
+import Swiper from 'react-native-swiper';
 
-const CheckoutScreen = ({ navigation }) => {
+const BookDetails = ({ route, navigation }) => {
+  const { title, finalPrice, description, mainImage, subImages } = route.params;
+  const [comment, setComment] = useState("");
+  const [comments, setComments] = useState([]);
+  const commentInputRef = useRef(null);
+  const scrollViewRef = useRef(null);
+  const [isInWishlist, setIsInWishlist] = useState(false);
+  const [rating, setRating] = useState(0);
   const dispatch = useDispatch();
-  const books = useSelector(selectBooksInCart);
-  const [region, setRegion] = useState('');
-  const [city, setCity] = useState('');
-  const [street, setStreet] = useState('');
-  const [discountCode, setDiscountCode] = useState('');
 
-  const handlePurchase = () => {
-    if (!region || !city || !street) {
-      Alert.alert('خطأ', 'يرجى اختيار المنطقة والمدينة وإدخال الشارع لإكمال الشراء');
-      return;
-    }
+  useEffect(() => {
+    console.log("Title:", title);
+    console.log("Final Price:", finalPrice);
+    console.log("Description:", description);
+    console.log("Main Image:", mainImage);
+    console.log("Sub Images:", subImages);
+  }, [title, finalPrice, description, mainImage, subImages]);
 
+  const addToCarts = () => {
+    const newItem = { title, price: finalPrice, image: mainImage?.secure_url, quantity: 1 };
+    dispatch(addToCart(newItem));
+    navigation.navigate("Cart");
     Alert.alert(
-      'تأكيد الشراء',
-      'هل ترغب في إكمال عملية الشراء؟',
+      "تمت إضافة الكتاب إلى عربة التسوق!",
+      "",
       [
         {
-          text: 'إلغاء',
-          style: 'cancel',
+          text: 'OK',
+          style: 'default',
+          onPress: () => {},
         },
-        {
-          text: 'موافق',
-          onPress: () => completePurchase(),
-        },
-      ]
+      ],
+      { cancelable: false }
     );
   };
 
-  const completePurchase = () => {
-    dispatch(clearCart());
-    Alert.alert('تمت العملية بنجاح', 'تمت عملية الشراء بنجاح!');
-    navigation.goBack();
+  const handleAddToCart = () => {
+    addToCarts();
   };
 
-  const getCityOptions = () => {
-    switch (region) {
-      case 'The West Bank':
-        return ['Tulkarm', 'Qalqilya', 'Nablus', 'Jericho', 'Jenin', 'Salfit', 'Ramallah'];
-      case 'The occupied interior':
-        return ['Jaffa', 'Haifa', 'Lod', 'Acre'];
-      case 'Jerusalem':
-        return ['Abu Dis', 'Sheikh Jarrah', 'Mount of Olives'];
-      default:
-        return [];
+  const handleAddToFavorites = () => {
+    if (isInWishlist) {
+      Alert.alert("الكتاب موجود بالفعل في المفضلة!");
+    } else {
+      setIsInWishlist(true);
+      Alert.alert(
+        "تمت إضافة الكتاب إلى المفضلة!",
+        "",
+        [
+          {
+            text: 'OK',
+            style: 'default',
+            onPress: () => {},
+          },
+        ],
+        { cancelable: false }
+      );
     }
   };
 
-  const getDeliveryCharge = () => {
-    switch (region) {
-      case 'The West Bank':
-        return 10;
-      case 'The occupied interior':
-        return 30;
-      case 'Jerusalem':
-        return 20;
-      default:
-        return 0;
+  const handleAddComment = () => {
+    if (comment.trim() !== "") {
+      setComments([...comments, comment]);
+      setComment("");
     }
   };
 
-  const deliveryCharge = getDeliveryCharge();
-  const totalPriceBeforeDiscount = books.reduce((total, item) => total + parseFloat(item.price) * item.quantity, 0) + deliveryCharge;
-  let totalPriceAfterDiscount = totalPriceBeforeDiscount;
-  if (discountCode === 'shahd1') {
-    totalPriceAfterDiscount *= 0.75; // Apply 25% discount
-  }
+  const handleStarPress = (index) => {
+    setRating(index + 1);
+    Alert.alert(`تم تقييم الكتاب بـ ${index + 1} نجوم`);
+  };
+
+  const scrollToCommentInput = () => {
+    if (scrollViewRef.current && commentInputRef.current) {
+      commentInputRef.current.measureLayout(
+        scrollViewRef.current,
+        (x, y) => {
+          scrollViewRef.current.scrollTo({ y: y, animated: true });
+        }
+      );
+    }
+  };
 
   return (
-    <View style={styles.container}>
-      <ScrollView>
-        {/* Display books with images */}
-        {books && books.map((item, index) => (
-          <View key={index} style={styles.bookContainer}>
-            <Image source={{ uri: item.image }} style={styles.bookImage} />
-            <View style={styles.bookDetails}>
-              <Text>{item.title}</Text>
-              <Text>الكمية: {item.quantity}</Text>
-            </View>
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+      <ScrollView contentContainerStyle={styles.container} ref={scrollViewRef}>
+        <Swiper style={styles.wrapper} showsButtons={true}>
+          {/* Main Image */}
+          <View style={styles.slide}>
+            {mainImage && mainImage.secure_url ? (
+              <Image
+                source={{ uri: mainImage.secure_url }}
+                style={styles.image}
+              />
+            ) : (
+              <Text>صورة غير متوفرة</Text>
+            )}
           </View>
-        ))}
 
-        {/* Region selection */}
-        <View style={styles.inputContainer}>
-          <Picker
-            selectedValue={region}
-            onValueChange={(itemValue, itemIndex) => setRegion(itemValue)}
-            style={styles.picker}
-          >
-            <Picker.Item label="القدس" value="Jerusalem" />
-            <Picker.Item label="الضفة الغربية" value="The West Bank" />
-            <Picker.Item label="الداخل المحتل" value="The occupied interior" />
-          </Picker>
-          <Text>اختر المنطقة:</Text>
-
-        </View>
-
-        {/* City selection */}
-        <View style={styles.inputContainer}>
-          <Picker
-            selectedValue={city}
-            onValueChange={(itemValue, itemIndex) => setCity(itemValue)}
-            style={styles.picker}
-          >
-            {getCityOptions().map((cityOption, index) => (
-              <Picker.Item key={index} label={cityOption} value={cityOption} />
-            ))}
-          </Picker>
-          <Text>اختر المدينة:</Text>
-
-        </View>
-
-
-        {/* Street input */}
-        <Text style={styles.label}>الحي أو الشارع:</Text>
-        <TextInput
-          placeholder="الحي أو الشارع"
-          value={street}
-          onChangeText={(text) => setStreet(text)}
-          style={styles.input}
-        />
-
-        {/* Discount code input */}
-        <Text style={styles.label}>أدخل كود الخصم:</Text>
-        <TextInput
-          placeholder="كود الخصم"
-          value={discountCode}
-          onChangeText={(text) => setDiscountCode(text)}
-          style={styles.input}
-        />
-
-        {/* Display prices */}
-        <View style={styles.priceContainer}>
-          <Text style={styles.textRight}>التوصيل:</Text>
-          <Text>{deliveryCharge} شيكل</Text>
-        </View>
-
-        <View style={styles.priceContainer}>
-          <Text style={styles.textRight}>قيمة الطلب قبل الخصم:</Text>
-          <Text>{totalPriceBeforeDiscount} شيكل</Text>
-        </View>
-        
-        <View style={styles.priceContainer}>
-          <Text style={styles.textRight}>قيمة الطلب بعد الخصم:</Text>
-          <Text>{totalPriceAfterDiscount} شيكل</Text>
-        </View>
-
-        <View style={styles.divider} />
-
-        {/* Total price display */}
-        <View style={styles.priceContainer}>
-          <Text style={styles.textRight}> المجموع الكلي (شامل التوصيل):</Text>
-          <Text style={[styles.totalPriceText, { fontWeight: 'bold' }]}>{totalPriceAfterDiscount} شيكل</Text>
-        </View>
-
-        {/* Purchase button */}
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handlePurchase}
-        >
-          <Text style={styles.buttonText}>ارسال الطلب </Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </View>
-  );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'white',
-    padding: 20,
-  },
-  bookContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  bookImage: {
-    width: 50,
-    height: 50,
-    marginRight: 10,
-  },
-  bookDetails: {
-    flex: 1,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 10,
-    marginLeft:50
-  },
-  label: {
-    textAlign: 'right',
-    
-  },
-  picker: {
-    width: 140,
-    height:200
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: Colors.GRAY,
-    padding: 1,
-    marginBottom: 10,
-    
-  },
-  priceContainer: {
-    flexDirection: 'row-reverse',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  textRight: {
-    textAlign: 'right',
-  },
-  divider: {
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.GRAY,
-    marginTop: 10,
-  },
-  button: {
-    backgroundColor: Colors.ORANGE,
-    padding: 15,
-    borderRadius: 5,
-    alignItems: 'center',
-    marginTop: 20,
-    marginBottom:30
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  totalPriceText: {
-    //color: Colors.BLUE,
-    fontWeight: 'bold',
-    fontSize: 16,
-    marginBottom:10
-  },
-});
-
-export default CheckoutScreen;
-//-----------------------------------------------------------------------------------------------------
-import React, { useState } from 'react';
-import { View, ScrollView, Text, TextInput, TouchableOpacity, Alert, Image, StyleSheet } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { removeFromCart, selectBooksInCart, clearCart } from '../../redux/BookSlice';
-import Colors from '../../Common/Utils/Colors';
-import { Picker } from '@react-native-picker/picker';
-
-const CheckoutScreen = ({ navigation }) => {
-  const dispatch = useDispatch();
-  const books = useSelector(selectBooksInCart);
-  const [region, setRegion] = useState('');
-  const [city, setCity] = useState('');
-  const [street, setStreet] = useState('');
-  const [discountCode, setDiscountCode] = useState('');
-
-  const handlePurchase = () => {
-    if (!region || !city || !street) {
-      Alert.alert('خطأ', 'يرجى اختيار المنطقة والمدينة وإدخال الشارع لإكمال الشراء');
-      return;
-    }
-
-    Alert.alert(
-      'تأكيد الشراء',
-      'هل ترغب في إكمال عملية الشراء؟',
-      [
-        {
-          text: 'إلغاء',
-          style: 'cancel',
-        },
-        {
-          text: 'موافق',
-          onPress: () => completePurchase(),
-        },
-      ]
-    );
-  };
-
-  const completePurchase = () => {
-    dispatch(clearCart());
-    Alert.alert('تمت العملية بنجاح', 'تمت عملية الشراء بنجاح!');
-    navigation.goBack();
-  };
-
-  const getCityOptions = () => {
-    switch (region) {
-      case 'The West Bank':
-        return ['Tulkarm', 'Qalqilya', 'Nablus', 'Jericho', 'Jenin', 'Salfit', 'Ramallah'];
-      case 'The occupied interior':
-        return ['Jaffa', 'Haifa', 'Lod', 'Acre'];
-      case 'Jerusalem':
-        return ['Abu Dis', 'Sheikh Jarrah', 'Mount of Olives'];
-      default:
-        return [];
-    }
-  };
-
-  const getDeliveryCharge = () => {
-    switch (region) {
-      case 'The West Bank':
-        return 10;
-      case 'The occupied interior':
-        return 30;
-      case 'Jerusalem':
-        return 20;
-      default:
-        return 0;
-    }
-  };
-
-  const deliveryCharge = getDeliveryCharge();
-  const totalPriceBeforeDiscount = books.reduce((total, item) => total + parseFloat(item.price) * item.quantity, 0) + deliveryCharge;
-  let totalPriceAfterDiscount = totalPriceBeforeDiscount;
-  if (discountCode === 'shahd1') {
-    totalPriceAfterDiscount *= 0.75; // Apply 25% discount
-  }
-
-  return (
-    <View style={styles.container}>
-      <ScrollView>
-        {/* Display books with images */}
-        {books &&
-          books.map((item, index) => (
-            <View key={index} style={styles.bookContainer}>
-              <View style={styles.bookInfo}>
-                <Image source={{ uri: item.image }} style={styles.bookImage} />
-                <View>
-                  <Text>{item.title}</Text>
-                  <Text>الكمية: {item.quantity}</Text>
-                </View>
+          {/* Sub Images */}
+          {subImages && subImages.length > 0 ? (
+            subImages.map((img, index) => (
+              <View style={styles.slide} key={index}>
+                {img && img.secure_url ? (
+                  <Image
+                    source={{ uri: img.secure_url }}
+                    style={styles.image}
+                  />
+                ) : (
+                  <Text>صورة غير متوفرة</Text>
+                )}
               </View>
-              {/* Place the picker for region and city here */}
-              {(index === 0 || index === books.length - 1) && (
-                <View style={styles.locationContainer}>
-                  {/* Region selection */}
-                  <View style={styles.locationRow}>
-                    <Text style={styles.label}>اختر المنطقة:</Text>
-                    <Picker
-                      selectedValue={region}
-                      onValueChange={(itemValue, itemIndex) => setRegion(itemValue)}
-                      style={styles.picker}
-                    >
-                      <Picker.Item label="القدس" value="Jerusalem" />
-                      <Picker.Item label="الضفة الغربية" value="The West Bank" />
-                      <Picker.Item label="الداخل المحتل" value="The occupied interior" />
-                    </Picker>
-                  </View>
-                  {/* City selection */}
-                  <View style={styles.locationRow}>
-                    <Text style={styles.label}>اختر المدينة:</Text>
-                    <Picker
-                      selectedValue={city}
-                      onValueChange={(itemValue, itemIndex) => setCity(itemValue)}
-                      style={styles.picker}
-                    >
-                      {getCityOptions().map((cityOption, index) => (
-                        <Picker.Item key={index} label={cityOption} value={cityOption} />
-                      ))}
-                    </Picker>
-                  </View>
-                </View>
-              )}
+            ))
+          ) : null}
+        </Swiper>
+
+        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.price}>السعر: ₪{finalPrice}</Text>
+        <Text style={styles.details}>{description}</Text>
+
+        <View style={styles.ratingContainer}>
+          <View style={styles.starContainer}>
+            {[...Array(5)].map((_, index) => (
+              <TouchableOpacity key={index} onPress={() => handleStarPress(index)}>
+                <FontAwesomeIcon
+                  icon={faStar}
+                  size={30}
+                  color={index < rating ? Colors.YELLOW : Colors.GRAY}
+                  style={styles.star}
+                />
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button} onPress={handleAddToCart}>
+            <FontAwesomeIcon icon={faShoppingCart} style={styles.buttonIcon} />
+            <Text style={styles.buttonText}>أضف إلى عربة التسوق</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={handleAddToFavorites}>
+            <FontAwesomeIcon icon={faHeart} style={styles.buttonIcon} />
+            <Text style={styles.buttonText}>أضف إلى المفضلة</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.commentsContainer}>
+          <View style={styles.commentsTitleContainer}>
+            <FontAwesomeIcon icon={faComment} style={styles.commentIcon} />
+            <Text style={styles.commentsTitle}>التعليقات</Text>
+          </View>
+
+          {comments.map((comment, index) => (
+            <View key={index} style={styles.commentContainer}>
+              <FontAwesomeIcon icon={faUser} style={styles.userIcon} />
+              <Text style={styles.commentText}>
+                {comment}
+              </Text>
             </View>
           ))}
-        {/* Street input */}
-        <Text style={styles.label}>الحي أو الشارع:</Text>
-        <TextInput
-          placeholder="الحي أو الشارع"
-          value={street}
-          onChangeText={(text) => setStreet(text)}
-          style={styles.input}
-        />
 
-        {/* Discount code input */}
-        <Text style={styles.label}>أدخل كود الخصم:</Text>
-        <TextInput
-          placeholder="كود الخصم"
-          value={discountCode}
-          onChangeText={(text) => setDiscountCode(text)}
-          style={styles.input}
-        />
-
-        {/* Display prices */}
-        <View style={styles.priceContainer}>
-          <Text>التوصيل:</Text>
-          <Text>{deliveryCharge} شيكل</Text>
-        </View>
-
-        <View style={styles.priceContainer}>
-          <Text>السعر قبل الخصم:</Text>
-          <Text>{totalPriceBeforeDiscount} شيكل</Text>
-        </View>
-
-        <View style={styles.priceContainer}>
-          <Text>السعر بعد الخصم:</Text>
-          <Text>{totalPriceAfterDiscount} شيكل</Text>
-        </View>
-
-        <View style={styles.divider} />
-
-        <View style={styles.totalContainer}>
-          <Text style={styles.totalLabel}>السعر الكلي (شامل التوصيل):</Text>
-          <Text style={styles.totalPrice}>{totalPriceAfterDiscount} شيكل</Text>
-        </View>
-
-        {/* Purchase button */}
-        <TouchableOpacity style={styles.button} onPress={handlePurchase}>
-          <Text style={styles.buttonText}>اتمام الشراء</Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </View>
-  );
+          <TextInput
+            ref={commentInputRef}
+            style={styles.commentInput}
+            placeholder="أضف تعليقك هنا"
+            value={comment}
+            onChangeText={setComment}
+            onFocus={scrollToCommentInput}
+          />
+          <TouchableOpacity style={styles.addButton} onPress={handleAddComment}>
+            <Text style={styles.addButtonText}>أضف تعليق</Text>
+          </TouchableOpacity>
+}
+</View>
+</ScrollView>
+<Footer />
+</KeyboardAvoidingView>
+);
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'white',
-    padding: 20,
-    //marginLeft:10,
-    //marginRight:20
-  },
-  /*
-  scrollView: {
-    flexGrow: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  */
-  bookContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  bookInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  bookImage: {
-    width: 50,
-    height: 50,
-    marginRight: 10,
-  },
-  locationContainer: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
-    flex: 1,
-  },
-  locationRow: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
-    marginRight: 20,
-  },
-  label: {
-    textAlign: 'right',
-  },
-  picker: {
-    width: 90,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: Colors.GRAY,
-    padding: 10,
-    marginBottom: 10,
-  },
-  priceContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  divider: {
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.GRAY,
-    marginTop: 10,
-  },
-  totalContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  totalLabel: {
-    textAlign: 'right',
-  },
-  totalPrice: {
-    fontWeight: 'bold',
-  },
-  button: {
-    backgroundColor: Colors.ORANGE,
-    padding: 15,
-    borderRadius: 5,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
+container: {
+flexGrow: 1,
+justifyContent: "center",
+alignItems: "center",
+paddingHorizontal: 10,
+},
+wrapper: {
+height: 400,
+},
+slide: {
+flex: 1,
+justifyContent: 'center',
+alignItems: 'center',
+},
+image: {
+width: '100%',
+height: 300,
+resizeMode: 'cover',
+},
+title: {
+fontSize: 24,
+fontWeight: "bold",
+textAlign: "center",
+marginVertical: 10,
+},
+price: {
+fontSize: 18,
+color: Colors.ORANGE,
+textAlign: "center",
+marginBottom: 10,
+fontWeight: "bold",
+},
+details: {
+fontSize: 16,
+textAlign: "center",
+marginBottom: 20,
+},
+buttonContainer: {
+flexDirection: "row",
+justifyContent: "space-between",
+width: "100%",
+marginBottom: 20,
+},
+button: {
+backgroundColor: Colors.ORANGE,
+padding: 12,
+borderRadius: 12,
+width: "48%",
+alignItems: "center",
+flexDirection: "row",
+},
+buttonText: {
+color: "white",
+fontWeight: "bold",
+fontSize: 16,
+marginLeft: 3,
+},
+buttonIcon: {
+color: "white",
+fontSize: 22,
+marginRight: 3,
+},
+ratingContainer: {
+flexDirection: 'row',
+justifyContent: 'center',
+width: "100%",
+marginTop: 8,
+marginBottom: 20,
+alignItems: "center",
+},
+starContainer: {
+flexDirection: 'row',
+},
+star: {
+marginHorizontal: 5,
+},
+commentsContainer: {
+width: "100%",
+marginTop: 20,
+padding: 10,
+borderWidth: 2,
+borderColor: Colors.PINK,
+borderRadius: 20,
+marginBottom: 70,
+},
+commentsTitleContainer: {
+flexDirection: "row-reverse",
+alignItems: "center",
+marginBottom: 20,
+},
+commentsTitle: {
+fontSize: 22,
+fontWeight: "bold",
+marginLeft: 8,
+color: Colors.BLUE,
+},
+commentIcon: {
+fontSize: 27,
+padding: 11,
+color: Colors.BLUE,
+alignSelf: 'center',
+},
+commentText: {
+fontSize: 20,
+flex: 1,
+},
+commentInput: {
+height: 40,
+borderColor: Colors.PINK,
+borderWidth: 1,
+borderRadius: 20,
+paddingHorizontal: 10,
+marginBottom: 20,
+textAlign: "right",
+},
+commentContainer: {
+flexDirection: "row-reverse",
+alignItems: "center",
+},
+userIcon: {
+marginRight: 10,
+marginLeft: 8,
+fontSize: 27,
+padding: 11,
+color: Colors.BLUE,
+alignSelf: 'center',
+marginBottom: 20,
+},
+addButton: {
+backgroundColor: Colors.PINK,
+padding: 10,
+borderRadius: 20,
+alignItems: "center",
+},
+addButtonText: {
+color: "white",
+fontWeight: "bold",
+fontSize: 16,
+},
 });
 
-export default CheckoutScreen;
+export default BookDetails;

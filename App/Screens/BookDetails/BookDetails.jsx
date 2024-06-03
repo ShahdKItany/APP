@@ -1,4 +1,5 @@
-import React, { useState, useRef } from "react";
+
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,19 +10,17 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Alert,
-  Keyboard,
 } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faShoppingCart, faHeart, faStar, faUser , faComment } from "@fortawesome/free-solid-svg-icons";
-
+import { faShoppingCart, faHeart, faStar, faUser, faComment } from "@fortawesome/free-solid-svg-icons";
 import Colors from "../../Common/Utils/Colors";
 import Footer from "../../Common/Footer/Footer";
-
 import { useDispatch } from "react-redux";
 import { addToCart } from "../../redux/BookSlice";
+import Swiper from 'react-native-swiper';
 
 const BookDetails = ({ route, navigation }) => {
-  const { id, title, price, details, image } = route.params;
+  const { title, finalPrice, description, mainImage, subImages } = route.params;
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState([]);
   const commentInputRef = useRef(null);
@@ -30,11 +29,17 @@ const BookDetails = ({ route, navigation }) => {
   const [rating, setRating] = useState(0);
   const dispatch = useDispatch();
 
+  useEffect(() => {
+    console.log("Title:", title);
+    console.log("Final Price:", finalPrice);
+    console.log("Description:", description);
+    console.log("Main Image:", mainImage);
+    console.log("Sub Images:", subImages);
+  }, [title, finalPrice, description, mainImage, subImages]);
+
   const addToCarts = () => {
-    const newItem = { id, title, price, image, quantity: 1 };
-
+    const newItem = { title, price: finalPrice, image: mainImage?.secure_url, quantity: 1 };
     dispatch(addToCart(newItem));
-
     navigation.navigate("Cart");
     Alert.alert(
       "تمت إضافة الكتاب إلى عربة التسوق!",
@@ -58,8 +63,7 @@ const BookDetails = ({ route, navigation }) => {
     if (isInWishlist) {
       Alert.alert("الكتاب موجود بالفعل في المفضلة!");
     } else {
-      const newItem = { title, price, image };
-      setIsInWishlist(true); // تحديث الحالة لتعكس الإضافة إلى المفضلة
+      setIsInWishlist(true);
       Alert.alert(
         "تمت إضافة الكتاب إلى المفضلة!",
         "",
@@ -98,15 +102,42 @@ const BookDetails = ({ route, navigation }) => {
     }
   };
 
-
-
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
       <ScrollView contentContainerStyle={styles.container} ref={scrollViewRef}>
-        <Image source={image} style={styles.bookImage} />
+        <Swiper style={styles.wrapper} showsButtons={true}>
+          {/* Main Image */}
+          <View style={styles.slide}>
+            {mainImage && mainImage.secure_url ? (
+              <Image
+                source={{ uri: mainImage.secure_url }}
+                style={styles.image}
+              />
+            ) : (
+              <Text>صورة غير متوفرة</Text>
+            )}
+          </View>
+
+          {/* Sub Images */}
+          {subImages && subImages.length > 0 ? (
+            subImages.map((img, index) => (
+              <View style={styles.slide} key={index}>
+                {img && img.secure_url ? (
+                  <Image
+                    source={{ uri: img.secure_url }}
+                    style={styles.image}
+                  />
+                ) : (
+                  <Text>صورة غير متوفرة</Text>
+                )}
+              </View>
+            ))
+          ) : null}
+        </Swiper>
+
         <Text style={styles.title}>{title}</Text>
-        <Text style={styles.price}>السعر: ₪{price}</Text>
-        <Text style={styles.details}>{details}</Text>
+        <Text style={styles.price}>السعر: ₪{finalPrice}</Text>
+        <Text style={styles.details}>{description}</Text>
 
         <View style={styles.ratingContainer}>
           <View style={styles.starContainer}>
@@ -133,7 +164,6 @@ const BookDetails = ({ route, navigation }) => {
             <Text style={styles.buttonText}>أضف إلى المفضلة</Text>
           </TouchableOpacity>
         </View>
-
         <View style={styles.commentsContainer}>
           <View style={styles.commentsTitleContainer}>
             <FontAwesomeIcon icon={faComment} style={styles.commentIcon} />
@@ -172,22 +202,26 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 20,
     paddingHorizontal: 10,
   },
-  bookImage: {
-    width: 200,
+  wrapper: {
+    height: 400,
+  },
+  slide: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  image: {
+    width: '100%',
     height: 300,
-    resizeMode: "cover",
-    borderRadius: 10,
-    marginBottom: 20,
-    marginTop: 40,
+    resizeMode: 'cover',
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 10,
+    marginVertical: 10,
   },
   price: {
     fontSize: 18,
@@ -250,40 +284,34 @@ const styles = StyleSheet.create({
     marginBottom: 70,
   },
   commentsTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center', // Center align the container
-
+    flexDirection: "row-reverse",
+    alignItems: "center",
     marginBottom: 20,
-  },
-  commentIcon: {
-    marginRight: 10,
-    fontSize: 20,
-    color: Colors.PINK,
   },
   commentsTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    
+    fontSize: 22,
+    fontWeight: "bold",
+    marginLeft: 8,
+    color: Colors.BLUE,
+  },
+  commentIcon: {
+    fontSize: 27,
+    padding: 11,
+    color: Colors.BLUE,
+    alignSelf: 'center',
   },
   commentText: {
-    fontSize: 18,
-    marginBottom: 1,
-    textAlign: "right",
-    marginBottom: 20,
+    fontSize: 20,
     flex: 1,
   },
   commentInput: {
     height: 40,
     borderColor: Colors.PINK,
     borderWidth: 1,
-    borderRadius: 5,
+    borderRadius: 20,
     paddingHorizontal: 10,
     marginBottom: 20,
-    borderRadius: 20,
     textAlign: "right",
-
-
   },
   commentContainer: {
     flexDirection: "row-reverse",

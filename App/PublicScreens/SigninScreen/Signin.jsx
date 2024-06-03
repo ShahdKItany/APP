@@ -5,6 +5,7 @@ import { saveToken } from '../../redux/BookSlice';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
+import Colors from '../../Common/Utils/Colors';
 
 const Signin = () => {
   const dispatch = useDispatch();
@@ -102,6 +103,10 @@ const Signin = () => {
           </Text>
         </TouchableOpacity>
       </View>
+
+      <TouchableOpacity style={styles.skipButton} onPress={() => navigation.navigate('Home')}>
+        <Text style={styles.skipButtonText}>تخطي</Text>
+      </TouchableOpacity>
     </KeyboardAvoidingView>
   );
 };
@@ -142,7 +147,6 @@ const styles = StyleSheet.create({
   },
   content: {
     marginTop: 50,
-    
   },
   inputContainer: {
     flexDirection: 'row',
@@ -186,6 +190,20 @@ const styles = StyleSheet.create({
   },
   bottomCreateAccount: {
     marginTop: 70,
+  },
+  skipButton: {
+    width: '30%',
+    height: 40,
+    backgroundColor: Colors.PINK,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: 10,
+  },
+  skipButtonText: {
+    fontSize: 16,
+    color: Colors.WHITE,
+    //textDecorationLine: 'underline',
   },
 });
 

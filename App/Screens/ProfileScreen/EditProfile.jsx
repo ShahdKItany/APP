@@ -14,7 +14,7 @@ import IconAntDesign from "react-native-vector-icons/AntDesign";
 const EditProfile = () => {
   const navigation = useNavigation();
 
-  const [email, setEmail] = useState("shahd.kitany@gmail.com");
+  const [email, setEmail] = useState("kitanyshahd@gmail.com");
   const [phoneNumber, setPhoneNumber] = useState("+970 59-364-7582");
   const [password, setPassword] = useState("shahd");
   const [confirmPassword, setConfirmPassword] = useState("");

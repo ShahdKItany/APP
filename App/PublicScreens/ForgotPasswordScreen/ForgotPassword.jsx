@@ -195,6 +195,71 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, KeyboardAvoidingView, Platform, ActivityIndicator, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -206,7 +271,6 @@ const ForgotPassword = () => {
   const navigation = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  //const [confirmPassword, setConfirmPassword] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [error, setError] = useState('');
   const [isCodeSent, setIsCodeSent] = useState(false);
@@ -214,7 +278,7 @@ const ForgotPassword = () => {
 
   const handleRequestVerificationCode = async () => {
     if (email === '') {
-      setError('الرجاء إدخال بريدك الإلكتروني');
+      setError('الرجاء إدخال بريدك الإلكتروني');  //enter your email
       console.log('Error: Email is empty');
     } else {
       setError('');
@@ -223,22 +287,31 @@ const ForgotPassword = () => {
 
       let timeoutId = setTimeout(() => {
         setLoading(false);
-        setError('حدثت مشكلة في إرسال الكود، حاول مرة أخرى');
+        setError('There was a problem sending the code, please try again');
         console.log('Error: Timeout - Verification code not sent');
-        Alert.alert( 'حدثت مشكلة في إرسال الكود، حاول مرة أخرى');
-      }, 100000); // 10 ثواني
+        Alert.alert('There was a problem sending the code, please try again');
+      }, 10000); // 10 seconds
 
       try {
-        await axios.post('https://ecommercebackend-jzct.onrender.com/auth/sendCode', { email });
+        const response = await axios.patch('https://ecommercebackend-jzct.onrender.com/auth/sendCode', { email });
+        console.log('Response:', response.data); // Log the response data
         clearTimeout(timeoutId);
         setIsCodeSent(true);
         console.log('Success: Verification code sent');
-        Alert.alert( 'تم إرسال الكود بنجاح');
+        Alert.alert('The code has been sent successfully');
       } catch (error) {
         clearTimeout(timeoutId);
-        setError('فشل في إرسال الكود , حاول مرة أخرى .');
+        if (error.response) {
+          console.log('Error data:', error.response.data);
+          console.log('Error status:', error.response.status);
+          console.log('Error headers:', error.response.headers);
+        } else if (error.request) {
+          console.log('Error request:', error.request);
+        } else {
+          console.log('Error message:', error.message);
+        }
+        setError('Failed to send the code, please try again.');
         console.log('Error: Failed to send verification code', error);
-       // Alert.alert( 'فشل في إرسال الكود');
       } finally {
         setLoading(false);
       }
@@ -247,31 +320,51 @@ const ForgotPassword = () => {
 
   const handleResetPassword = async () => {
     if (password === '' || verificationCode === '') {
-      setError('الرجاء إدخال كلمة المرور الجديدة والكود');
+      setError('الرجاء إدخال كلمة المرور الجديدة والكود');   //enter new password and code
       console.log('Error: Password or verification code is empty');
     } else if (!isValidPassword(password)) {
-      setError('يجب أن تحتوي كلمة المرور على الأقل على 8 أحرف وأرقام');
+      setError('يجب أن تحتوي كلمة المرور على الأقل على 8 أحرف وأرقام'); //Password must contain at least 8 letters and numbers'
       console.log('Error: Password does not meet criteria');
     } else {
       setError('');
       setLoading(true);
       console.log('Resetting password...');
-
-      try {
-        await axios.post('https://ecommercebackend-jzct.onrender.com/auth/forgetPassword', { email, password, verificationCode });
-        console.log('Success: Password reset');
-        navigation.navigate('ResetPasswordSuccess');
-      } catch (error) {
-        setError('فشل في إعادة تعيين كلمة المرور');
-        console.log('Error: Failed to reset password', error);
-      } finally {
-        setLoading(false);
+  
+      let attempts = 0;
+      const maxAttempts = 3;
+      const retryDelay = 1000; // 1 second
+  
+      while (attempts < maxAttempts) {
+        try {
+          attempts++;
+          console.log(`Attempt ${attempts} to reset password...`);
+          await axios.patch('https://ecommercebackend-jzct.onrender.com/auth/forgetPassword', { email, password, code: verificationCode });
+          console.log('Success: Password reset');
+          navigation.navigate('ResetPasswordSuccess');
+          setLoading(false);
+          return; // Exit the loop and function after successful reset
+        } catch (error) {
+          if (error.response && error.response.status === 502) {
+            console.log(`Error: 502 Bad Gateway, retrying attempt ${attempts}...`);
+            if (attempts < maxAttempts) {
+              await new Promise(resolve => setTimeout(resolve, retryDelay * attempts)); // Exponential backoff
+            } else {
+              console.log('Max attempts reached, could not reset password.');
+              setError('فشل في إعادة تعيين كلمة المرور'); //Failed to reset password'
+            }
+          } else {
+            console.log('Error: Failed to reset password', error);
+            setError('فشل في إعادة تعيين كلمة المرور');//Failed to reset password'
+            break; // Exit the loop if not a 502 error
+          }
+        }
       }
+      setLoading(false);
     }
   };
+  
 
   const isValidPassword = (password) => {
-    // Password should be at least 8 characters long and contain both letters and numbers
     const valid = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/.test(password);
     console.log('Password validation:', valid);
     return valid;
@@ -284,15 +377,15 @@ const ForgotPassword = () => {
     >
       <View style={styles.inner}>
         <Image source={require('../../../assets/logo/logo.jpg')} style={styles.logo} />
-
-        <Text style={styles.title}>إعادة تعين كلمة المرور</Text>
+            {/* Password Reset */}
+        <Text style={styles.title}>إعادة تعيين كلمة المرور</Text> 
         {error !== '' && <Text style={styles.error}>{error}</Text>}
 
         <View style={styles.inputContainer}>
           <Icon name="envelope" size={20} color="#0abae4" style={styles.icon} />
           <TextInput
             style={styles.input}
-            placeholder="أدخل  رقم الهاتف أو البريد الالكتروني"
+            placeholder="أدخل رقم الهاتف أو البريد الإلكتروني" //"Enter phone number or email"
             value={email}
             onChangeText={setEmail}
           />
@@ -304,27 +397,17 @@ const ForgotPassword = () => {
               <Icon name="lock" size={20} color="#0abae4" style={styles.icon} />
               <TextInput
                 style={styles.input}
-                placeholder="أدخل كلمة المرور الجديدة"
+                placeholder="أدخل كلمة المرور الجديدة" //enter new password
                 secureTextEntry={true}
                 value={password}
                 onChangeText={setPassword}
               />
             </View>
-            {/* <View style={styles.inputContainer}>
-              <Icon name="lock" size={20} color="#0abae4" style={styles.icon} />
-              <TextInput
-                style={styles.input}
-                placeholder="تأكيد كلمة المرور"
-                secureTextEntry={true}
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-              />
-            </View> */}
             <View style={styles.inputContainer}>
               <Icon name="key" size={20} color="#0abae4" style={styles.icon} />
               <TextInput
                 style={styles.input}
-                placeholder="ادخل الكود هنا"
+                placeholder="ادخل الكود هنا" //enter the code here
                 value={verificationCode}
                 onChangeText={setVerificationCode}
               />
@@ -337,7 +420,7 @@ const ForgotPassword = () => {
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.buttonText}>تلقي الكود</Text>
+              <Text style={styles.buttonText}>ارسال الكود</Text> //send code
             )}
           </TouchableOpacity>
         )}
@@ -347,7 +430,7 @@ const ForgotPassword = () => {
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.buttonText}>تأكيد</Text>
+              <Text style={styles.buttonText}>تأكيد</Text> // to be sure
             )}
           </TouchableOpacity>
         )}

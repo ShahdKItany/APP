@@ -15,17 +15,14 @@ const Signup = () => {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
 
-  //const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSignUp = async () => {
-    if (username === '' || email === '' || phone === '' || password === '' ) {
+    if (username === '' || email === '' || phone === '' || password === '') {
       setError('الرجاء تعبئة جميع الحقول');
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       setError('الرجاء إدخال عنوان بريد إلكتروني صحيح');
-    // } else if (password !== confirmPassword) {
-    //   setError('كلمة المرور وتأكيد كلمة المرور غير متطابقين');
     } else if (!/(?=.*\d)(?=.*[a-zA-Z]).{8,}/.test(password)) {
       setError('يجب أن تحتوي كلمة المرور على الأقل 8 أحرف وأرقام');
     } else if (!/^\d{10}$/.test(phone)) {
@@ -43,7 +40,6 @@ const Signup = () => {
 
         const { message, token } = response.data;
 
-        // حفظ token في Redux state
         dispatch(saveToken(token));
 
         Alert.alert('Sign up successful', message, [
@@ -53,15 +49,21 @@ const Signup = () => {
         console.error('Error signing up:', error);
         if (error.response) {
           console.error('Response data:', error.response.data);
-          console.error('______________________________________________________');
           console.error('Response status:', error.response.status);
           console.error('Response headers:', error.response.headers);
+
+          if (error.response.status === 409) {
+            setError('الحساب موجود بالفعل');
+          } else {
+            setError('حدث خطأ أثناء إنشاء الحساب');
+          }
         } else if (error.request) {
           console.error('Request data:', error.request);
+          setError('لم يتم تلقي استجابة من الخادم');
         } else {
           console.error('Error message:', error.message);
+          setError('حدث خطأ أثناء إنشاء الحساب');
         }
-        setError('حدث خطأ أثناء إنشاء الحساب');
       } finally {
         setLoading(false);
       }
@@ -70,128 +72,92 @@ const Signup = () => {
 
   return (
     <KeyboardAvoidingView
-    //   behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    //   style={styles.container}
-    // >
-
-    behavior={Platform.OS === 'ios' ? 'padding' : null}
-    style={styles.container}
-    keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0} // تغيير القيمة حسب الحاجة
-  >
-    <ScrollView contentContainerStyle={styles.scrollView}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.header} onPress={() => navigation.navigate('Signin')}>
-          <IconAntDesign name="arrowleft" size={25} color="black" />
-        </TouchableOpacity>
-      </View>
-
-
-      <View style={styles.logoContainer}>
-        <Image source={require('../../../assets/logo/logo.jpg')} style={styles.logo} />
-      </View>
-
-      <Text style={styles.title}>إنشاء حساب</Text>
-      {error !== '' && <Text style={styles.error}>{error}</Text>}
-      <View style={styles.content}>
-
-
-
-        <View style={styles.inputContainer}>
-          <Icon name="user" size={20} color="#0abae4" style={styles.icon} />
-          <TextInput
-            style={styles.input}
-            placeholder="الاسم"
-            value={username}
-            onChangeText={setUserName}
-          />
-        </View>
-
-
-        <View style={styles.inputContainer}>
-          <Icon name="envelope" size={20} color="#0abae4" style={styles.icon} />
-          <TextInput
-            style={styles.input}
-            placeholder="البريد الالكتروني"
-            value={email}
-            onChangeText={setEmail}
-          />
-        </View>
-
-
-
-        <View style={styles.inputContainer}>
-          <Icon name="phone" size={20} color="#0abae4" style={styles.icon} />
-          <TextInput
-            style={styles.input}
-            placeholder="رقم الهاتف"
-            value={phone}
-            onChangeText={(text) => setPhone(text.replace(/[^0-9]/g, ''))}
-            keyboardType="numeric"
-          />
-        </View>
-
-
-
-        <View style={styles.inputContainer}>
-          <Icon name="lock" size={20} color="#0abae4" style={styles.icon} />
-          <TextInput
-            style={styles.input}
-            placeholder="كلمة المرور"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
-        </View>
-
-        {/* <View style={styles.inputContainer}>
-          <Icon name="lock" size={20} color="#0abae4" style={styles.icon} />
-          <TextInput
-            style={styles.input}
-            placeholder="تأكيد كلمة المرور"
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            secureTextEntry
-          />
-        </View> */}
-
-
-
-        {/* <TouchableOpacity style={styles.button} onPress={handleSignUp} disabled={loading}>
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>إنشاء حساب</Text>
-          )}
-        </TouchableOpacity> */}
-
-<TouchableOpacity style={styles.button} onPress={handleSignUp} disabled={loading}>
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>
-               إنشاء حساب    <Icon name="user-plus" size={20} color="white" />
-            </Text>
-          )}
-        </TouchableOpacity>
-
-
-        <View style={styles.bottomButtonsContainer}>
-          <TouchableOpacity onPress={() => navigation.navigate('Signin')}>
-            <Text style={styles.bottomCreateAccount}>
-              <Text style={{ color: '#0abae4' }}>هل لديك حساب؟</Text>
-              <Text> </Text>
-              <Text style={{ color: '#f93a8f' }}>تسجيل الدخول</Text>
-            </Text>
+      behavior={Platform.OS === 'ios' ? 'padding' : null}
+      style={styles.container}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0}
+    >
+      <ScrollView contentContainerStyle={styles.scrollView}>
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.header} onPress={() => navigation.navigate('Signin')}>
+            <IconAntDesign name="arrowleft" size={25} color="black" />
           </TouchableOpacity>
         </View>
-      </View>
+
+        <View style={styles.logoContainer}>
+          <Image source={require('../../../assets/logo/logo.jpg')} style={styles.logo} />
+        </View>
+
+        <Text style={styles.title}>إنشاء حساب</Text>
+        {error !== '' && <Text style={styles.error}>{error}</Text>}
+        <View style={styles.content}>
+          <View style={styles.inputContainer}>
+            <Icon name="user" size={20} color="#0abae4" style={styles.icon} />
+            <TextInput
+              style={styles.input}
+              placeholder="الاسم"
+              value={username}
+              onChangeText={setUserName}
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Icon name="envelope" size={20} color="#0abae4" style={styles.icon} />
+            <TextInput
+              style={styles.input}
+              placeholder="البريد الالكتروني"
+              value={email}
+              onChangeText={setEmail}
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Icon name="phone" size={20} color="#0abae4" style={styles.icon} />
+            <TextInput
+              style={styles.input}
+              placeholder="رقم الهاتف"
+              value={phone}
+              onChangeText={(text) => setPhone(text.replace(/[^0-9]/g, ''))}
+              keyboardType="numeric"
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Icon name="lock" size={20} color="#0abae4" style={styles.icon} />
+            <TextInput
+              style={styles.input}
+              placeholder="كلمة المرور"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
+          </View>
+
+          <TouchableOpacity style={styles.button} onPress={handleSignUp} disabled={loading}>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>
+                إنشاء حساب <Icon name="user-plus" size={20} color="white" />
+              </Text>
+            )}
+          </TouchableOpacity>
+
+          <View style={styles.bottomButtonsContainer}>
+            <TouchableOpacity onPress={() => navigation.navigate('Signin')}>
+              <Text style={styles.bottomCreateAccount}>
+                <Text style={{ color: '#0abae4' }}>هل لديك حساب؟</Text>
+                <Text> </Text>
+                <Text style={{ color: '#f93a8f' }}>تسجيل الدخول</Text>
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-
   scrollView: {
     flexGrow: 1,
     justifyContent: 'center',
@@ -201,7 +167,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignSelf: 'stretch',
-    //marginBottom: 1,
   },
   backButton: {
     color: '#0abae4',
@@ -231,7 +196,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#ffa500',
     margin: 10,
-   marginBottom: 1,
+    marginBottom: 1,
   },
   error: {
     fontSize: 16,
@@ -274,23 +239,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     margin: 10,
-    alignSelf: 'center', // Center the button
-     padding:10,
-     paddingLeft:40,
-     paddingRight:40
+    alignSelf: 'center',
+    padding: 10,
+    paddingLeft: 40,
+    paddingRight: 40,
   },
   buttonText: {
     fontSize: 18,
     color: '#fff',
     fontWeight: 'bold',
-    
   },
-
   bottomButtonsContainer: {
     marginTop: 1,
-    alignItems: 'center', // Center the bottom button container
-
-    
+    alignItems: 'center',
   },
   bottomCreateAccount: {
     marginTop: 70,

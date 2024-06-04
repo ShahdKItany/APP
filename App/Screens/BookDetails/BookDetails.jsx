@@ -22,10 +22,12 @@ const BookDetails = ({ route, navigation }) => {
   const { title, finalPrice, description, mainImage, subImages } = route.params;
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState([]);
-  const commentInputRef = useRef(null);
-  const scrollViewRef = useRef(null);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [rating, setRating] = useState(0);
+
+  const commentInputRef = useRef(null);
+  const scrollViewRef = useRef(null);
+
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -36,26 +38,11 @@ const BookDetails = ({ route, navigation }) => {
     console.log("Sub Images:", subImages);
   }, [title, finalPrice, description, mainImage, subImages]);
 
-  const addToCarts = () => {
+  const handleAddToCart = () => {
     const newItem = { title, price: finalPrice, image: mainImage, quantity: 1 };
     dispatch(addToCart(newItem));
     navigation.navigate("Cart");
-    Alert.alert(
-      "تمت إضافة الكتاب إلى عربة التسوق!",
-      "",
-      [
-        {
-          text: 'OK',
-          style: 'default',
-          onPress: () => {},
-        },
-      ],
-      { cancelable: false }
-    );
-  };
-
-  const handleAddToCart = () => {
-    addToCarts();
+    Alert.alert("تمت إضافة الكتاب إلى عربة التسوق!", "", [{ text: 'OK', style: 'default' }], { cancelable: false });
   };
 
   const handleAddToFavorites = () => {
@@ -63,18 +50,7 @@ const BookDetails = ({ route, navigation }) => {
       Alert.alert("الكتاب موجود بالفعل في المفضلة!");
     } else {
       setIsInWishlist(true);
-      Alert.alert(
-        "تمت إضافة الكتاب إلى المفضلة!",
-        "",
-        [
-          {
-            text: 'OK',
-            style: 'default',
-            onPress: () => {},
-          },
-        ],
-        { cancelable: false }
-      );
+      Alert.alert("تمت إضافة الكتاب إلى المفضلة!", "", [{ text: 'OK', style: 'default' }], { cancelable: false });
     }
   };
 
@@ -92,50 +68,37 @@ const BookDetails = ({ route, navigation }) => {
 
   const scrollToCommentInput = () => {
     if (scrollViewRef.current && commentInputRef.current) {
-      commentInputRef.current.measureLayout(
-        scrollViewRef.current,
-        (x, y) => {
-          scrollViewRef.current.scrollTo({ y: y, animated: true });
-        }
-      );
+      commentInputRef.current.measureLayout(scrollViewRef.current, (x, y) => {
+        scrollViewRef.current.scrollTo({ y, animated: true });
+      });
     }
   };
+
+  const combinedImages = [mainImage, ...subImages];
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
       <ScrollView contentContainerStyle={styles.container} ref={scrollViewRef}>
         <Swiper style={styles.wrapper} showsButtons={true}>
-          {/* Main Image */}
-          <View style={styles.slide}>
-            {mainImage ? (
-              <Image
-                source={{ uri: mainImage }}
-                style={styles.image}
-              />
-            ) : (
-              <Text>صورة غير متوفرة</Text>
-            )}
-          </View>
-
-          {/* Sub Images */}
-          {subImages && subImages.length > 0 ? (
-            subImages.map((img, index) => (
-              <View style={styles.slide} key={index}>
-                {img ? (
-                  <Image
-                    source={{ uri: img }}
-                    style={styles.image}
-                  />
-                ) : (
-                  <Text>صورة غير متوفرة</Text>
-                )}
-              </View>
-            ))
-          ) : null}
+          {combinedImages.map((img, index) => (
+            <View style={styles.slide} key={index}>
+              {img ? (
+                <Image source={{ uri: img }} style={styles.image} />
+              ) : (
+                <Text>الصورة غير متوفرة</Text>
+              )}
+            </View>
+          ))}
         </Swiper>
 
+        
         <Text style={styles.title}>{title}</Text>
-        <Text style={styles.price}>السعر: ₪{finalPrice}</Text>
+        {/* {finalPrice !== undefined && finalPrice > 0 && (
+  <Text style={styles.originalPrice}>₪{finalPrice.toFixed(2)}</Text>
+)} */}
+
+<Text style={styles.price}>السعر: ₪{finalPrice}</Text>
+
         <Text style={styles.details}>{description}</Text>
 
         <View style={styles.ratingContainer}>
@@ -163,6 +126,7 @@ const BookDetails = ({ route, navigation }) => {
             <Text style={styles.buttonText}>أضف إلى المفضلة</Text>
           </TouchableOpacity>
         </View>
+
         <View style={styles.commentsContainer}>
           <View style={styles.commentsTitleContainer}>
             <FontAwesomeIcon icon={faComment} style={styles.commentIcon} />
@@ -172,9 +136,7 @@ const BookDetails = ({ route, navigation }) => {
           {comments.map((comment, index) => (
             <View key={index} style={styles.commentContainer}>
               <FontAwesomeIcon icon={faUser} style={styles.userIcon} />
-              <Text style={styles.commentText}>
-                {comment}
-              </Text>
+              <Text style={styles.commentText}>{comment}</Text>
             </View>
           ))}
 
@@ -204,17 +166,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   wrapper: {
-    height: 400,
+    height: 430,
   },
   slide: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   image: {
-    width: '100%',
+    width: "80%",
     height: 300,
-    resizeMode: 'cover',
+    resizeMode: "cover",
   },
   title: {
     fontSize: 24,
@@ -260,15 +222,15 @@ const styles = StyleSheet.create({
     marginRight: 3,
   },
   ratingContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     width: "100%",
     marginTop: 8,
     marginBottom: 20,
     alignItems: "center",
   },
   starContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   star: {
     marginHorizontal: 5,
@@ -297,7 +259,7 @@ const styles = StyleSheet.create({
     fontSize: 27,
     padding: 11,
     color: Colors.BLUE,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   commentText: {
     fontSize: 20,
@@ -322,7 +284,7 @@ const styles = StyleSheet.create({
     fontSize: 27,
     padding: 11,
     color: Colors.BLUE,
-    alignSelf: 'center',
+    alignSelf: "center",
     marginBottom: 20,
   },
   addButton: {
@@ -336,6 +298,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
   },
+  originalPrice: {
+    fontSize: 15,
+    color: Colors.PINK,
+    fontWeight: 'bold',
+    textDecorationLine: 'line-through', // تحديد الخط بالتشطيب
+  },
+  
 });
 
 export default BookDetails;

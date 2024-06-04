@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native'; 
+import { useNavigation } from '@react-navigation/native'; 
 import Colors from '../Utils/Colors';
 
 const Navbar = () => {
   const [activeTab, setActiveTab] = useState('Home'); 
   const navigation = useNavigation(); 
-  const route = useRoute();
 
   const tabs = [
     { id: 'New', title: 'جديد', screen: 'New' },
@@ -14,18 +13,22 @@ const Navbar = () => {
     { id: 'Home', title: 'الكل', screen: 'Home' },
   ];
 
-  useEffect(() => {
-    // Update active tab based on the current screen
-    const currentScreen = route.name;
-    const tab = tabs.find(tab => tab.screen === currentScreen);
-    if (tab) {
-      setActiveTab(tab.id);
-    }
-  }, [route]);
-
   const handleTabPress = (tabId, screenName) => {
     setActiveTab(tabId); 
-    navigation.navigate(screenName);
+    // Navigate to the corresponding screen based on tabId
+    switch (tabId) {
+      case 'Home':
+        navigation.navigate('Home');
+        break;
+      case 'New':
+        navigation.navigate('New');
+        break;
+      case 'Discount':
+        navigation.navigate('Discount');
+        break;
+      default:
+        break;
+    }
   };
 
   // Render tab item

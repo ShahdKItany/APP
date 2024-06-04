@@ -274,113 +274,147 @@ export default Home;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import React, { useState, useEffect } from "react";
-import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import axios from "axios";
-
-import Header from "../../Common/Header/Header";
-import Footer from "../../Common/Footer/Footer";
-import Navbar from "../../Common/Navbar/Navbar";
-import Colors from "../../Common/Utils/Colors";
+// Home.js
+import React, { useState, useEffect } from 'react';
+import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
+import Header from '../../Common/Header/Header';
+import Footer from '../../Common/Footer/Footer';
+import Navbar from '../../Common/Navbar/Navbar';
+import Colors from '../../Common/Utils/Colors';
+import Icon from 'react-native-vector-icons/FontAwesome'; // Import FontAwesome icons
 
 const Home = () => {
   const navigation = useNavigation();
   const [books, setBooks] = useState([]);
+  const [isLoading, setIsLoading] = useState(true); // State to track loading status
 
   useEffect(() => {
     fetchBooks();
   }, []);
 
   const fetchBooks = async () => {
-    console.log("Fetching books...");
+    console.log('Fetching books...');
     try {
-      const response = await axios.get("https://ecommercebackend-jzct.onrender.com/book/Active");
-      console.log("Books fetched:", response.data);
+      const response = await axios.get('https://ecommercebackend-jzct.onrender.com/book/Active');
+      console.log('Books fetched:', response.data);
       setBooks(response.data.books);
+      setIsLoading(false); // Set loading status to false when books are fetched
     } catch (error) {
-      console.error("Error fetching books:", error);
+      console.error('Error fetching books:', error);
+      setIsLoading(false); // Set loading status to false in case of error
+      // Handle error here, such as displaying an error message to the user
     }
   };
 
   const handleBookPress = (item) => {
-    console.log("Book pressed:", item);
-    const { _id, title, price, description, mainImage, subImages } = item;
-    const mainImageUrl = mainImage && mainImage.secure_url ? mainImage.secure_url : null;
-    const subImagesUrls = subImages.map(image => image.secure_url);
-  
-    navigation.navigate("BookDetails", {
+    console.log('Book pressed:', item);
+    const { _id, title, price, description, mainImage, subImages, Discount } = item;
+    const mainImageUrl = mainImage?.secure_url || null;
+    const subImagesUrls = subImages.map((image) => image.secure_url);
+    const finalPrice = price * ((100 - Discount) / 100); // Corrected final price calculation
+
+    navigation.navigate('BookDetails', {
       id: _id,
       title,
       description,
       mainImage: mainImageUrl,
       subImages: subImagesUrls,
+      Discount,
       price,
-      finalPrice: price,
+      finalPrice,
     });
   };
-  
+
+  const isNewBook = (book) => {
+    const today = new Date();
+    const bookDate = new Date(book.createdAt);
+    const sixtyDaysAgo = new Date(today.setDate(today.getDate() - 60));
+    return bookDate >= sixtyDaysAgo;
+  };
+
+  const isDiscountedBook = (book) => {
+    return book.Discount !== undefined && book.Discount > 0;
+  };
+
+  const calculateDiscountPercentage = (book) => {
+    if (isDiscountedBook(book)) {
+      return book.Discount;
+    } else {
+      return 0; // No discount, so return 0 percentage
+    }
+  };
+
+  const renderBookItem = ({ item }) => {
+    const isNew = isNewBook(item);
+    const isDiscounted = isDiscountedBook(item);
+    const discountPercentage = calculateDiscountPercentage(item);
+    const finalPrice = item.price * ((100 - item.Discount) / 100); // Ensure valid calculation
+
+    // Log the price and final price
+    console.log('Discount =', item.Discount);
+    console.log('Price:', item.price);
+    console.log('Final Price:', finalPrice);
+    console.log('___________________________________________');
+
+    if (isDiscounted) {
+      console.log(`${item.title} is discounted by ${discountPercentage}% (${item.price - finalPrice}₪)`);
+    } else {
+      console.log(`${item.title} has no discount`);
+    }
+
+    return (
+      <TouchableOpacity style={styles.bookContainer} onPress={() => handleBookPress(item)}>
+        {item.mainImage?.secure_url ? (
+          <View>
+            <Image source={{ uri: item.mainImage.secure_url }} style={styles.bookImage} />
+            {isDiscounted && (
+              <View style={styles.discountLabel}>
+                <Icon name="fire" size={19} color="white" />
+                <Text style={styles.discountText}> {discountPercentage}%</Text>
+              </View>
+            )}
+          </View>
+        ) : (
+          <View style={styles.bookImagePlaceholderContainer}>
+            <View style={styles.bookImagePlaceholder}>
+              <Text style={styles.placeholderText}>Image not available</Text>
+            </View>
+          </View>
+        )}
+        {isNew && <Text style={styles.newLabel}>جديد</Text>}
+        <Text style={styles.title}>{item.title}</Text>
+        {isDiscounted ? (
+          <View style={styles.discountContainer}>
+            <Text style={styles.discountedPrice}>₪{item.price}</Text>
+            <Text style={styles.originalPrice}>₪{finalPrice.toFixed(2)}</Text>
+          </View>
+        ) : (
+          <View style={styles.discountContainer}>
+            <Text style={styles.price}>₪{item.price}</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={{ flex: 1 }}>
       <Header />
       <Navbar />
       <View style={{ flex: 1, paddingHorizontal: 10, marginBottom: 50 }}>
-        <FlatList
-          data={books}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.bookContainer}
-              onPress={() => handleBookPress(item)}
-            >
-              {item.mainImage && item.mainImage.secure_url ? (
-                <Image
-                  source={{ uri: item.mainImage.secure_url }}
-                  style={styles.bookImage}
-                />
-              ) : (
-                <View style={styles.bookImagePlaceholderContainer}>
-                  <View style={styles.bookImagePlaceholder}>
-                    <Text style={styles.placeholderText}>Image not available</Text>
-                  </View>
-                </View>
-              )}
-              <Text style={styles.title}>{item.title}</Text>
-              <Text style={styles.price}>₪{item.price}</Text>
-            </TouchableOpacity>
-          )}
-          keyExtractor={(item) => item._id}
-          numColumns={2}
-          contentContainerStyle={{ paddingBottom: 20 }}
-        />
+        {isLoading ? ( // Show activity indicator if loading
+          <ActivityIndicator size="large" color={Colors.ORANGE} style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} />
+        ) : (
+          <FlatList
+            data={books}
+            renderItem={renderBookItem}
+            keyExtractor={(item) => item._id}
+            numColumns={2}
+            contentContainerStyle={{ paddingBottom: 20 }}
+          />
+        )}
       </View>
       <Footer navigation={navigation} />
     </View>
@@ -390,13 +424,13 @@ const Home = () => {
 const styles = StyleSheet.create({
   bookContainer: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#fff",
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
     margin: 10,
     padding: 10,
     borderRadius: 10,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
@@ -411,30 +445,47 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 10,
   },
+  discountLabel: {
+    position: 'absolute',
+    top: -5,
+    right: -7,
+    padding: 3,
+    borderRadius: 10,
+    backgroundColor: Colors.PINK,
+    flexDirection: 'column',
+    alignItems: 'center',
+    //transform: [{ rotate: '22deg' }], // Add rotation to make it slanted
+  },
+  discountText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginLeft: 3, // Add some margin between icon and text
+  },
   bookImagePlaceholderContainer: {
     width: 120,
     height: 160,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     borderWidth: 2,
-    borderColor: "pink",
+    borderColor: 'pink',
     borderRadius: 10,
   },
   bookImagePlaceholder: {
     width: 100,
     height: 140,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f2f2f2",
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f2f2f2',
     borderRadius: 8,
   },
   placeholderText: {
-    color: "gray",
+    color: 'gray',
     fontSize: 12,
   },
   title: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginTop: 6,
     marginBottom: 5,
   },
@@ -443,7 +494,34 @@ const styles = StyleSheet.create({
     color: Colors.ORANGE,
     marginTop: 8,
     marginBottom: 2,
-    fontWeight: "bold",
+    fontWeight: 'bold',
+  },
+  newLabel: {
+    position: 'absolute',
+    top: 3,
+    left: 5,
+    padding: 3,
+    color: 'white',
+    fontSize: 15,
+    fontWeight: 'bold',
+    borderRadius: 10,
+    backgroundColor: '#0BDA51',
+  },
+  discountContainer: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginTop: 5,
+  },
+  discountedPrice: {
+    fontSize: 15,
+    color: Colors.ORANGE,
+    fontWeight: 'bold',
+    textDecorationLine: 'line-through',
+  },
+  originalPrice: {
+    fontSize: 15,
+    color: Colors.PINK,
+    fontWeight: 'bold',
   },
 });
 

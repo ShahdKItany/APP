@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Linking, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Colors from '../../Common/Utils/Colors';
+import { removeToken } from '../../ReduxAndAsyncStorage/Storage';
 
 const menuItems = [
   { id: '1', title: 'تعديل الملف الشخصي', icon: 'edit' },
@@ -98,7 +99,8 @@ const Profile = ({ navigation }) => {
                 },
                 {
                   text: 'نعم',
-                  onPress: () => {
+                  onPress: async() => {
+                    await removeToken();
                     navigation.navigate('Login');
                   },
                 },

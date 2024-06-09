@@ -12,6 +12,7 @@ export const saveToken = async (token) => {
 export const getToken = async () => {
   try {
     const token = await AsyncStorage.getItem('@user_token');
+    console.log(token)
     return token;
   } catch (e) {
     console.error('Failed to fetch the token from storage', e);

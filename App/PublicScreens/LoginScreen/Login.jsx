@@ -3,10 +3,11 @@
 
 
 //App Screens LoginScreen Login.jsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Colors from '../../Common/Utils/Colors';
+import { getToken } from '../../ReduxAndAsyncStorage/Storage';
 
 export default function Login() {
   const navigation = useNavigation();
@@ -14,7 +15,17 @@ export default function Login() {
   const handleNavigate = () => {
     navigation.navigate('Signin');
   };
+  
+   useEffect(() => {
+    const checkUser = async() => {
+      const token = await getToken();
 
+      if(token)
+        navigation.navigate('Home');
+
+    }
+    checkUser()
+  }, []);
   return (
     <View style={styles.container}>
       <Image

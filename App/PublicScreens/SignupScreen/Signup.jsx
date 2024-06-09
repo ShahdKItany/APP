@@ -39,7 +39,7 @@ const Signup = () => {
         });
 
         const { message, token } = response.data;
-
+        console.log(response.data)
         dispatch(saveToken(token));
 
         Alert.alert('Sign up successful', message, [

@@ -29,7 +29,7 @@ const Signin = () => {
 
         const { token } = response.data;
 
-        await dispatch(storeToken(token));
+         dispatch(storeToken(token));
         
         console.log('تم تسجيل الدخول بنجاح. التوكين:', token);
         Alert.alert('Login successful', 'تم تسجيل الدخول بنجاح', [

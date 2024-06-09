@@ -2,42 +2,40 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Linking, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Colors from '../../Common/Utils/Colors';
+import { useDispatch } from 'react-redux';
+import { clearToken } from '../../ReduxAndAsyncStorage/Actions'; // Import the clearToken action
 
 const menuItems = [
   { id: '1', title: 'تعديل الملف الشخصي', icon: 'edit' },
   { id: '2', title: 'قائمة المفضلة', icon: 'heart' },
   { id: '3', title: 'عربة التسوق', icon: 'shopping-cart' },
-  // { id: '4', title: 'الوضع المظلم', icon: 'moon-o' },
   { id: '5', title: 'تواصل معنا', icon: 'phone' },
 ];
 
 const Profile = ({ navigation }) => {
   const [showOptions, setShowOptions] = useState(false);
-  const [isDarkMode, setDarkMode] = useState(false);
-
-  const openLink = (link) => {
-    Linking.openURL(link).catch(() => {
-      console.error('Failed to open link');
-    });
-    setShowOptions(false);
-  };
-
-  const toggleDarkMode = () => {
-    setDarkMode(!isDarkMode);
-    // يمكنك هنا إضافة المنطق الخاص بتبديل الوضع المظلم في التطبيق
-  };
-
-  const openCartPage = () => {
-    navigation.navigate('Cart');
-    setShowOptions(false);
-  };
-  const openWishListPage = () => {
-    navigation.navigate('WishList');
-    setShowOptions(false);
-  };
-  const openEditProfilePage = () => {
-    navigation.navigate('EditProfile');
-    setShowOptions(false);
+  const dispatch = useDispatch(); // Get dispatch function from redux
+  const handleLogout = () => {
+    // Function to handle logout
+    Alert.alert(
+      'تسجيل الخروج',
+      'هل أنت متأكد من رغبتك في تسجيل الخروج؟',
+      [
+        {
+          text: 'إلغاء',
+          style: 'cancel',
+        },
+        {
+          text: 'نعم',
+          onPress: () => {
+            // Clear token on logout
+            dispatch(clearToken());
+            navigation.navigate('Login');
+          },
+        },
+      ],
+      { cancelable: false }
+    );
   };
 
   return (
@@ -56,13 +54,12 @@ const Profile = ({ navigation }) => {
               if (item.title === 'تواصل معنا') {
                 setShowOptions(true);
               } else if (item.title === 'تعديل الملف الشخصي') {
-                 openEditProfilePage();
+                navigation.navigate('EditProfile');
               } else if (item.title === 'عربة التسوق') {
-                openCartPage();
-              // } else if (item.title === 'الوضع المظلم') {
-              //   toggleDarkMode();
+                navigation.navigate('Cart');
               } else if (item.title === 'قائمة المفضلة') {
-                openWishListPage();              }
+                navigation.navigate('WishList');
+              }
             }}
           >
             <Icon name={item.icon} size={24} color={Colors.BLACK} style={styles.icon} />
@@ -73,45 +70,20 @@ const Profile = ({ navigation }) => {
 
         {showOptions && (
           <View style={styles.optionsContainer}>
-            <TouchableOpacity style={styles.optionButton} onPress={() => openLink('https://www.instagram.com/kidskills1/')}>
+            <TouchableOpacity style={styles.optionButton} onPress={() => Linking.openURL('https://www.instagram.com/kidskills1/')}>
               <Text style={styles.optionButtonText}>إنستجرام</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.optionButton} onPress={() => openLink('https://www.facebook.com/profile.php?id=100068874728638')}>
+            <TouchableOpacity style={styles.optionButton} onPress={() => Linking.openURL('https://www.facebook.com/profile.php?id=100068874728638')}>
               <Text style={styles.optionButtonText}>فيسبوك</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.optionButtonText} onPress={() => setShowOptions(false)}>
-            <Text style={styles.cancelButtonText}>إلغاء</Text>
-          </TouchableOpacity>
+              <Text style={styles.cancelButtonText}>إلغاء</Text>
+            </TouchableOpacity>
           </View>
         )}
 
-        <TouchableOpacity
-          style={styles.logoutButton}
-          onPress={() => {
-            Alert.alert(
-              'تسجيل الخروج',
-              'هل أنت متأكد من رغبتك في تسجيل الخروج؟',
-              [
-                {
-                  text: 'إلغاء',
-                  style: 'cancel',
-                },
-                {
-                  text: 'نعم',
-                  onPress: () => {
-                    navigation.navigate('Login');
-                  },
-                },
-              ],
-              { cancelable: false }
-            );
-          }}
-        >
-
-
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Text style={styles.buttonText}>تسجيل الخروج</Text>
-
-          
         </TouchableOpacity>
       </View>
     </View>
@@ -121,8 +93,7 @@ const Profile = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-   // backgroundColor: Colors.LIGHT_GRAY,
-   backgroundColor:Colors.WHITE,
+    backgroundColor: Colors.WHITE,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -133,9 +104,9 @@ const styles = StyleSheet.create({
     width: 150,
     height: 150,
     borderRadius: 100,
-    resizeMode: "contain",
+    resizeMode: 'contain',
     borderWidth: 1,
-    borderColor:Colors.PINK,
+    borderColor: Colors.PINK,
   },
   title: {
     fontSize: 24,
@@ -167,15 +138,10 @@ const styles = StyleSheet.create({
   icon: {
     marginRight: 10,
   },
-
   buttonText: {
     fontSize: 18,
     fontWeight: 'bold',
     color: Colors.WHITE,
-    backgroundColor: Colors.PINK,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-
   },
   optionsContainer: {
     flexDirection: 'column',
@@ -195,25 +161,20 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: Colors.WHITE,
   },
-
-  
   cancelButtonText: {
-fontSize:20,
-fontWeight: 'bold',
-
+    fontSize: 20,
+    fontWeight: 'bold',
   },
   logoutButton: {
     backgroundColor: Colors.PINK,
-    borderRadius: 20, // Adjust the value to your preference
-    paddingVertical: 5,
-//paddingHorizontal: 10,
+    borderRadius: 20,
+    paddingVertical: 13,
     justifyContent: 'center',
     alignItems: 'center',
     marginVertical: 20,
     width: '70%',
-    marginTop:40
-  }
- 
+    marginTop: 40,
+  },
 });
 
 export default Profile;

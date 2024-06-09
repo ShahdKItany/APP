@@ -1,4 +1,3 @@
-// App\ReduxAndAsyncStorage\Storage.js
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const saveToken = async (token) => {
@@ -12,7 +11,7 @@ export const saveToken = async (token) => {
 export const getToken = async () => {
   try {
     const token = await AsyncStorage.getItem('@user_token');
-    console.log(token)
+    console.log('Retrieved token:', token);
     return token;
   } catch (e) {
     console.error('Failed to fetch the token from storage', e);

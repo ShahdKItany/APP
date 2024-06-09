@@ -1,4 +1,3 @@
-// App\ReduxAndAsyncStorage\Actions.js
 import { saveToken as asyncStoreToken, getToken as asyncGetToken, removeToken as asyncRemoveToken } from './Storage';
 import { saveToken } from './BookSlice';
 
@@ -12,6 +11,7 @@ export const loadToken = () => async (dispatch) => {
   const token = await asyncGetToken();
   if (token) {
     dispatch(saveToken(token));
+    console.log('Token loaded:', token); // Print token to console after loading
   }
 };
 

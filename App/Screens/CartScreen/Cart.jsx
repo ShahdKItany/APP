@@ -11,9 +11,8 @@ import {
   selectTotalPrice,
   setCart,
   selectToken,
+  saveToken,
 } from '../../ReduxAndAsyncStorage/BookSlice';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 import Colors from '../../Common/Utils/Colors';
 import Footer from '../../Common/Footer/Footer';
 
@@ -25,7 +24,11 @@ const Cart = ({ navigation }) => {
 
   useEffect(() => {
     if (token) {
+      console.log('_______Token available____token is :', token); // طباعة التوكن إذا كان متاحًا
       getCartAPI();
+    } else {
+      console.error('Token not available');
+      navigation.navigate('Signin');
     }
   }, [token]);
 
@@ -48,7 +51,6 @@ const Cart = ({ navigation }) => {
     }
   };
 
-  // تابع حذف الكتاب من السلة
   const removeFromCartAPI = async (itemId) => {
     try {
       const response = await axios.delete(`https://ecommercebackend-jzct.onrender.com/cart/${itemId}`, {
@@ -84,7 +86,27 @@ const Cart = ({ navigation }) => {
         console.error('Failed to fetch cart');
       }
     } catch (error) {
-      console.error('Error fetching cart:', error.message);
+      if (error.response && error.response.status === 401) {
+        console.error('________Error fetching cart______:', error.message);
+
+        
+        Alert.alert(
+          'خطأ في المصادقة',
+          'انتهت صلاحية جلسة تسجيل الدخول. يرجى تسجيل الدخول مرة أخرى.',
+          [
+            {
+              text: 'موافق',
+              onPress: () => {
+                dispatch(saveToken('')); // Clear token in redux state
+              //  navigation.navigate('Login'); // Navigate to Login screen
+              },
+            },
+          ],
+          { cancelable: false }
+        );
+      } else {
+        console.error('Error fetching cart:', error.message);
+      }
     }
   };
 
@@ -129,44 +151,51 @@ const Cart = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollView}>
-        {books.length === 0 ? (
-          <Text style={styles.emptyCartText}>عربة التسوق فارغة!</Text>
-        ) : (
-          <>
-            {books.map((book) => (
-              <View style={styles.itemContainer} key={book.id}>
-                <Image source={{ uri: book.image }} style={styles.image} />
-                <View style={styles.textContainer}>
-                  <Text style={styles.title}>{book.title}</Text>
-                  <Text style={styles.price}>₪{book.price.toFixed(2)}</Text>
-                </View>
-                <View style={styles.quantityContainer}>
-                  <TouchableOpacity onPress={() => dispatch(decrementQuantity(book.id))}>
-                    <Text style={styles.quantityButton}>-</Text>
+        {token ? (
+          // إذا كان التوكين متاحًا، قم بعرض محتويات عربة التسوق
+          books.length === 0 ? (
+            <Text style={styles.emptyCartText}>عربة التسوق فارغة!</Text>
+          ) : (
+            <>
+              {books.map((book) => (
+                <View style={styles.itemContainer} key={book.id}>
+                  <Image source={{ uri: book.image }} style={styles.image} />
+                  <View style={styles.textContainer}>
+                    <Text style={styles.title}>{book.title}</Text>
+                    <Text style={styles.price}>₪{book.price.toFixed(2)}</Text>
+                  </View>
+                  <View style={styles.quantityContainer}>
+                    <TouchableOpacity onPress={() => dispatch(decrementQuantity(book.id))}>
+                      <Text style={styles.quantityButton}>-</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.quantity}>{book.quantity}</Text>
+                    <TouchableOpacity onPress={() => dispatch(incrementQuantity(book.id))}>
+                      <Text style={styles.quantityButton}>+</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <TouchableOpacity onPress={() => handleRemoveFromCart(book.id)}>
+                    <Text style={styles.removeButton}>حذف</Text>
                   </TouchableOpacity>
-                  <Text style={styles.quantity}>{book.quantity}</Text>
-                  <TouchableOpacity onPress={() => dispatch(incrementQuantity(book.id))}>
-                    <Text style={styles.quantityButton}>+</Text>
-                  </TouchableOpacity>
                 </View>
-                <TouchableOpacity onPress={() => handleRemoveFromCart(book.id)}>
-                  <Text style={styles.removeButton}>حذف</Text>
-                </TouchableOpacity>
+              ))}
+              <View style={styles.totalContainer}>
+                <Text style={styles.totalText}>المجموع:</Text>
+                <Text style={styles.totalPrice}>₪{totalPrice.toFixed(2)}</Text>
               </View>
-            ))}
-            <View style={styles.totalContainer}>
-              <Text style={styles.totalText}>المجموع:</Text>
-              <Text style={styles.totalPrice}>₪{totalPrice.toFixed(2)}</Text>
-            </View>
-            <TouchableOpacity style={styles.clearButton} onPress={handleClearCart}>
-              <Text style={styles.clearButtonText}>حذف الكل</Text>
-            </TouchableOpacity>
-          </>
+              <TouchableOpacity style={styles.clearButton} onPress={handleClearCart}>
+                <Text style={styles.clearButtonText}>حذف الكل</Text>
+              </TouchableOpacity>
+            </>
+          )
+        ) : (
+          // إذا لم يكن التوكين متاحًا، قم بعرض رسالة تطلب من المستخدم تسجيل الدخول
+          <Text style={styles.emptyCartText}>يرجى تسجيل الدخول لعرض عربة التسوق!</Text>
         )}
       </ScrollView>
       <Footer />
     </View>
   );
+  
 };
 
 const styles = StyleSheet.create({
@@ -264,3 +293,4 @@ const styles = StyleSheet.create({
 });
 
 export default Cart;
+      

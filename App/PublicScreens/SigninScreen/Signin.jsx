@@ -26,12 +26,12 @@ const Signin = () => {
           email,
           password
         });
-
+      
         const { token } = response.data;
-
-        await dispatch(storeToken(token));
-        
-        console.log('تم تسجيل الدخول بنجاح. التوكين:', token);
+      
+        await dispatch(storeToken(token)); // حفظ التوكن باستخدام الـ Redux action
+      
+        console.log('You have been logged in successfully. Token is :', token);
         Alert.alert('Login successful', 'تم تسجيل الدخول بنجاح', [
           { text: 'OK', onPress: () => navigation.navigate('Home') }
         ]);
@@ -43,6 +43,7 @@ const Signin = () => {
       }
     }
   };
+  
 
   return (
     <KeyboardAvoidingView

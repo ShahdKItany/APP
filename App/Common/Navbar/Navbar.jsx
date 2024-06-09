@@ -4,8 +4,8 @@ import { useNavigation } from '@react-navigation/native';
 import Colors from '../Utils/Colors';
 
 const Navbar = () => {
-  const [activeTab, setActiveTab] = useState('Home'); 
   const navigation = useNavigation(); 
+  const [activeTab, setActiveTab] = useState('Home'); // تعيين الحالة النشطة بالابتداء
 
   const tabs = [
     { id: 'New', title: 'جديد', screen: 'New' },
@@ -14,27 +14,19 @@ const Navbar = () => {
   ];
 
   const handleTabPress = (tabId, screenName) => {
-    setActiveTab(tabId); 
-    // Navigate to the corresponding screen based on tabId
-    switch (tabId) {
-      case 'Home':
-        navigation.navigate('Home');
-        break;
-      case 'New':
-        navigation.navigate('New');
-        break;
-      case 'Discount':
-        navigation.navigate('Discount');
-        break;
-      default:
-        break;
-    }
+    // تحديث الحالة النشطة عند الضغط على الزر
+    setActiveTab(tabId);
+    // توجيه المستخدم إلى الشاشة المناسبة بناءً على الزر الذي تم الضغط عليه
+    navigation.navigate(screenName);
   };
 
-  // Render tab item
+  // عرض عناصر الأزرار
   const renderTabItem = ({ item }) => (
     <TouchableOpacity
-      style={[styles.tabItem, item.id === activeTab && styles.activeTab]}
+      style={[
+        styles.tabItem,
+        item.id === activeTab && styles.activeTab, // تطبيق الأنماط إذا كان الزر نشطًا
+      ]}
       onPress={() => handleTabPress(item.id, item.screen)}
     >
       <Text style={[styles.tabText, item.id === activeTab && styles.activeTabText]}>{item.title}</Text>
@@ -68,7 +60,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   activeTab: {
-    backgroundColor: Colors.ORANGE,
+    backgroundColor: Colors.ORANGE, // تغيير لون خلفية الزر النشط
   },
   tabText: {
     fontSize: 16,
@@ -76,7 +68,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   activeTabText: {
-    color: '#fff', // Change text color for active tab
+    color: '#fff', // تغيير لون النص للزر النشط
   },
 });
 

@@ -7,7 +7,7 @@ import {
   decrementQuantity,
   selectBooksInCart,
   selectTotalPrice,
-} from '../../redux/BookSlice';
+} from '../../ReduxAndAsyncStorage/BookSlice';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faHeart } from '@fortawesome/free-solid-svg-icons'; // Import the heart icon
 import Colors from '../../Common/Utils/Colors';

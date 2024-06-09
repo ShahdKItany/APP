@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, ScrollView, Text, TextInput, TouchableOpacity, Alert, Image, StyleSheet, KeyboardAvoidingView } from 'react-native'; 
 import { useDispatch, useSelector } from 'react-redux';
-import { removeFromCart, selectBooksInCart, clearCart } from '../../redux/BookSlice';
+import { removeFromCart, selectBooksInCart, clearCart } from '../../ReduxAndAsyncStorage/BookSlice';
 import Colors from '../../Common/Utils/Colors';
 import { Picker } from '@react-native-picker/picker';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';

@@ -1,13 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import axios from 'axios';
 import {
   removeFromCart,
   incrementQuantity,
   decrementQuantity,
+  clearCart,
   selectBooksInCart,
   selectTotalPrice,
-} from '../../redux/BookSlice';
+  setCart,
+  selectToken,
+} from '../../ReduxAndAsyncStorage/BookSlice';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 import Colors from '../../Common/Utils/Colors';
@@ -15,84 +19,150 @@ import Footer from '../../Common/Footer/Footer';
 
 const Cart = ({ navigation }) => {
   const dispatch = useDispatch();
+  const books = useSelector(selectBooksInCart) || [];
+  const totalPrice = useSelector(selectTotalPrice) || 0;
+  const token = useSelector(selectToken);
 
-  const books = useSelector(selectBooksInCart);
-  const totalPrice = useSelector(selectTotalPrice);
+  useEffect(() => {
+    if (token) {
+      getCartAPI();
+    }
+  }, [token]);
 
+  const clearCartAPI = async () => {
+    try {
+      const response = await axios.delete('https://ecommercebackend-jzct.onrender.com/cart/', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.status === 200) {
+        console.log('Cart cleared successfully');
+        dispatch(clearCart());
+      } else {
+        console.error('Failed to clear cart');
+      }
+    } catch (error) {
+      console.error('Error clearing cart:', error.message);
+    }
+  };
 
-  const handleDelete = (itemId) => {
+  // تابع حذف الكتاب من السلة
+  const removeFromCartAPI = async (itemId) => {
+    try {
+      const response = await axios.delete(`https://ecommercebackend-jzct.onrender.com/cart/${itemId}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.status === 200) {
+        console.log('Item removed from cart successfully');
+        dispatch(removeFromCart(itemId));
+      } else {
+        console.error('Failed to remove item from cart');
+      }
+    } catch (error) {
+      console.error('Error removing item from cart:', error.message);
+    }
+  };
+
+  const getCartAPI = async () => {
+    try {
+      const response = await axios.get('https://ecommercebackend-jzct.onrender.com/cart/', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.status === 200) {
+        console.log('Cart fetched successfully');
+        dispatch(setCart(response.data));
+      } else {
+        console.error('Failed to fetch cart');
+      }
+    } catch (error) {
+      console.error('Error fetching cart:', error.message);
+    }
+  };
+
+  const handleRemoveFromCart = (itemId) => {
     Alert.alert(
       'تأكيد الحذف',
-      'هل أنت متأكد أنك تريد حذف هذا الكتاب من عربة التسوق؟',
+      'هل أنت متأكد أنك تريد إزالة الكتاب من عربة التسوق؟',
       [
-        { text: 'إلغاء', onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
-        { text: 'حذف', onPress: () => dispatch(removeFromCart(itemId)) },
+        {
+          text: 'لا',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {
+          text: 'نعم',
+          onPress: () => removeFromCartAPI(itemId),
+        },
       ],
       { cancelable: false }
     );
   };
 
-
-  const handleOrder = () => {
-    if (books.length === 0) {
-      Alert.alert('العربة فارغة', 'الرجاء إضافة كتب إلى عربة التسوق قبل إتمام عملية الشراء.');
-    } else {
-      navigation.navigate('OrderScreen'); 
-    }
-  };
-
-  const renderCartItem = (item, index) => {
-    return (
-      <View key={index} style={styles.bookDetails}>
-        <Image source={item.source} style={styles.bookImage} />
-        <View style={styles.bookContent}>
-          <Text style={styles.bookTitle}>{item.title}</Text>
-          <View style={styles.bookInfo}>
-            <View style={styles.buttonsContainer}>
-              <TouchableOpacity style={styles.removeButton} onPress={() => handleDelete(item.id)}>
-                <Text style={styles.buttonText}>حذف</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.quantityButton} onPress={() => dispatch(incrementQuantity(item.id))}>
-                <Text style={styles.buttonText}>+</Text>
-              </TouchableOpacity>
-              <Text style={styles.bookQuantity}>الكمية: {item.quantity}</Text>
-              <TouchableOpacity style={styles.quantityButton} onPress={() => dispatch(decrementQuantity(item.id))}>
-                <Text style={styles.buttonText}>-</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-          <Text style={styles.bookPrice}>السعر: {(parseFloat(item.price) * item.quantity).toFixed(2)} ₪</Text>
-        </View>
-      </View>
+  const handleClearCart = () => {
+    Alert.alert(
+      'تأكيد الحذف',
+      'هل أنت متأكد أنك تريد حذف كل العناصر من عربة التسوق؟',
+      [
+        {
+          text: 'لا',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {
+          text: 'نعم',
+          onPress: () => clearCartAPI(),
+        },
+      ],
+      { cancelable: false }
     );
   };
 
   return (
     <View style={styles.container}>
-      <ScrollView>
-        <View style={styles.content}>
-          <View style={[styles.header, { backgroundColor: '#f93a8f' }]}>
-          <FontAwesomeIcon icon={faShoppingCart} style={styles.buttonIcon} />
-
-            <Text style={styles.headerText}>عربة التسوق</Text>
-           
-          </View>
-
-          {books.length > 0 ? (
-            <View>
-              {books.map((item, index) => renderCartItem(item, index))}
-              <View style={styles.totalAmountContainer}>
-                <Text style={styles.totalAmountText}>المجموع: {totalPrice} ₪</Text>
+      <ScrollView contentContainerStyle={styles.scrollView}>
+        {books.length === 0 ? (
+          <Text style={styles.emptyCartText}>عربة التسوق فارغة!</Text>
+        ) : (
+          <>
+            {books.map((book) => (
+              <View style={styles.itemContainer} key={book.id}>
+                <Image source={{ uri: book.image }} style={styles.image} />
+                <View style={styles.textContainer}>
+                  <Text style={styles.title}>{book.title}</Text>
+                  <Text style={styles.price}>₪{book.price.toFixed(2)}</Text>
+                </View>
+                <View style={styles.quantityContainer}>
+                  <TouchableOpacity onPress={() => dispatch(decrementQuantity(book.id))}>
+                    <Text style={styles.quantityButton}>-</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.quantity}>{book.quantity}</Text>
+                  <TouchableOpacity onPress={() => dispatch(incrementQuantity(book.id))}>
+                    <Text style={styles.quantityButton}>+</Text>
+                  </TouchableOpacity>
+                </View>
+                <TouchableOpacity onPress={() => handleRemoveFromCart(book.id)}>
+                  <Text style={styles.removeButton}>حذف</Text>
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity style={styles.checkoutButton} onPress={handleOrder}>
-                {/* <FontAwesomeIcon icon={faShoppingCart} style={styles.buttonIcon} /> */}
-                <Text style={styles.checkoutButtonText}>إتمام عملية الشراء</Text>
-              </TouchableOpacity>
+            ))}
+            <View style={styles.totalContainer}>
+              <Text style={styles.totalText}>المجموع:</Text>
+              <Text style={styles.totalPrice}>₪{totalPrice.toFixed(2)}</Text>
             </View>
-          ) : (
-            <Text style={styles.emptyCart}>العربة فارغة</Text>
-          )}
-        </View>
+            <TouchableOpacity style={styles.clearButton} onPress={handleClearCart}>
+              <Text style={styles.clearButtonText}>حذف الكل</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </ScrollView>
       <Footer />
     </View>
@@ -102,121 +172,93 @@ const Cart = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
-    paddingTop: 50,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  emptyCart: {
-    textAlign: 'center',
-    marginTop: 50,
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  header: {
-    flexDirection: 'row',
+    justifyContent: 'flex-start',
     alignItems: 'center',
-    padding: 15,
+    backgroundColor: Colors.WHITE,
+  },
+  scrollView: {
+    flexGrow: 1,
     justifyContent: 'center',
-  },
-  headerText: {
-    fontSize: 20,
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  bookDetails: {
-    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    paddingHorizontal: 20,
+    paddingVertical: 20,
   },
-  bookImage: {
+  emptyCartText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: Colors.GRAY,
+  },
+  itemContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '90%',
+    marginBottom: 20,
+    borderWidth: 1,
+    borderRadius: 10,
+    borderColor: Colors.LIGHT_GRAY,
+    padding: 10,
+  },
+  image: {
     width: 100,
     height: 150,
-    marginRight: 10,
-    borderWidth: 1, // Add this
-    borderColor: Colors.BLUE, // Add this
+    resizeMode: 'contain',
   },
-  
-  bookContent: {
+  textContainer: {
     flex: 1,
+    marginLeft: 10,
   },
-  bookTitle: {
+  title: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 10,
-    textAlign: 'right',
   },
-  bookInfo: {
+  price: {
+    fontSize: 16,
+    color: Colors.PINK,
+  },
+  quantityContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  bookPrice: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    textAlign: 'right',
-    marginTop: 18,
-  },
-  bookQuantity: {
-    fontSize: 17,
-    color: '#888',
-    textAlign: 'right',
-    padding: 5,
-  },
-  buttonsContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
   },
   quantityButton: {
-    backgroundColor: '#3498db',
-    paddingVertical: 5,
+    fontSize: 20,
+    color: Colors.PINK,
     paddingHorizontal: 10,
-    borderRadius: 5,
-    marginLeft: 5,
+  },
+  quantity: {
+    fontSize: 18,
+    marginHorizontal: 10,
   },
   removeButton: {
-    backgroundColor: '#e74c3c',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-    marginLeft: 50,
+    fontSize: 16,
+    color: Colors.RED,
+    marginLeft: 10,
   },
-  buttonText: {
-    color: 'white',
-  },
-  totalAmountContainer: {
+  totalContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
     alignItems: 'center',
+    width: '90%',
     marginTop: 20,
   },
-  totalAmountText: {
+  totalText: {
     fontSize: 18,
     fontWeight: 'bold',
+    marginRight: 10,
   },
-  checkoutButton: {
-    flexDirection: 'row', // Ensure the icon and text are in a row
-    alignItems: 'center', // Center the icon and text vertically
-    justifyContent: 'center', // Center the icon and text horizontally
-    backgroundColor: Colors.ORANGE,
-    paddingVertical: 10,
-    borderRadius: 5,
-    marginTop: 20,
-    marginBottom: 80,
-  },
-  buttonIcon: {
-    marginRight: 10, // Add some space between the icon and the text
-    color: 'white',
-    fontSize: 22,
-    padding:10
-  },
-  checkoutButtonText: {
-    color: 'white',
+  totalPrice: {
     fontSize: 18,
+    color: Colors.PINK,
+  },
+  clearButton: {
+    backgroundColor: Colors.RED,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    marginTop: 20,
+  },
+  clearButtonText: {
+    color: Colors.WHITE,
+    fontSize: 16,
     fontWeight: 'bold',
   },
 });

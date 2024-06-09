@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { useDispatch } from 'react-redux';
-import { saveToken } from '../../redux/BookSlice';
+import { saveToken } from '../../ReduxAndAsyncStorage/BookSlice';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import IconAntDesign from 'react-native-vector-icons/AntDesign';

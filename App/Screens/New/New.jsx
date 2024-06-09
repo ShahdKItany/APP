@@ -31,7 +31,7 @@ const New = () => {
 
   const filterNewBooks = (books) => {
     const today = new Date();
-    const sixtyDaysAgo = new Date(today.setDate(today.getDate() - 60));
+    const sixtyDaysAgo = new Date(today.setDate(today.getDate() - 14));
     
     return books.filter(book => {
       const bookDate = new Date(book.createdAt);
@@ -40,42 +40,53 @@ const New = () => {
   };
 
   const handleBookPress = (item) => {
-    const { _id, title, price, description, mainImage, subImages } = item;
+    const { _id, title, price, description, mainImage, subImages, finalPrice } = item;
     const mainImageUrl = mainImage && mainImage.secure_url ? mainImage.secure_url : null;
     const subImagesUrls = subImages.map(image => image.secure_url);
 
-    navigation.navigate("BookDetails", {
+    navigation.navigate('BookDetails', {
       id: _id,
       title,
       description,
       mainImage: mainImageUrl,
       subImages: subImagesUrls,
       price,
-      finalPrice: price,
+      finalPrice,
     });
   };
 
-  const renderBookItem = ({ item }) => (
-    <TouchableOpacity style={styles.bookContainer} onPress={() => handleBookPress(item)}>
-      <View style={styles.imageContainer}>
-        {item.mainImage?.secure_url ? (
-          <Image source={{ uri: item.mainImage.secure_url }} style={styles.bookImage} />
-        ) : (
-          <View style={styles.bookImagePlaceholderContainer}>
-            <View style={styles.bookImagePlaceholder}>
-              <Text style={styles.placeholderText}>Image not available</Text>
+  const renderBookItem = ({ item }) => {
+    const formatPrice = (price) => {
+      return price % 1 === 0 ? `₪${price.toFixed(0)}` : `₪${price.toFixed(2)}`;
+    };
+  
+    return (
+      <TouchableOpacity style={styles.bookContainer} onPress={() => handleBookPress(item)}>
+        <View style={styles.imageContainer}>
+          {item.mainImage?.secure_url ? (
+            <Image source={{ uri: item.mainImage.secure_url }} style={styles.bookImage} />
+          ) : (
+            <View style={styles.bookImagePlaceholderContainer}>
+              <View style={styles.bookImagePlaceholder}>
+                <Text style={styles.placeholderText}>Image not available</Text>
+              </View>
             </View>
+          )}
+          <View style={styles.newLabelContainer}>
+            <Text style={styles.newLabel}>جديد</Text>
           </View>
-        )}
-        <View style={styles.newLabelContainer}>
-          <Text style={styles.newLabel}>جديد</Text>
         </View>
-      </View>
-      <Text style={styles.title}>{item.title}</Text>
-      <Text style={styles.price}>₪{item.price}</Text>
-    </TouchableOpacity>
-  );
-
+        <Text style={styles.title}>{item.title}</Text>
+  
+        {item.price !== undefined && item.price !== item.finalPrice && (
+          <Text style={styles.originalPrice}>{formatPrice(item.price)}</Text>
+        )}
+  
+        <Text style={styles.finalPrice}>السعر: {formatPrice(item.finalPrice)}</Text>
+      </TouchableOpacity>
+    );
+  };
+  
   return (
     <View style={styles.container}>
       <Header />
@@ -160,12 +171,20 @@ const styles = StyleSheet.create({
     marginTop: 6,
     marginBottom: 5,
   },
-  price: {
-    fontSize: 15,
+  originalPrice: {
+    fontSize: 14,
     color: Colors.ORANGE,
-    marginTop: 8,
-    marginBottom: 2,
-    fontWeight: 'bold',
+    textAlign: "center",
+    textDecorationLine: 'line-through',
+    marginTop:5
+  },
+  finalPrice: {
+    fontSize: 14,
+    color: Colors.PINK,
+    textAlign: "center",
+    fontWeight: "bold",
+    marginTop:5
+
   },
   newLabelContainer: {
     position: 'absolute',

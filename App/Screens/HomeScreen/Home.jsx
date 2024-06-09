@@ -330,7 +330,7 @@ const Home = () => {
   const isNewBook = (book) => {
     const today = new Date();
     const bookDate = new Date(book.createdAt);
-    const sixtyDaysAgo = new Date(today.setDate(today.getDate() - 60));
+    const sixtyDaysAgo = new Date(today.setDate(today.getDate() - 14));
     return bookDate >= sixtyDaysAgo;
   };
 

@@ -87,34 +87,28 @@ const Discount = () => {
     );
   };
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={Colors.ORANGE} />
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Error fetching books. Please try again later.</Text>
-      </View>
-    );
-  }
-
   return (
     <View style={{ flex: 1 }}>
       <Header />
       <Navbar />
       <View style={{ flex: 1, paddingHorizontal: 10, marginBottom: 50 }}>
-        <FlatList
-          data={discountedBooks}
-          renderItem={renderBookItem}
-          keyExtractor={(item) => item._id}
-          numColumns={2}
-          contentContainerStyle={{ paddingBottom: 20 }}
-        />
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={Colors.ORANGE} />
+          </View>
+        ) : error ? (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>Error fetching books. Please try again later.</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={discountedBooks}
+            renderItem={renderBookItem}
+            keyExtractor={(item) => item._id}
+            numColumns={2}
+            contentContainerStyle={{ paddingBottom: 20 }}
+          />
+        )}
       </View>
       <Footer />
     </View>
@@ -177,13 +171,13 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   discountedPrice: {
-    fontSize: 15,
+    fontSize: 14,
     color: Colors.ORANGE,
     fontWeight: 'bold',
     textDecorationLine: 'line-through',
   },
   originalPrice: {
-    fontSize: 15,
+    fontSize: 14,
     color: Colors.PINK,
     fontWeight: 'bold',
   },
@@ -210,7 +204,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.PINK,
     flexDirection: 'column',
     alignItems: 'center',
-    //transform: [{ rotate: '22deg' }], // Add rotation to make it slanted
   },
   discountText: {
     color: 'white',

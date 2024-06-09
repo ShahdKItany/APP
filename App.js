@@ -2,6 +2,7 @@
 //   git add .
 //  git commit -m "changes" 
 //  git push -u origin main
+//الباك :    https://documenter.getpostman.com/view/30950345/2sA3Bt1Ugg?fbclid=IwZXh0bgNhZW0CMTAAAR03fz_CFshXtjs4BCh3-YJEKTt9to2xIafeYtQyVxLzjuUjg2oyXdwoD9Y_aem_AfZ9gYzpQzGKGF_yLr6qIBCIfgQQC99U5AQD0LJIUh23R6dGSceeAfE8-COdKOmZsM0RUVb74nfMm-fyIHTVxl3k#intro
 //______________________________________________
 
 // App.js
@@ -26,7 +27,7 @@ import EditProfile from "./App/Screens/ProfileScreen/EditProfile";
 import WishList from "./App/Screens/WishList/WishList";
 import BookDetails from "./App/Screens/BookDetails/BookDetails";
 
-import store, { persistor } from "./App/redux/store";
+import store, { persistor } from "./App/ReduxAndAsyncStorage/store";
 import { PersistGate } from "redux-persist/integration/react";
 import OrderScreen from "./App/Screens/OrderScreen/OrderScreen";
 import BooksByCategory from "./App/Screens/CategoriesScreen/BooksByCategory";
@@ -40,7 +41,7 @@ const App = () => {
       <PersistGate loading={null} persistor={persistor}>
         <NavigationContainer>
           <Stack.Navigator
-            initialRouteName="Discount"
+            initialRouteName="Login"
             screenOptions={{ headerShown: false }}
           >
             <Stack.Screen name="Login" component={Login} />
@@ -48,10 +49,13 @@ const App = () => {
             <Stack.Screen name="Signup" component={Signup} />
             <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
             <Stack.Screen
-              name="Home"
-              component={Home}
-              options={{ footer: () => <Footer /> }}
-            />
+  name="Home"
+  component={Home}
+  options={({ navigation }) => ({
+    footer: () => <Footer navigation={navigation} />, 
+  })}
+/>
+
             <Stack.Screen
               name="Categories"
               component={Categories}
@@ -69,16 +73,22 @@ const App = () => {
              options={{ footer: () => <Footer /> }}
              />
 
-            <Stack.Screen
-              name="New"
-              component={New}
-              options={{ footer: () => <Footer /> }}
-            />
-            <Stack.Screen
-              name="Discount"
-              component={Discount}
-              options={{ footer: () => <Footer /> }}
-            />
+<Stack.Screen
+  name="New"
+  component={New}
+  options={({ navigation }) => ({
+    footer: () => <Footer navigation={navigation} />, // تمرير الخاصية navigation
+  })}
+/>
+
+<Stack.Screen
+  name="Discount"
+  component={Discount}
+  options={({ navigation }) => ({
+    footer: () => <Footer navigation={navigation} />, // تمرير الخاصية navigation
+  })}
+/>
+
             <Stack.Screen
               name="Profile"
               component={Profile}

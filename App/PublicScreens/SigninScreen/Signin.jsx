@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform, ActivityIndicator, Alert } from 'react-native';
 import { useDispatch } from 'react-redux';
-import { saveToken } from '../../redux/BookSlice';
+import { storeToken } from '../../ReduxAndAsyncStorage/Actions'; 
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
@@ -29,23 +29,15 @@ const Signin = () => {
 
         const { token } = response.data;
 
-        // حفظ token في Redux state
-        dispatch(saveToken(token));
-
+      
+        await dispatch(storeToken(token));
+        
+        console.log('تم تسجيل الدخول بنجاح. التوكين:', token);
         Alert.alert('Login successful', 'تم تسجيل الدخول بنجاح', [
           { text: 'OK', onPress: () => navigation.navigate('Home') }
         ]);
       } catch (error) {
         console.error('Error signing in:', error);
-        if (error.response) {
-          console.error('Response data:', error.response.data);
-          console.error('Response status:', error.response.status);
-          console.error('Response headers:', error.response.headers);
-        } else if (error.request) {
-          console.error('Request data:', error.request);
-        } else {
-          console.error('Error message:', error.message);
-        }
         setError('حدث خطأ أثناء تسجيل الدخول');
       } finally {
         setLoading(false);
@@ -203,7 +195,6 @@ const styles = StyleSheet.create({
   skipButtonText: {
     fontSize: 16,
     color: Colors.WHITE,
-    //textDecorationLine: 'underline',
   },
 });
 

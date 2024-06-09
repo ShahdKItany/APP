@@ -268,13 +268,6 @@ export default Home;
 
 
 
-
-
-
-
-
-
-// Home.js
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -283,7 +276,7 @@ import Header from '../../Common/Header/Header';
 import Footer from '../../Common/Footer/Footer';
 import Navbar from '../../Common/Navbar/Navbar';
 import Colors from '../../Common/Utils/Colors';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Import FontAwesome icons
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const Home = () => {
   const navigation = useNavigation();
@@ -295,16 +288,15 @@ const Home = () => {
   }, []);
 
   const fetchBooks = async () => {
-    console.log('Fetching books...');
+    setIsLoading(true); // Set loading status to true before fetching books
     try {
       const response = await axios.get('https://ecommercebackend-jzct.onrender.com/book/Active');
-      console.log('Books fetched:', response.data);
       setBooks(response.data.books);
-      setIsLoading(false); // Set loading status to false when books are fetched
     } catch (error) {
       console.error('Error fetching books:', error);
-      setIsLoading(false); // Set loading status to false in case of error
       // Handle error here, such as displaying an error message to the user
+    } finally {
+      setIsLoading(false); // Set loading status to false after books are fetched
     }
   };
 
@@ -351,18 +343,6 @@ const Home = () => {
     const isDiscounted = isDiscountedBook(item);
     const discountPercentage = calculateDiscountPercentage(item);
     const finalPrice = item.price * ((100 - item.Discount) / 100); // Ensure valid calculation
-
-    // Log the price and final price
-    console.log('Discount =', item.Discount);
-    console.log('Price:', item.price);
-    console.log('Final Price:', finalPrice);
-    console.log('___________________________________________');
-
-    if (isDiscounted) {
-      console.log(`${item.title} is discounted by ${discountPercentage}% (${item.price - finalPrice}₪)`);
-    } else {
-      console.log(`${item.title} has no discount`);
-    }
 
     return (
       <TouchableOpacity style={styles.bookContainer} onPress={() => handleBookPress(item)}>

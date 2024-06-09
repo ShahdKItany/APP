@@ -1,5 +1,3 @@
-
-
 // App\ReduxAndAsyncStorage\Actions.js
 import { saveToken as asyncStoreToken, getToken as asyncGetToken, removeToken as asyncRemoveToken } from './Storage';
 import { saveToken } from './BookSlice';
@@ -7,6 +5,7 @@ import { saveToken } from './BookSlice';
 export const storeToken = (token) => async (dispatch) => {
   await asyncStoreToken(token);
   dispatch(saveToken(token));
+  console.log('Token saved:', token); // Print token to console after saving
 };
 
 export const loadToken = () => async (dispatch) => {

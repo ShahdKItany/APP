@@ -1,11 +1,7 @@
-
-
-
-
-//App\ReduxAndAsyncStorage\Storage.js
+// App\ReduxAndAsyncStorage\Storage.js
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export const storeToken = async (token) => {
+export const saveToken = async (token) => {
   try {
     await AsyncStorage.setItem('@user_token', token);
   } catch (e) {

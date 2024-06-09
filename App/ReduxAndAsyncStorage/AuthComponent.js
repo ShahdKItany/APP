@@ -1,13 +1,11 @@
-
-
-
-
-//App\ReduxAndAsyncStorage\AuthComponent.js
+// App\ReduxAndAsyncStorage\AuthComponent.js
 import React, { useEffect } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { loadToken } from './Actions';
 import { selectToken } from './BookSlice';
+import Home from '../../Screens/HomeScreen/Home'; // Import Home component
+import Login from '../../PublicScreens/LoginScreen/Login'; // Import Login component
 
 const AuthComponent = () => {
   const dispatch = useDispatch();

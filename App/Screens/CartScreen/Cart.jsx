@@ -21,14 +21,12 @@ const Cart = ({ navigation }) => {
   const books = useSelector(selectBooksInCart) || [];
   const totalPrice = useSelector(selectTotalPrice) || 0;
   const token = useSelector(selectToken);
+ 
+  console.log('3-token in cart : ',token);
 
   useEffect(() => {
     if (token) {
-      console.log('_______Token available____token is :', token); // طباعة التوكن إذا كان متاحًا
       getCartAPI();
-    } else {
-      console.error('Token not available');
-      navigation.navigate('Signin');
     }
   }, [token]);
 
@@ -37,17 +35,16 @@ const Cart = ({ navigation }) => {
       const response = await axios.delete('https://ecommercebackend-jzct.onrender.com/cart/', {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `AmanGRAD__${token}`
         }
       });
       if (response.status === 200) {
-        console.log('Cart cleared successfully');
         dispatch(clearCart());
       } else {
-        console.error('Failed to clear cart');
+       // console.error('Failed to clear cart');
       }
     } catch (error) {
-      console.error('Error clearing cart:', error.message);
+      //console.error('Error clearing cart:', error.message);
     }
   };
 
@@ -56,17 +53,16 @@ const Cart = ({ navigation }) => {
       const response = await axios.delete(`https://ecommercebackend-jzct.onrender.com/cart/${itemId}`, {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `AmanGRAD__${token}`
         }
       });
       if (response.status === 200) {
-        console.log('Item removed from cart successfully');
         dispatch(removeFromCart(itemId));
       } else {
-        console.error('Failed to remove item from cart');
+        //console.error('Failed to remove item from cart');
       }
     } catch (error) {
-      console.error('Error removing item from cart:', error.message);
+     // console.error('Error removing item from cart:', error.message);
     }
   };
 
@@ -75,21 +71,17 @@ const Cart = ({ navigation }) => {
       const response = await axios.get('https://ecommercebackend-jzct.onrender.com/cart/', {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `AmanGRAD__${token}`
         }
       });
-
+  
       if (response.status === 200) {
-        console.log('Cart fetched successfully');
         dispatch(setCart(response.data));
       } else {
-        console.error('Failed to fetch cart');
+        console.error('Failed from cart');
       }
     } catch (error) {
       if (error.response && error.response.status === 401) {
-        console.error('________Error fetching cart______:', error.message);
-
-        
         Alert.alert(
           'خطأ في المصادقة',
           'انتهت صلاحية جلسة تسجيل الدخول. يرجى تسجيل الدخول مرة أخرى.',
@@ -97,15 +89,15 @@ const Cart = ({ navigation }) => {
             {
               text: 'موافق',
               onPress: () => {
-                dispatch(saveToken('')); // Clear token in redux state
-              //  navigation.navigate('Login'); // Navigate to Login screen
+                dispatch(saveToken(''));
+                navigation.navigate('Login');
               },
             },
           ],
           { cancelable: false }
         );
       } else {
-        console.error('Error fetching cart:', error.message);
+       // console.error(error.message);
       }
     }
   };
@@ -152,7 +144,6 @@ const Cart = ({ navigation }) => {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollView}>
         {token ? (
-          // إذا كان التوكين متاحًا، قم بعرض محتويات عربة التسوق
           books.length === 0 ? (
             <Text style={styles.emptyCartText}>عربة التسوق فارغة!</Text>
           ) : (
@@ -188,14 +179,12 @@ const Cart = ({ navigation }) => {
             </>
           )
         ) : (
-          // إذا لم يكن التوكين متاحًا، قم بعرض رسالة تطلب من المستخدم تسجيل الدخول
           <Text style={styles.emptyCartText}>يرجى تسجيل الدخول لعرض عربة التسوق!</Text>
         )}
       </ScrollView>
       <Footer />
     </View>
   );
-  
 };
 
 const styles = StyleSheet.create({
@@ -293,4 +282,3 @@ const styles = StyleSheet.create({
 });
 
 export default Cart;
-      

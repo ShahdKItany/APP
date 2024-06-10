@@ -21,17 +21,14 @@ const Footer = () => {
 
   return (
     <View style={styles.container}>
-      {/* Home Icon */}
       <TouchableOpacity onPress={goToHome} style={styles.iconContainer}>
         <Icon name="home" size={35} color={Colors.WHITE} />
       </TouchableOpacity>
 
-      {/* Cart Icon */}
       <TouchableOpacity onPress={goToCart} style={styles.iconContainer}>
         <Icon name="shopping-cart" size={35} color={Colors.WHITE} />
       </TouchableOpacity>
 
-      {/* Categories Icon */}
       <TouchableOpacity onPress={goToCategories} style={styles.iconContainer}>
         <Icon name="list" size={35} color={Colors.WHITE} />
       </TouchableOpacity>
@@ -48,15 +45,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: Colors.BLUE,
-    height: 60, // Adjust the height as needed
+    height: 60,
     paddingHorizontal: 20,
   },
   iconContainer: {
     flex: 1,
     alignItems: 'center',
-    paddingBottom: 10, // Add paddingTop to move icons up
-
+    paddingBottom: 10,
   },
 });
 
 export default Footer;
+

@@ -17,11 +17,11 @@ import Footer from "../../Common/Footer/Footer";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart, selectToken } from "../../ReduxAndAsyncStorage/BookSlice";
 import Swiper from 'react-native-swiper';
-import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
+import { useNavigation } from '@react-navigation/native';
 
 const BookDetails = ({ route }) => {
-  const { title, price, finalPrice, description, mainImage, subImages } = route.params;
+  const { title, price, finalPrice, description, mainImage, subImages, id } = route.params;
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState([]);
   const [isInWishlist, setIsInWishlist] = useState(false);
@@ -32,24 +32,26 @@ const BookDetails = ({ route }) => {
 
   const dispatch = useDispatch();
   const navigation = useNavigation();
-
   const token = useSelector(selectToken);
-  
+
   useEffect(() => {
+    console.log("Book Details from Database:");
     console.log("Title:", title);
-    console.log("Original Price:", price);
+    console.log("Price:", price);
     console.log("Final Price:", finalPrice);
     console.log("Description:", description);
     console.log("Main Image:", mainImage);
     console.log("Sub Images:", subImages);
-  }, [title, price, finalPrice, description, mainImage, subImages]);
+    console.log("Book ID:", id);
+  }, [title, price, finalPrice, description, mainImage, subImages, id]);
 
   const handleAddToCart = async () => {
     try {
       if (!token) {
         Alert.alert(
           'يرجى تسجيل الدخول لإضافة الكتب إلى عربة التسوق',
-          [{ text: 'OK', style: 'default' }]
+          '',
+          [{ text: 'موافق', style: 'default' }]
         );
         return;
       }
@@ -57,38 +59,39 @@ const BookDetails = ({ route }) => {
       const response = await axios.post(
         'https://ecommercebackend-jzct.onrender.com/cart/',
         {
-          bookId: route.params.bookId
+          bookId: id,
         },
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Authorization': `AmanGRAD__${token}`
           }
         }
       );
-      
-      if (response.status !== 200) {
-        throw new Error('Failed to add book to cart');
+  
+      if (response.status === 200) {
+        dispatch(addToCart({ title, price: finalPrice, image: mainImage, quantity: 1 }));
+        navigation.navigate("Cart");
+        Alert.alert("تمت إضافة الكتاب إلى عربة التسوق!", "", [{ text: 'موافق', style: 'default' }], { cancelable: false });
+      } else {
+        throw new Error(`فشل في إضافة الكتاب إلى العربة, الرمز الناتج: ${response.status}`);
       }
-  
-      dispatch(addToCart({ title, price: finalPrice, image: mainImage, quantity: 1 }));
-  
-      navigation.navigate("Cart");
-  
-      Alert.alert("تمت إضافة الكتاب إلى عربة التسوق!", "", [{ text: 'OK', style: 'default' }], { cancelable: false });
-  
     } catch (error) {
-      console.error('Error adding book to cart:', error);
-      Alert.alert('Failed to add book to cart', '', [{ text: 'OK', style: 'default' }]);
+      if (error.response ) {  //(error.response && error.response.status === 409)
+        Alert.alert("الكتاب موجود بالفعل في عربة التسوق!", "", [{ text: 'موافق', style: 'default' }], { cancelable: false });
+      } else {
+        Alert.alert("فشل في إضافة الكتاب إلى العربة!", "", [{ text: 'موافق', style: 'default' }], { cancelable: false });
+      }
     }
   };
   
+
   const handleAddToFavorites = () => {
     if (isInWishlist) {
       Alert.alert("الكتاب موجود بالفعل في المفضلة!");
     } else {
       setIsInWishlist(true);
-      Alert.alert("تمت إضافة الكتاب إلى المفضلة!", "", [{ text: 'OK', style: 'default' }], { cancelable: false });
+      Alert.alert("تمت إضافة الكتاب إلى المفضلة!", "", [{ text: 'موافق', style: 'default' }], { cancelable: false });
     }
   };
 
@@ -147,7 +150,7 @@ const BookDetails = ({ route }) => {
                   icon={faStar}
                   size={30}
                   color={index < rating ? Colors.YELLOW : Colors.GRAY}
-                  style={styles.star}
+                  style={styles.star} // Place the style here
                 />
               </TouchableOpacity>
             ))}
@@ -178,170 +181,145 @@ const BookDetails = ({ route }) => {
             </View>
           ))}
 
-          
-<TextInput
-         ref={commentInputRef}
-         style={styles.commentInput}
-         placeholder="أضف تعليقك هنا"
-         value={comment}
-         onChangeText={setComment}
-         onFocus={scrollToCommentInput}
-       />
-<TouchableOpacity style={styles.addButton} onPress={handleAddComment}>
-<Text style={styles.addButtonText}>أضف تعليق</Text>
-</TouchableOpacity>
-</View>
-</ScrollView>
-<Footer />
-</KeyboardAvoidingView>
-);
+          <TextInput
+            ref={commentInputRef}
+            style={styles.commentInput}
+            placeholder="أضف تعليقك هنا"
+            value={comment}
+            onChangeText={setComment}
+            onFocus={scrollToCommentInput}
+          />
+          <TouchableOpacity style={styles.addButton} onPress={handleAddComment}>
+            <Text style={styles.addButtonText}>أضف تعليق</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+      <Footer />
+    </KeyboardAvoidingView>
+  );
 };
 
 const styles = StyleSheet.create({
-container: {
-flexGrow: 1,
-justifyContent: "center",
-alignItems: "center",
-paddingHorizontal: 10,
-},
-wrapper: {
-height: 430,
-},
-slide: {
-flex: 1,
-justifyContent: "center",
-alignItems: "center",
-},
-image: {
-width: "80%",
-height: 300,
-resizeMode: "cover",
-},
-title: {
-fontSize: 24,
-fontWeight: "bold",
-textAlign: "center",
-marginVertical: 10,
-},
-originalPrice: {
-fontSize: 18,
-color: Colors.ORANGE,
-textAlign: "center",
-textDecorationLine: 'line-through',
-},
-finalPrice: {
-fontSize: 18,
-color: Colors.PINK,
-textAlign: "center",
-fontWeight: "bold",
-},
-details: {
-fontSize: 16,
-textAlign: "center",
-marginBottom: 20,
-},
-buttonContainer: {
-flexDirection: "row",
-justifyContent: "space-between",
-width: "100%",
-marginBottom: 20,
-},
-button: {
-backgroundColor: Colors.ORANGE,
-padding: 12,
-borderRadius: 12,
-width: "48%",
-alignItems: "center",
-flexDirection: "row",
-},
-buttonText: {
-color: "white",
-fontWeight: "bold",
-fontSize: 16,
-marginLeft: 3,
-},
-buttonIcon: {
-color: "white",
-fontSize: 22,
-marginRight: 3,
-},
-ratingContainer: {
-flexDirection: "row",
-justifyContent: "center",
-width: "100%",
-marginTop: 8,
-marginBottom: 20,
-alignItems: "center",
-},
-starContainer: {
-flexDirection: "row",
-},
-star: {
-marginHorizontal: 5,
-},
-commentsContainer: {
-width: "100%",
-marginTop: 20,
-padding: 10,
-borderWidth: 2,
-borderColor: Colors.PINK,
-borderRadius: 20,
-marginBottom: 70,
-},
-commentsTitleContainer: {
-flexDirection: "row-reverse",
-alignItems: "center",
-marginBottom: 20,
-},
-commentsTitle: {
-fontSize: 22,
-fontWeight: "bold",
-marginLeft: 8,
-color: Colors.BLUE,
-},
-commentIcon: {
-fontSize: 27,
-padding: 11,
-color: Colors.BLUE,
-alignSelf: "center",
-},
-commentText: {
-fontSize: 20,
-flex: 1,
-},
-commentInput: {
-height: 40,
-borderColor: Colors.PINK,
-borderWidth: 1,
-borderRadius: 20,
-paddingHorizontal: 10,
-marginBottom: 20,
-textAlign: "right",
-},
-commentContainer: {
-flexDirection: "row-reverse",
-alignItems: "center",
-},
-userIcon: {
-marginRight: 10,
-marginLeft: 8,
-fontSize: 27,
-padding: 11,
-color: Colors.BLUE,
-alignSelf: "center",
-marginBottom: 20,
-},
-addButton: {
-backgroundColor: Colors.PINK,
-padding: 10,
-borderRadius: 20,
-alignItems: "center",
-},
-addButtonText: {
-color: "white",
-fontWeight: "bold",
-fontSize: 16,
-},
+  container: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 10,
+  },
+  wrapper: {
+    height: 430,
+  },
+  slide: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  image: {
+    width: "80%",
+    height: 300,
+    resizeMode: "cover",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginVertical: 10,
+  },
+  originalPrice: {
+    fontSize: 18,
+    color: "gray",
+    textDecorationLine: "line-through",
+  },
+  finalPrice: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginVertical: 5,
+  },
+  details: {
+    fontSize: 16,
+    marginVertical: 10,
+    textAlign: "center",
+  },
+  ratingContainer: {
+    marginVertical: 10,
+    alignItems: "center",
+  },
+  starContainer: {
+    flexDirection: "row",
+  },
+  star: {
+    marginHorizontal: 5,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    marginVertical: 10,
+  },
+  button: {
+    flexDirection: "row",
+    backgroundColor: Colors.BLUE,
+    padding: 10,
+    borderRadius: 5,
+    alignItems: "center",
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  buttonIcon: {
+    marginRight: 5,
+    color: "white",
+  },
+  buttonText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+ commentsContainer: {
+    marginVertical: 10,
+  },
+  commentsTitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  commentIcon: {
+    marginRight: 5,
+    color: Colors.BLUE,
+  },
+  commentsTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: Colors.BLUE,
+  },
+  commentContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 5,
+  },
+  userIcon: {
+    marginRight: 5,
+    color: "gray",
+  },
+  commentText: {
+    fontSize: 16,
+    color: "gray",
+  },
+  commentInput: {
+    borderWidth: 1,
+    borderColor: Colors.BLUE,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+    minHeight: 50,
+  },
+  addButton: {
+    backgroundColor: Colors.BLUE,
+    padding: 10,
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  addButtonText: {
+    color: "white",
+    fontWeight: "bold",
+  },
 });
 
 export default BookDetails;

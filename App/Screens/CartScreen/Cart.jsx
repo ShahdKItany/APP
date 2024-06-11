@@ -1,5 +1,6 @@
+// Cart.jsx
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Image } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import {
@@ -13,24 +14,34 @@ import {
 import Colors from '../../Common/Utils/Colors';
 import Footer from '../../Common/Footer/Footer';
 import CartItem from './CartItem';
-
 const Cart = ({ navigation }) => {
   const dispatch = useDispatch();
   const books = useSelector(selectBooksInCart) || [];
   const totalPrice = useSelector(selectTotalPrice) || 0;
   const token = useSelector(selectToken);
+  
 
+  /*
   useEffect(() => {
-    console.log("Token changed. Fetching cart data...");
+    console.log("Book Details from Database:");
+    console.log("Title:", title);
+    console.log("Price:", price);
+    console.log("Final Price:", finalPrice);
+    console.log("Description:", description);
+    console.log("Main Image:", mainImage);
+    console.log("Sub Images:", subImages);
+    console.log("Book ID:", id);
+  }, [title, price, finalPrice, description, mainImage, subImages, id]);
+
+  */
+  useEffect(() => {
     if (token) {
       getCartAPI();
-      console.log('toen is : ', token);
     }
   }, [token]);
 
   const clearCartAPI = async () => {
     try {
-      console.log("Clearing cart...");
       const response = await axios.delete('https://ecommercebackend-jzct.onrender.com/cart/', {
         headers: {
           'Content-Type': 'application/json',
@@ -43,11 +54,10 @@ const Cart = ({ navigation }) => {
     } catch (error) {
       console.error('Error clearing cart:', error.message);
     }
-   };
+  };
 
   const getCartAPI = async () => {
     try {
-      console.log("Fetching cart data(getCartAPI)...");
       const response = await axios.get('https://ecommercebackend-jzct.onrender.com/cart/', {
         headers: {
           'Content-Type': 'application/json',
@@ -56,21 +66,60 @@ const Cart = ({ navigation }) => {
       });
 
       if (response.status === 200) {
+       // console.log('Cart data:', response.data); 
         dispatch(setCart(response.data));
+  
+
+        const cartData = response.data.cart;
+        console.log('________________________cartData : ', cartData);
+        const getBookDetails = async (bookId) => {
+          try {
+            const response = await axios.get(`https://ecommercebackend-jzct.onrender.com/book/${bookId}`, {
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `AmanGRAD__${token}`
+              }
+            });
+        
+            if (response.status === 200) {
+              const bookDetails = response.data;
+              console.log('Title:', bookDetails.title);
+              console.log('Price:', bookDetails.price);
+              console.log('Main Image:', bookDetails.mainImage);
+            } else {
+              console.error('Failed to fetch book details');
+            }
+          } catch (error) {
+            console.error('Error fetching book details:', error.message);
+          }
+        };
+        
+        if (cartData && cartData.books && cartData.books.length > 0) {
+          // Iterate over each book object in the 'books' array
+          for (const book of cartData.books) {
+            console.log('Book ID:', book.bookId);
+            await getBookDetails(book.bookId);
+          }
+        }
+        
+        
+        
+        
+
+
+
+        
       } else {
         console.error('Failed to fetch cart data');
       }
     } catch (error) {
       if (error.response && error.response.status === 401) {
         Alert.alert(
-          // 'خطأ في المصادقة',
-          // 'انتهت صلاحية جلسة تسجيل الدخول. يرجى تسجيل الدخول مرة أخرى.',
           'Authentication error',
           'The login session has expired. Please log in again.',
           [
             {
               text: '(okay)موافق',
-              //okay
               onPress: () => {
                 dispatch(saveToken(''));
                 navigation.navigate('Login');
@@ -86,22 +135,17 @@ const Cart = ({ navigation }) => {
   };
 
   const handleClearCart = () => {
-    console.log("Prompting confirmation for clearing cart...");
     Alert.alert(
-      // 'تأكيد الحذف',
-      // 'هل أنت متأكد أنك تريد حذف كل العناصر من عربة التسوق؟',
       'Confirm deletion',
       'Are you sure you want to delete all items from the shopping cart?',
       [
         {
           text: 'لا',
-          //no
           onPress: () => console.log('Cancel Pressed'),
           style: 'cancel',
         },
         {
           text: 'نعم',
-          //yes
           onPress: () => clearCartAPI(),
         },
       ],
@@ -109,32 +153,35 @@ const Cart = ({ navigation }) => {
     );
   };
 
-  console.log("Rendering Cart component...");
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollView}>
         {token ? (
           books.length === 0 ? (
-            <Text style={styles.emptyCartText}>عربة التسوق فارغة!                                             
-                 Your shopping cart is empty!  </Text>
-
+            <Text style={styles.emptyCartText}>
+              عربة التسوق فارغة!
+              Your shopping cart is empty!
+            </Text>
           ) : (
             <>
               {books.map((book) => (
                 <CartItem key={book.id} book={book} token={token} />
               ))}
+            
               <View style={styles.totalContainer}>
                 <Text style={styles.totalText}>المجموع(total): </Text>
                 <Text style={styles.totalPrice}>₪{totalPrice.toFixed(2)}</Text>
               </View>
               <TouchableOpacity style={styles.clearButton} onPress={handleClearCart}>
-                <Text style={styles.clearButtonText}> Delete all</Text>
+                <Text style={styles.clearButtonText}>Delete all</Text>
               </TouchableOpacity>
             </>
           )
         ) : (
-          <Text style={styles.emptyCartText}>يرجى تسجيل الدخول لعرض عربة التسوق!
-          Please log in to view your cart!</Text>
+          <Text style={styles.emptyCartText}>
+            يرجى تسجيل الدخول لعرض عربة التسوق!
+            Please log in to view your cart!
+          </Text>
         )}
       </ScrollView>
       <Footer />
@@ -145,48 +192,41 @@ const Cart = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    backgroundColor: Colors.WHITE,
+    backgroundColor: Colors.white,
   },
   scrollView: {
     flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 20,
+    padding: 16,
   },
   emptyCartText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: Colors.GRAY,
+    fontSize: 18,
+    textAlign: 'center',
+    marginVertical: 20,
   },
   totalContainer: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    width: '90%',
-    marginTop: 20,
+    marginVertical: 20,
+    paddingHorizontal: 10,
   },
   totalText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginRight: 10,
   },
   totalPrice: {
-    fontSize: 18,
-    color: Colors.PINK,
+    fontSize: 20,
+    color: Colors.primary,
   },
   clearButton: {
-    backgroundColor: Colors.RED,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    marginTop: 20,
+    backgroundColor: Colors.red,
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
   },
   clearButtonText: {
-    color: Colors.WHITE,
+    color: Colors.white,
     fontSize: 16,
-    fontWeight: 'bold',
   },
 });
 

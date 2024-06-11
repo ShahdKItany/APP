@@ -9,11 +9,10 @@ export const addToCart = createAsyncThunk(
     const existingBook = state.books.booksInCart.find(book => book.id === bookData.id);
     if (existingBook) {
       Alert.alert('-The book is already in the cart-الكتاب موجود بالفعل في العربة');
-      //Alert Say : The book is already in the cart
       return;
     }
-    const { id, title, price, image, quantity } = bookData;
-    dispatch(addToCartSuccess({ id, title, price, image, quantity }));
+    const { id, title, price, mainImage, quantity } = bookData;
+    dispatch(addToCartSuccess({ id, title, price, mainImage, quantity }));
   }
 );
 
@@ -30,7 +29,6 @@ const bookSlice = createSlice({
   name: 'books',
   initialState,
   reducers: {
-    
     removeFromCart: (state, action) => {
       const removedBook = state.booksInCart.find(book => book.id === action.payload);
       state.booksInCart = state.booksInCart.filter(book => book.id !== action.payload);
@@ -62,13 +60,11 @@ const bookSlice = createSlice({
     },
     setCart: (state, action) => {
       state.booksInCart = action.payload.books;
-      state.totalPrice = action.payload.totalPrice || 0; // Initialize totalPrice to 0 if undefined
+      state.totalPrice = action.payload.totalPrice || 0;
     },
-    
   },
   extraReducers: (builder) => {
-    builder.addCase(addToCart.fulfilled, (state, action) => {
-    });
+    builder.addCase(addToCart.fulfilled, (state, action) => {});
     builder.addCase(addToCartSuccess, (state, action) => {
       state.booksInCart.push(action.payload);
       state.totalPrice += action.payload.price * action.payload.quantity;

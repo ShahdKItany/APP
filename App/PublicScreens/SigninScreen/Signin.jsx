@@ -61,7 +61,7 @@ const Signin = () => {
           <Icon name="envelope" size={20} color="#0abae4" style={styles.icon} />
           <TextInput
             style={styles.input}
-            placeholder="البريد الالكتروني أو رقم الهاتف"
+            placeholder="  البريد الالكتروني  /  email"
             value={email}
             onChangeText={setEmail}
           />
@@ -71,7 +71,7 @@ const Signin = () => {
           <Icon name="lock" size={20} color="#0abae4" style={styles.icon} />
           <TextInput
             style={styles.input}
-            placeholder="كلمة المرور"
+            placeholder="كلمة المرور-password"
             value={password}
             onChangeText={setPassword}
             secureTextEntry

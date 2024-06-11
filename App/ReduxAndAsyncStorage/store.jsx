@@ -1,5 +1,3 @@
-
-// App\ReduxAndAsyncStorage\store.jsx
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import { persistStore, persistReducer } from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -33,3 +31,4 @@ export const store = configureStore({
 export const persistor = persistStore(store);
 
 export default store;
+

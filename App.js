@@ -2,7 +2,7 @@
 //   git add .
 //  git commit -m "changes" 
 //  git push -u origin main
-//الباك :    https://documenter.getpostman.com/view/30950345/2sA3Bt1Ugg?fbclid=IwZXh0bgNhZW0CMTAAAR03fz_CFshXtjs4BCh3-YJEKTt9to2xIafeYtQyVxLzjuUjg2oyXdwoD9Y_aem_AfZ9gYzpQzGKGF_yLr6qIBCIfgQQC99U5AQD0LJIUh23R6dGSceeAfE8-COdKOmZsM0RUVb74nfMm-fyIHTVxl3k#intro
+//  backend link (API):    https://documenter.getpostman.com/view/30950345/2sA3Bt1Ugg?fbclid=IwZXh0bgNhZW0CMTAAAR03fz_CFshXtjs4BCh3-YJEKTt9to2xIafeYtQyVxLzjuUjg2oyXdwoD9Y_aem_AfZ9gYzpQzGKGF_yLr6qIBCIfgQQC99U5AQD0LJIUh23R6dGSceeAfE8-COdKOmZsM0RUVb74nfMm-fyIHTVxl3k#intro
 //______________________________________________
 
 // App.js
@@ -11,7 +11,6 @@ import React from "react";
 import { Provider } from "react-redux";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-
 import Login from "./App/PublicScreens/LoginScreen/Login";
 import Signin from "./App/PublicScreens/SigninScreen/Signin";
 import Signup from "./App/PublicScreens/SignupScreen/Signup";
@@ -26,12 +25,17 @@ import Profile from "./App/Screens/ProfileScreen/Profile";
 import EditProfile from "./App/Screens/ProfileScreen/EditProfile";
 import WishList from "./App/Screens/WishList/WishList";
 import BookDetails from "./App/Screens/BookDetails/BookDetails";
-
 import store, { persistor } from "./App/ReduxAndAsyncStorage/store";
 import { PersistGate } from "redux-persist/integration/react";
 import OrderScreen from "./App/Screens/OrderScreen/OrderScreen";
 import BooksByCategory from "./App/Screens/CategoriesScreen/BooksByCategory";
 import BookItem from "./App/Screens/CategoriesScreen/BookItem";
+import CartItem from './App/Screens/CartScreen/CartItem';
+
+
+
+
+
 const Stack = createStackNavigator();
 
 
@@ -77,7 +81,7 @@ const App = () => {
   name="New"
   component={New}
   options={({ navigation }) => ({
-    footer: () => <Footer navigation={navigation} />, // تمرير الخاصية navigation
+    footer: () => <Footer navigation={navigation} />, 
   })}
 />
 
@@ -85,7 +89,7 @@ const App = () => {
   name="Discount"
   component={Discount}
   options={({ navigation }) => ({
-    footer: () => <Footer navigation={navigation} />, // تمرير الخاصية navigation
+    footer: () => <Footer navigation={navigation} />, 
   })}
 />
 
@@ -113,6 +117,13 @@ const App = () => {
             <Stack.Screen
               name="Cart"
               component={Cart}
+              options={({ navigation }) => ({
+                footer: () => <Footer navigation={navigation} />,
+              })}
+            />
+             <Stack.Screen
+              name="CartItem"
+              component={CartItem}
               options={({ navigation }) => ({
                 footer: () => <Footer navigation={navigation} />,
               })}

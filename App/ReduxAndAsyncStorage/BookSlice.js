@@ -1,22 +1,15 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { createAction } from '@reduxjs/toolkit';
-import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux'; // Import useDispatch and useSelector
+import { createSlice, createAsyncThunk, createAction } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { Alert } from 'react-native'; // Import Alert for native environment
+import { Alert } from 'react-native';
 
-// Redux thunk to add a book to the cart
 export const addToCart = createAsyncThunk(
   'books/addToCart',
   async (bookData, { getState, dispatch }) => {
     const state = getState();
-    if (!state) {
-      console.error('State is undefined or null');
-      return;
-    }
     const existingBook = state.books.booksInCart.find(book => book.id === bookData.id);
     if (existingBook) {
-      console.error('Book already in cart');
+      Alert.alert('-The book is already in the cart-الكتاب موجود بالفعل في العربة');
+      //Alert Say : The book is already in the cart
       return;
     }
     const { id, title, price, image, quantity } = bookData;
@@ -24,10 +17,8 @@ export const addToCart = createAsyncThunk(
   }
 );
 
-// Action creator for successful addition to cart
 export const addToCartSuccess = createAction('books/addToCartSuccess');
 
-// Reducer slice
 const initialState = {
   booksInCart: [],
   totalPrice: 0,
@@ -39,21 +30,24 @@ const bookSlice = createSlice({
   name: 'books',
   initialState,
   reducers: {
+    
     removeFromCart: (state, action) => {
-      state.booksInCart = state.booksInCart.filter(book => book.id !== action.payload);
       const removedBook = state.booksInCart.find(book => book.id === action.payload);
-      state.totalPrice -= removedBook.price * removedBook.quantity;
+      state.booksInCart = state.booksInCart.filter(book => book.id !== action.payload);
+      if (removedBook) {
+        state.totalPrice -= removedBook.price * removedBook.quantity;
+      }
     },
     incrementQuantity: (state, action) => {
-      const { id } = action.payload;
-      const bookToUpdate = state.booksInCart.find(book => book.id === id);
-      bookToUpdate.quantity++;
-      state.totalPrice += bookToUpdate.price;
+      const bookToUpdate = state.booksInCart.find(book => book.id === action.payload);
+      if (bookToUpdate) {
+        bookToUpdate.quantity++;
+        state.totalPrice += bookToUpdate.price;
+      }
     },
     decrementQuantity: (state, action) => {
-      const { id } = action.payload;
-      const bookToUpdate = state.booksInCart.find(book => book.id === id);
-      if (bookToUpdate.quantity > 1) {
+      const bookToUpdate = state.booksInCart.find(book => book.id === action.payload);
+      if (bookToUpdate && bookToUpdate.quantity > 1) {
         bookToUpdate.quantity--;
         state.totalPrice -= bookToUpdate.price;
       }
@@ -66,10 +60,14 @@ const bookSlice = createSlice({
       state.token = action.payload;
       state.loading = false;
     },
+    setCart: (state, action) => {
+      state.booksInCart = action.payload.books;
+      state.totalPrice = action.payload.totalPrice || 0; // Initialize totalPrice to 0 if undefined
+    },
+    
   },
   extraReducers: (builder) => {
     builder.addCase(addToCart.fulfilled, (state, action) => {
-      // No need to handle anything here as the logic is already handled in the async thunk
     });
     builder.addCase(addToCartSuccess, (state, action) => {
       state.booksInCart.push(action.payload);
@@ -84,6 +82,7 @@ export const {
   decrementQuantity,
   clearCart,
   saveToken,
+  setCart,
 } = bookSlice.actions;
 
 export const selectBooksInCart = (state) => state.books.booksInCart;

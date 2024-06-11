@@ -1,11 +1,8 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import {
-  removeFromCart,
-  incrementQuantity,
-  decrementQuantity,
   clearCart,
   selectBooksInCart,
   selectTotalPrice,
@@ -15,23 +12,25 @@ import {
 } from '../../ReduxAndAsyncStorage/BookSlice';
 import Colors from '../../Common/Utils/Colors';
 import Footer from '../../Common/Footer/Footer';
+import CartItem from './CartItem';
 
 const Cart = ({ navigation }) => {
   const dispatch = useDispatch();
   const books = useSelector(selectBooksInCart) || [];
   const totalPrice = useSelector(selectTotalPrice) || 0;
   const token = useSelector(selectToken);
- 
-  console.log('3-token in cart : ',token);
 
   useEffect(() => {
+    console.log("Token changed. Fetching cart data...");
     if (token) {
       getCartAPI();
+      console.log('toen is : ', token);
     }
   }, [token]);
 
   const clearCartAPI = async () => {
     try {
+      console.log("Clearing cart...");
       const response = await axios.delete('https://ecommercebackend-jzct.onrender.com/cart/', {
         headers: {
           'Content-Type': 'application/json',
@@ -40,54 +39,38 @@ const Cart = ({ navigation }) => {
       });
       if (response.status === 200) {
         dispatch(clearCart());
-      } else {
-       // console.error('Failed to clear cart');
       }
     } catch (error) {
-      //console.error('Error clearing cart:', error.message);
+      console.error('Error clearing cart:', error.message);
     }
-  };
-
-  const removeFromCartAPI = async (itemId) => {
-    try {
-      const response = await axios.delete(`https://ecommercebackend-jzct.onrender.com/cart/${itemId}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `AmanGRAD__${token}`
-        }
-      });
-      if (response.status === 200) {
-        dispatch(removeFromCart(itemId));
-      } else {
-        //console.error('Failed to remove item from cart');
-      }
-    } catch (error) {
-     // console.error('Error removing item from cart:', error.message);
-    }
-  };
+   };
 
   const getCartAPI = async () => {
     try {
+      console.log("Fetching cart data(getCartAPI)...");
       const response = await axios.get('https://ecommercebackend-jzct.onrender.com/cart/', {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `AmanGRAD__${token}`
         }
       });
-  
+
       if (response.status === 200) {
         dispatch(setCart(response.data));
       } else {
-        console.error('Failed from cart');
+        console.error('Failed to fetch cart data');
       }
     } catch (error) {
       if (error.response && error.response.status === 401) {
         Alert.alert(
-          'خطأ في المصادقة',
-          'انتهت صلاحية جلسة تسجيل الدخول. يرجى تسجيل الدخول مرة أخرى.',
+          // 'خطأ في المصادقة',
+          // 'انتهت صلاحية جلسة تسجيل الدخول. يرجى تسجيل الدخول مرة أخرى.',
+          'Authentication error',
+          'The login session has expired. Please log in again.',
           [
             {
-              text: 'موافق',
+              text: '(okay)موافق',
+              //okay
               onPress: () => {
                 dispatch(saveToken(''));
                 navigation.navigate('Login');
@@ -97,42 +80,28 @@ const Cart = ({ navigation }) => {
           { cancelable: false }
         );
       } else {
-       // console.error(error.message);
+        console.error('Error:', error.message);
       }
     }
   };
 
-  const handleRemoveFromCart = (itemId) => {
-    Alert.alert(
-      'تأكيد الحذف',
-      'هل أنت متأكد أنك تريد إزالة الكتاب من عربة التسوق؟',
-      [
-        {
-          text: 'لا',
-          onPress: () => console.log('Cancel Pressed'),
-          style: 'cancel',
-        },
-        {
-          text: 'نعم',
-          onPress: () => removeFromCartAPI(itemId),
-        },
-      ],
-      { cancelable: false }
-    );
-  };
-
   const handleClearCart = () => {
+    console.log("Prompting confirmation for clearing cart...");
     Alert.alert(
-      'تأكيد الحذف',
-      'هل أنت متأكد أنك تريد حذف كل العناصر من عربة التسوق؟',
+      // 'تأكيد الحذف',
+      // 'هل أنت متأكد أنك تريد حذف كل العناصر من عربة التسوق؟',
+      'Confirm deletion',
+      'Are you sure you want to delete all items from the shopping cart?',
       [
         {
           text: 'لا',
+          //no
           onPress: () => console.log('Cancel Pressed'),
           style: 'cancel',
         },
         {
           text: 'نعم',
+          //yes
           onPress: () => clearCartAPI(),
         },
       ],
@@ -140,46 +109,32 @@ const Cart = ({ navigation }) => {
     );
   };
 
+  console.log("Rendering Cart component...");
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollView}>
         {token ? (
           books.length === 0 ? (
-            <Text style={styles.emptyCartText}>عربة التسوق فارغة!</Text>
+            <Text style={styles.emptyCartText}>عربة التسوق فارغة!                                             
+                 Your shopping cart is empty!  </Text>
+
           ) : (
             <>
               {books.map((book) => (
-                <View style={styles.itemContainer} key={book.id}>
-                  <Image source={{ uri: book.image }} style={styles.image} />
-                  <View style={styles.textContainer}>
-                    <Text style={styles.title}>{book.title}</Text>
-                    <Text style={styles.price}>₪{book.price.toFixed(2)}</Text>
-                  </View>
-                  <View style={styles.quantityContainer}>
-                    <TouchableOpacity onPress={() => dispatch(decrementQuantity(book.id))}>
-                      <Text style={styles.quantityButton}>-</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.quantity}>{book.quantity}</Text>
-                    <TouchableOpacity onPress={() => dispatch(incrementQuantity(book.id))}>
-                      <Text style={styles.quantityButton}>+</Text>
-                    </TouchableOpacity>
-                  </View>
-                  <TouchableOpacity onPress={() => handleRemoveFromCart(book.id)}>
-                    <Text style={styles.removeButton}>حذف</Text>
-                  </TouchableOpacity>
-                </View>
+                <CartItem key={book.id} book={book} token={token} />
               ))}
               <View style={styles.totalContainer}>
-                <Text style={styles.totalText}>المجموع:</Text>
+                <Text style={styles.totalText}>المجموع(total): </Text>
                 <Text style={styles.totalPrice}>₪{totalPrice.toFixed(2)}</Text>
               </View>
               <TouchableOpacity style={styles.clearButton} onPress={handleClearCart}>
-                <Text style={styles.clearButtonText}>حذف الكل</Text>
+                <Text style={styles.clearButtonText}> Delete all</Text>
               </TouchableOpacity>
             </>
           )
         ) : (
-          <Text style={styles.emptyCartText}>يرجى تسجيل الدخول لعرض عربة التسوق!</Text>
+          <Text style={styles.emptyCartText}>يرجى تسجيل الدخول لعرض عربة التسوق!
+          Please log in to view your cart!</Text>
         )}
       </ScrollView>
       <Footer />
@@ -204,52 +159,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: Colors.GRAY,
-  },
-  itemContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '90%',
-    marginBottom: 20,
-    borderWidth: 1,
-    borderRadius: 10,
-    borderColor: Colors.LIGHT_GRAY,
-    padding: 10,
-  },
-  image: {
-    width: 100,
-    height: 150,
-    resizeMode: 'contain',
-  },
-  textContainer: {
-    flex: 1,
-    marginLeft: 10,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  price: {
-    fontSize: 16,
-    color: Colors.PINK,
-  },
-  quantityContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  quantityButton: {
-    fontSize: 20,
-    color: Colors.PINK,
-    paddingHorizontal: 10,
-  },
-  quantity: {
-    fontSize: 18,
-    marginHorizontal: 10,
-  },
-  removeButton: {
-    fontSize: 16,
-    color: Colors.RED,
-    marginLeft: 10,
   },
   totalContainer: {
     flexDirection: 'row',

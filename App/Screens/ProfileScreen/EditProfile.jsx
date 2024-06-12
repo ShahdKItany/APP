@@ -1,4 +1,7 @@
-import React, { useState } from "react";
+
+
+
+import React, { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
   View,
@@ -6,26 +9,53 @@ import {
   TouchableOpacity,
   Image,
   TextInput,
+  ScrollView,
   Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import IconAntDesign from "react-native-vector-icons/AntDesign";
+import axios from "axios";
 
 const EditProfile = () => {
   const navigation = useNavigation();
-
-  const [email, setEmail] = useState("kitanyshahd@gmail.com");
-  const [phoneNumber, setPhoneNumber] = useState("+970 59-364-7582");
-  const [password, setPassword] = useState("shahd");
+  const scrollViewRef = useRef();
+  const [username, setUserName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isEditMode, setIsEditMode] = useState(false);
+
+  useEffect(() => {
+    // Fetch user data from backend
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/auth/user", {
+          headers: {
+            authorization:
+              "AmanGRAD__eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NDdiMDk0ZTIwMGRhNTIzZTU4OWU3MiIsInJvbGUiOiJBZG1pbiIsInN0YXR1cyI6IkFjdGl2YXRlZCIsImlhdCI6MTcxNjQxMDkxMH0.tnRasV2O9eQOeCf5-5OhxS3FOF_-JLLaxx1-U6Ynmks",
+          },
+        });
+        const userData = response.data;
+        setEmail(userData.email);
+        setPhoneNumber(userData.phoneNumber);
+        // Assuming password is not fetched for security reasons
+        setPassword("");
+        setConfirmPassword("");
+      } catch (error) {
+        Alert.alert("Failed to fetch user data", error.message);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   const handleToggleEditMode = () => {
     setIsEditMode(!isEditMode);
   };
 
-  const handleSaveProfile = () => {
-    // Save logic here
+  const handleSaveProfile = async () => {
+    // Validate inputs
     if (!validateEmail(email)) {
       Alert.alert("Invalid email address");
       return;
@@ -39,11 +69,39 @@ const EditProfile = () => {
       return;
     }
 
-    // Implement logic to update user profile on the backend server securely
+    // Prepare data for the server
+    const profileData = {
+      username,
+      email,
+      phoneNumber,
+      password,
+    };
 
-    // Alert user on success or failure
-    Alert.alert("Profile updated successfully!");
-    setIsEditMode(false);
+   
+
+    try {
+      const response = await axios.patch(
+        "http://localhost:3000/auth/update",
+        profileData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            authorization:
+              "AmanGRAD__eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NDdiMDk0ZTIwMGRhNTIzZTU4OWU3MiIsInJvbGUiOiJBZG1pbiIsInN0YXR1cyI6IkFjdGl2YXRlZCIsImlhdCI6MTcxNjQxMDkxMH0.tnRasV2O9eQOeCf5-5OhxS3FOF_-JLLaxx1-U6Ynmks",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        Alert.alert("Profile updated successfully!");
+        setIsEditMode(false);
+      } else {
+        Alert.alert("Failed to update profile", response.data.message);
+        //console.log(response.data.message);
+      }
+    } catch (error) {
+      Alert.alert("An error occurred", error.message);
+    }
   };
 
   const validateEmail = (email) => {
@@ -53,13 +111,15 @@ const EditProfile = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.header}
-        onPress={() => navigation.navigate("Profile")}
-      >
-        <IconAntDesign name="arrowleft" size={25} color="black" />
-      </TouchableOpacity>
+    <ScrollView contentContainerStyle={styles.container} ref={scrollViewRef}>
+      <View style={styles.headerContainer}>
+        <TouchableOpacity
+          style={styles.header}
+          onPress={() => navigation.navigate("Profile")}
+        >
+          <IconAntDesign name="arrowleft" size={25} color="black" />
+        </TouchableOpacity>
+      </View>
 
       <View style={styles.logoContainer}>
         <Image
@@ -71,6 +131,15 @@ const EditProfile = () => {
       <Text style={styles.title}>تعديل الملف الشخصي</Text>
 
       <View>
+      <TextInput
+          style={styles.input}
+          placeholder=" الاسم"
+          keyboardType="username"
+          autoCapitalize="none"
+          value={username}
+          onChangeText={setUserName}
+          editable={isEditMode}
+        />
         <TextInput
           style={styles.input}
           placeholder="البريد الالكتروني"
@@ -113,7 +182,7 @@ const EditProfile = () => {
       >
         <Text style={styles.buttonText}>{isEditMode ? "حفظ" : "تعديل"}</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -125,11 +194,15 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: "white",
     alignItems: "center",
     justifyContent: "flex-start",
     padding: 16,
+  },
+  headerContainer: {
+    width: "100%",
+    alignItems: "flex-start",
   },
   logoContainer: {
     alignItems: "center",

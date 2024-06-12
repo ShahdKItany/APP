@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from "react";
 import { View, FlatList, StyleSheet, Text, ActivityIndicator, Image, TouchableOpacity } from "react-native";
 import { useNavigation } from '@react-navigation/native';
@@ -23,7 +21,7 @@ const BooksByCategory = ({ route }) => {
     axios.get(`https://ecommercebackend-jzct.onrender.com/category/books/${categoryId}`)
       .then((response) => {
         const { data } = response;
-        console.log("Fetched Books:", data.books); // طباعة البيانات المجلوبة
+        console.log("Fetched Books:", data.books); // Print fetched data
         setBooks(data.books);
         setLoading(false);
       })
@@ -34,16 +32,31 @@ const BooksByCategory = ({ route }) => {
   };
 
   const handleBookPress = (book) => {
-    const mainImage = book.mainImage.secure_url;
-    console.log("Selected Book:", book); // طباعة تفاصيل الكتاب المختار
-    navigation.navigate('BookDetails', {
-      bookId: book._id,
-      title: book.title,
-      price: book.price,
-      details: book.description, // Assuming details are in description
-      mainImage: mainImage,
-    });
+    const { _id, title, price, description, mainImage, subImages, Discount } = book;
+    const mainImageUrl = mainImage?.secure_url || null;
+    const subImagesUrls = subImages.map((image) => image.secure_url);
+    const finalPrice = price * ((100 - Discount) / 100);
+  
+    console.log("Selected Book:", book);
+    
+    if (mainImageUrl) {
+      navigation.navigate('BookDetails', {
+        id: _id,
+        title,
+        description,
+        mainImage: mainImageUrl,
+        subImages: subImagesUrls,
+        Discount,
+        price,
+        finalPrice,
+      });
+    } else {
+      // Handle error loading image
+      console.error("Error loading image for book:", book);
+      // Optionally, display a placeholder image or show an error message
+    }
   };
+  
 
   return (
     <View style={styles.container}>
@@ -52,7 +65,11 @@ const BooksByCategory = ({ route }) => {
           <IconAntDesign name="arrowleft" size={25} color={Colors.ORANGE} />
         </TouchableOpacity>
         <Text style={[styles.categoryName, { color: Colors.PINK }]}>{categoryName}</Text>
-        <Image source={{ uri: categoryImage }} style={styles.categoryImage} />
+        <Image
+          source={{ uri: categoryImage }}
+          style={styles.categoryImage}
+          onError={(error) => console.error("Error loading image:", error)}
+        />
       </View>
 
       {loading ? (
@@ -65,7 +82,7 @@ const BooksByCategory = ({ route }) => {
               title={item.title}
               price={item.finalPrice}
               description={item.description}
-              mainImage={item.mainImage.secure_url} // تحديث هنا
+              mainImage={item.mainImage.secure_url}
               onPress={() => handleBookPress(item)}
             />
           )}
@@ -113,3 +130,4 @@ const styles = StyleSheet.create({
 });
 
 export default BooksByCategory;
+

@@ -95,12 +95,49 @@ const BookDetails = ({ route }) => {
     }
   };
 
-  const handleAddComment = () => {
-    if (comment.trim() !== "") {
-      setComments([...comments, comment]);
-      setComment("");
+  const handleAddComment = async () => {
+    try {
+      // Check if the comment is empty
+      if (comment.trim() === "") {
+        Alert.alert("يرجى إدخال تعليق قبل إرساله!");
+        return;
+      }
+  
+      const response = await axios.post(
+        `https://ecommercebackend-jzct.onrender.com/book/${id}/review`,
+        {
+          comment,
+          rating
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `AmanGRAD__${token}`
+          }
+        }
+      );
+  
+      if (response.status === 200) {
+        // Assuming the API returns the newly created review
+        const newReview = response.data;
+        // Update comments state with the new review
+        setComments([...comments, newReview.comment]);
+        // Clear the comment input field
+        setComment("");
+        // Show success message or handle as needed
+        Alert.alert("تمت إضافة التعليق بنجاح!", "", [{ text: 'موافق', style: 'default' }], { cancelable: false });
+      } else {
+        throw new Error(`Failed to add comment. Status code: ${response.status}`);
+      }
+    } catch (error) {
+      console.error("Error adding comment:", error);
+      // Show error message or handle as needed
+      Alert.alert("فشل في إضافة التعليق!", "", [{ text: 'موافق', style: 'default' }], { cancelable: false });
     }
   };
+  
+  
+  
 
   const handleStarPress = (index) => {
     setRating(index + 1);
@@ -144,16 +181,17 @@ const BookDetails = ({ route }) => {
 
         <View style={styles.ratingContainer}>
           <View style={styles.starContainer}>
-            {[...Array(5)].map((_, index) => (
-              <TouchableOpacity key={index} onPress={() => handleStarPress(index)}>
-                <FontAwesomeIcon
-                  icon={faStar}
-                  size={30}
-                  color={index < rating ? Colors.YELLOW : Colors.GRAY}
-                  style={styles.star} // Place the style here
-                />
-              </TouchableOpacity>
-            ))}
+          {[...Array(5)].map((_, index) => (
+  <TouchableOpacity key={index} onPress={() => handleStarPress(index)}>
+    <FontAwesomeIcon
+      icon={faStar}
+      size={30}
+      color={index < rating ? Colors.YELLOW : Colors.GRAY}
+      style={styles.star}
+    />
+  </TouchableOpacity>
+))}
+
           </View>
         </View>
 
@@ -162,6 +200,7 @@ const BookDetails = ({ route }) => {
             <FontAwesomeIcon icon={faShoppingCart} style={styles.buttonIcon} />
             <Text style={styles.buttonText}>أضف إلى عربة التسوق</Text>
           </TouchableOpacity>
+
           <TouchableOpacity style={styles.button} onPress={handleAddToFavorites}>
             <FontAwesomeIcon icon={faHeart} style={styles.buttonIcon} />
             <Text style={styles.buttonText}>أضف إلى المفضلة</Text>
@@ -223,16 +262,18 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     marginVertical: 10,
+  
   },
   originalPrice: {
     fontSize: 18,
-    color: "gray",
+    color:Colors.ORANGE,
     textDecorationLine: "line-through",
   },
   finalPrice: {
     fontSize: 20,
     fontWeight: "bold",
     marginVertical: 5,
+    color:Colors.PINK,
   },
   details: {
     fontSize: 16,
@@ -257,28 +298,31 @@ const styles = StyleSheet.create({
   },
   button: {
     flexDirection: "row",
-    backgroundColor: Colors.BLUE,
-    padding: 10,
+    backgroundColor: Colors.PINK,
+    padding: 11,
     borderRadius: 5,
     alignItems: "center",
     flex: 1,
-    marginHorizontal: 5,
+    marginHorizontal: 8,
   },
   buttonIcon: {
-    marginRight: 5,
+    marginRight: 10,
     color: "white",
   },
   buttonText: {
     color: "white",
     fontWeight: "bold",
+    fontSize:15
   },
  commentsContainer: {
     marginVertical: 10,
+    
   },
   commentsTitleContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 10,
+    
   },
   commentIcon: {
     marginRight: 5,
@@ -315,10 +359,14 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     alignItems: "center",
+    marginBottom:100,
+  
+   
   },
   addButtonText: {
     color: "white",
     fontWeight: "bold",
+   
   },
 });
 

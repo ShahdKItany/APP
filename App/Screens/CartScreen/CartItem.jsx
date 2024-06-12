@@ -1,11 +1,14 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useDispatch } from 'react-redux';
-import axios from 'axios';
 import { removeFromCart, incrementQuantity, decrementQuantity } from '../../ReduxAndAsyncStorage/BookSlice';
 import Colors from '../../Common/Utils/Colors';
 
 const CartItem = ({ book }) => {
+  if (!book || !book.quantity || book.price === undefined) {
+    return null; // Render nothing if book is undefined, null, quantity is undefined, or price is undefined
+  }
+
   const dispatch = useDispatch();
 
   const handleRemoveFromCart = (itemId) => {
@@ -41,11 +44,11 @@ const CartItem = ({ book }) => {
 
   return (
     <View style={styles.itemContainer}>
-      <Text style={styles.bookId}>Book ID: {book.id}</Text> {/* عرض ال Book ID هنا */}
+      <Text style={styles.bookId}>Book ID: {book.id}</Text>
       <Image source={{ uri: book.image }} style={styles.image} />
       <View style={styles.textContainer}>
         <Text style={styles.title}>{book.title}</Text>
-        <Text style={styles.price}>₪{book.price.toFixed(2)}</Text>
+        <Text style={styles.price}>₪{book.price.toFixed(2)}</Text> {/* Check if book.price is defined */}
       </View>
       <TouchableOpacity onPress={() => dispatch(decrementQuantity(book.id))}>
         <Text style={styles.quantityButton}>-</Text>
@@ -85,10 +88,6 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 14,
     color: Colors.primary,
-  },
-  quantityContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
   },
   quantityButton: {
     fontSize: 18,

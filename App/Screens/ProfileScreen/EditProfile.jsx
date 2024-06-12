@@ -86,9 +86,7 @@ const EditProfile = () => {
         {
           headers: {
             "Content-Type": "application/json",
-            authorization:
-              "AmanGRAD__eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NDdiMDk0ZTIwMGRhNTIzZTU4OWU3MiIsInJvbGUiOiJBZG1pbiIsInN0YXR1cyI6IkFjdGl2YXRlZCIsImlhdCI6MTcxNjQxMDkxMH0.tnRasV2O9eQOeCf5-5OhxS3FOF_-JLLaxx1-U6Ynmks",
-          },
+           'Authorization': `AmanGRAD__${token}`        },
         }
       );
 

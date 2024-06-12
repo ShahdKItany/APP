@@ -1,6 +1,5 @@
-// Cart.jsx
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import {
@@ -14,6 +13,7 @@ import {
 import Colors from '../../Common/Utils/Colors';
 import Footer from '../../Common/Footer/Footer';
 import CartItem from './CartItem';
+
 const Cart = ({ navigation }) => {
   const dispatch = useDispatch();
   const books = useSelector(selectBooksInCart) || [];
@@ -21,19 +21,6 @@ const Cart = ({ navigation }) => {
   const token = useSelector(selectToken);
   
 
-  /*
-  useEffect(() => {
-    console.log("Book Details from Database:");
-    console.log("Title:", title);
-    console.log("Price:", price);
-    console.log("Final Price:", finalPrice);
-    console.log("Description:", description);
-    console.log("Main Image:", mainImage);
-    console.log("Sub Images:", subImages);
-    console.log("Book ID:", id);
-  }, [title, price, finalPrice, description, mainImage, subImages, id]);
-
-  */
   useEffect(() => {
     if (token) {
       getCartAPI();
@@ -48,6 +35,7 @@ const Cart = ({ navigation }) => {
           'Authorization': `AmanGRAD__${token}`
         }
       });
+
       if (response.status === 200) {
         dispatch(clearCart());
       }
@@ -66,12 +54,9 @@ const Cart = ({ navigation }) => {
       });
 
       if (response.status === 200) {
-       // console.log('Cart data:', response.data); 
         dispatch(setCart(response.data));
-  
 
         const cartData = response.data.cart;
-        console.log('________________________cartData : ', cartData);
         const getBookDetails = async (bookId) => {
           try {
             const response = await axios.get(`https://ecommercebackend-jzct.onrender.com/book/${bookId}`, {
@@ -83,9 +68,9 @@ const Cart = ({ navigation }) => {
         
             if (response.status === 200) {
               const bookDetails = response.data;
-              console.log('Title:', bookDetails.title);
-              console.log('Price:', bookDetails.price);
-              console.log('Main Image:', bookDetails.mainImage);
+              console.log('Title:', bookDetails.book.title);
+              console.log('Price:', bookDetails.book.price);
+              console.log('Main Image:', bookDetails.book.mainImage);
             } else {
               console.error('Failed to fetch book details');
             }
@@ -95,20 +80,10 @@ const Cart = ({ navigation }) => {
         };
         
         if (cartData && cartData.books && cartData.books.length > 0) {
-          // Iterate over each book object in the 'books' array
           for (const book of cartData.books) {
-            console.log('Book ID:', book.bookId);
             await getBookDetails(book.bookId);
           }
         }
-        
-        
-        
-        
-
-
-
-        
       } else {
         console.error('Failed to fetch cart data');
       }
@@ -157,26 +132,27 @@ const Cart = ({ navigation }) => {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollView}>
         {token ? (
-          books.length === 0 ? (
-            <Text style={styles.emptyCartText}>
-              عربة التسوق فارغة!
-              Your shopping cart is empty!
-            </Text>
-          ) : (
-            <>
-              {books.map((book) => (
-                <CartItem key={book.id} book={book} token={token} />
-              ))}
-            
-              <View style={styles.totalContainer}>
-                <Text style={styles.totalText}>المجموع(total): </Text>
-                <Text style={styles.totalPrice}>₪{totalPrice.toFixed(2)}</Text>
-              </View>
-              <TouchableOpacity style={styles.clearButton} onPress={handleClearCart}>
-                <Text style={styles.clearButtonText}>Delete all</Text>
-              </TouchableOpacity>
-            </>
-          )
+          <>
+            {books.length === 0 ? (
+              <Text style={styles.emptyCartText}>
+                عربة التسوق فارغة!
+                Your shopping cart is empty!
+              </Text>
+            ) : (
+              <>
+                {books.map((book) => (
+                  <CartItem key={book.bookId} book={book} />
+                ))}
+                <View style={styles.totalContainer}>
+                  <Text style={styles.totalText}>المجموع(total): </Text>
+                  <Text style={styles.totalPrice}>₪{totalPrice.toFixed(2)}</Text>
+                </View>
+                <TouchableOpacity style={styles.clearButton} onPress={handleClearCart}>
+                  <Text style={styles.clearButtonText}>Delete all</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </>
         ) : (
           <Text style={styles.emptyCartText}>
             يرجى تسجيل الدخول لعرض عربة التسوق!
@@ -187,6 +163,7 @@ const Cart = ({ navigation }) => {
       <Footer />
     </View>
   );
+  
 };
 
 const styles = StyleSheet.create({
@@ -202,6 +179,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center',
     marginVertical: 20,
+    marginTop:300,
   },
   totalContainer: {
     flexDirection: 'row',
@@ -231,3 +209,4 @@ const styles = StyleSheet.create({
 });
 
 export default Cart;
+

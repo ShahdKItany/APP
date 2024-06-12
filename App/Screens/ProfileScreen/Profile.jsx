@@ -2,19 +2,22 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Linking, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Colors from '../../Common/Utils/Colors';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { clearToken } from '../../ReduxAndAsyncStorage/Actions'; // Import the clearToken action
+import { selectToken } from '../../ReduxAndAsyncStorage/BookSlice'; // Import selector for token
 
 const menuItems = [
-  { id: '1', title: 'تعديل الملف الشخصي', icon: 'edit' },
-  { id: '2', title: 'قائمة المفضلة', icon: 'heart' },
-  { id: '3', title: 'عربة التسوق', icon: 'shopping-cart' },
-  { id: '5', title: 'تواصل معنا', icon: 'phone' },
+  { id: '1', title: 'تعديل الملف الشخصي', icon: 'edit', requiresAuth: true },
+  { id: '2', title: 'قائمة المفضلة', icon: 'heart', requiresAuth: true },
+  { id: '3', title: 'عربة التسوق', icon: 'shopping-cart', requiresAuth: true },
+  { id: '5', title: 'تواصل معنا', icon: 'phone', requiresAuth: false },
 ];
 
 const Profile = ({ navigation }) => {
   const [showOptions, setShowOptions] = useState(false);
   const dispatch = useDispatch(); // Get dispatch function from redux
+  const token = useSelector(selectToken); // Get the token from the Redux store
+
   const handleLogout = () => {
     // Function to handle logout
     Alert.alert(
@@ -46,27 +49,34 @@ const Profile = ({ navigation }) => {
       </View>
 
       <View style={styles.content}>
-        {menuItems.map((item) => (
-          <TouchableOpacity
-            key={item.id}
-            style={styles.menuItem}
-            onPress={() => {
-              if (item.title === 'تواصل معنا') {
-                setShowOptions(true);
-              } else if (item.title === 'تعديل الملف الشخصي') {
-                navigation.navigate('EditProfile');
-              } else if (item.title === 'عربة التسوق') {
-                navigation.navigate('Cart');
-              } else if (item.title === 'قائمة المفضلة') {
-                navigation.navigate('WishList');
-              }
-            }}
-          >
-            <Icon name={item.icon} size={24} color={Colors.BLACK} style={styles.icon} />
-            <Text style={styles.menuText}>{item.title}</Text>
-            <Icon name="chevron-right" size={24} color={Colors.BLACK} />
-          </TouchableOpacity>
-        ))}
+        {menuItems.map((item) => {
+          // Check if the item requires authentication and if token is present
+          if (item.requiresAuth && !token) {
+            return null; // Skip rendering this item
+          }
+
+          return (
+            <TouchableOpacity
+              key={item.id}
+              style={styles.menuItem}
+              onPress={() => {
+                if (item.title === 'تواصل معنا') {
+                  setShowOptions(true);
+                } else if (item.title === 'تعديل الملف الشخصي') {
+                  navigation.navigate('EditProfile');
+                } else if (item.title === 'عربة التسوق') {
+                  navigation.navigate('Cart');
+                } else if (item.title === 'قائمة المفضلة') {
+                  navigation.navigate('WishList');
+                }
+              }}
+            >
+              <Icon name={item.icon} size={24} color={Colors.BLACK} style={styles.icon} />
+              <Text style={styles.menuText}>{item.title}</Text>
+              <Icon name="chevron-right" size={24} color={Colors.BLACK} />
+            </TouchableOpacity>
+          );
+        })}
 
         {showOptions && (
           <View style={styles.optionsContainer}>
@@ -82,9 +92,15 @@ const Profile = ({ navigation }) => {
           </View>
         )}
 
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.buttonText}>تسجيل الخروج</Text>
-        </TouchableOpacity>
+        {token ? (
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Text style={styles.buttonText}>تسجيل الخروج</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('Signin')}>
+            <Text style={styles.buttonText}>تسجيل الدخول</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -150,7 +166,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   optionButton: {
-    backgroundColor: Colors.BLUE,
+    backgroundColor: Colors.ORANGE,
     borderRadius: 10,
     paddingVertical: 12,
     paddingHorizontal: 110,
@@ -166,7 +182,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   logoutButton: {
-    backgroundColor: Colors.PINK,
+    backgroundColor: Colors.BLUE,
+    borderRadius: 20,
+    paddingVertical: 13,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 20,
+    width: '70%',
+    marginTop: 40,
+  },
+  loginButton: {
+    backgroundColor: Colors.ORANGE,
     borderRadius: 20,
     paddingVertical: 13,
     justifyContent: 'center',

@@ -14,17 +14,20 @@ const Signup = () => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSignUp = async () => {
-    if (username === '' || email === '' || phone === '' || password === '') {
+    if (username === '' || email === '' || phone === '' || password === '' || confirmPassword === '') {
       setError('الرجاء تعبئة جميع الحقول');
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       setError('الرجاء إدخال عنوان بريد إلكتروني صحيح');
     } else if (!/(?=.*\d)(?=.*[a-zA-Z]).{8,}/.test(password)) {
-      setError('يجب أن تحتوي كلمة المرور على الأقل 8 أحرف وأرقام');
+      setError('يجب أن تحتوي كلمة المرور على الأقل 8 خانات و أحرف وأرقام');
+    } else if (password !== confirmPassword) {
+      setError('كلمتا المرور غير متطابقتين');
     } else if (!/^\d{10}$/.test(phone)) {
       setError('الرجاء إدخال رقم هاتف صحيح');
     } else {
@@ -39,11 +42,10 @@ const Signup = () => {
         });
 
         const { message, token } = response.data;
-        console.log(response.data)
         dispatch(saveToken(token));
 
-        Alert.alert('Sign up successful', message, [
-          { text: 'OK', onPress: () => navigation.navigate('Home') }
+        Alert.alert('تسجيل ناجح', message, [
+          { text: 'موافق', onPress: () => navigation.navigate('Signin') } // Navigate to Signin screen after successful signup
         ]);
       } catch (error) {
         console.error('Error signing up:', error);
@@ -132,12 +134,23 @@ const Signup = () => {
             />
           </View>
 
+          <View style={styles.inputContainer}>
+            <Icon name="lock" size={20} color="#0abae4" style={styles.icon} />
+            <TextInput
+              style={styles.input}
+              placeholder="تأكيد كلمة المرور"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry
+            />
+          </View>
+
           <TouchableOpacity style={styles.button} onPress={handleSignUp} disabled={loading}>
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
               <Text style={styles.buttonText}>
-                إنشاء حساب <Icon name="user-plus" size={20} color="white" />
+                إنشاء الحساب    <Icon name="user-plus" size={20} color="white" />
               </Text>
             )}
           </TouchableOpacity>
@@ -206,8 +219,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   content: {
-    marginTop: 50,
-  },
+    marginTop: 30,
+ },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -222,7 +235,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   input: {
-    height: 40,
+    height:    40,
     flex: 1,
     textAlign: 'right',
   },
@@ -250,11 +263,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   bottomButtonsContainer: {
-    marginTop: 1,
+    marginTop: 20,
     alignItems: 'center',
   },
   bottomCreateAccount: {
-    marginTop: 70,
+    marginTop: 20,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

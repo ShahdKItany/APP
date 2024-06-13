@@ -1,3 +1,6 @@
+
+
+
 import React, { useState, useRef, useEffect } from "react";
 import {
   View,
@@ -23,7 +26,7 @@ import { useNavigation } from '@react-navigation/native';
 const BookDetails = ({ route }) => {
   const { title, price, finalPrice, description, mainImage, subImages, id } = route.params;
   const [comment, setComment] = useState("");
-  const [comments, setComments] = useState([]);
+  const [comments, setComments] = useState([]); // State to hold comments
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [rating, setRating] = useState(0);
 
@@ -34,17 +37,30 @@ const BookDetails = ({ route }) => {
   const navigation = useNavigation();
   const token = useSelector(selectToken);
 
-  useEffect(() => {
-    console.log("Book Details from Database:");
-    console.log("Title:", title);
-    console.log("Price:", price);
-    console.log("Final Price:", finalPrice);
-    console.log("Description:", description);
-    console.log("Main Image:", mainImage);
-    console.log("Sub Images:", subImages);
-    console.log("Book ID:", id);
-  }, [title, price, finalPrice, description, mainImage, subImages, id]);
+ 
 
+  useEffect(() => {
+    fetchComments();
+  }, []);
+  
+  const fetchComments = async () => {
+    try {
+      const response = await axios.get(`https://ecommercebackend-jzct.onrender.com/book/${id}/reviews`);
+      
+      if (response.status === 200) {
+        const fetchedComments = response.data;
+        setComments(fetchedComments);
+      } else {
+        throw new Error(`Failed to fetch comments. Status code: ${response.status}`);
+      }
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+      Alert.alert("Failed to fetch comments. Please try again later.");
+    }
+  };
+  
+  
+  
   const handleAddToCart = async () => {
     try {
       if (!token) {
@@ -84,7 +100,6 @@ const BookDetails = ({ route }) => {
       }
     }
   };
-  
 
   const handleAddToFavorites = () => {
     if (isInWishlist) {
@@ -97,9 +112,8 @@ const BookDetails = ({ route }) => {
 
   const handleAddComment = async () => {
     try {
-      // Check if the comment is empty
       if (comment.trim() === "") {
-        Alert.alert("يرجى إدخال تعليق قبل إرساله!");
+        Alert.alert("Please enter a comment before submitting!");
         return;
       }
   
@@ -118,25 +132,18 @@ const BookDetails = ({ route }) => {
       );
   
       if (response.status === 200) {
-        // Assuming the API returns the newly created review
         const newReview = response.data;
-        // Update comments state with the new review
-        setComments([...comments, newReview.comment]);
-        // Clear the comment input field
+        setComments([...comments, newReview]);
         setComment("");
-        // Show success message or handle as needed
-        Alert.alert("تمت إضافة التعليق بنجاح!", "", [{ text: 'موافق', style: 'default' }], { cancelable: false });
+        Alert.alert("Comment added successfully!");
       } else {
         throw new Error(`Failed to add comment. Status code: ${response.status}`);
       }
     } catch (error) {
       console.error("Error adding comment:", error);
-      // Show error message or handle as needed
-      Alert.alert("فشل في إضافة التعليق!", "", [{ text: 'موافق', style: 'default' }], { cancelable: false });
+      Alert.alert("Failed to add comment. Please try again later.");
     }
   };
-  
-  
   
 
   const handleStarPress = (index) => {
@@ -181,17 +188,16 @@ const BookDetails = ({ route }) => {
 
         <View style={styles.ratingContainer}>
           <View style={styles.starContainer}>
-          {[...Array(5)].map((_, index) => (
-  <TouchableOpacity key={index} onPress={() => handleStarPress(index)}>
-    <FontAwesomeIcon
-      icon={faStar}
-      size={30}
-      color={index < rating ? Colors.YELLOW : Colors.GRAY}
-      style={styles.star}
-    />
-  </TouchableOpacity>
-))}
-
+            {[...Array(5)].map((_, index) => (
+              <TouchableOpacity key={index} onPress={() => handleStarPress(index)}>
+                <FontAwesomeIcon
+                  icon={faStar}
+                  size={30}
+                  color={index < rating ? Colors.YELLOW :                  Colors.GRAY}
+                  style={styles.star}
+                />
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
 
@@ -213,10 +219,11 @@ const BookDetails = ({ route }) => {
             <Text style={styles.commentsTitle}>التعليقات</Text>
           </View>
 
+          {/* Render all comments */}
           {comments.map((comment, index) => (
             <View key={index} style={styles.commentContainer}>
               <FontAwesomeIcon icon={faUser} style={styles.userIcon} />
-              <Text style={styles.commentText}>{comment}</Text>
+              <Text style={styles.commentText}>{comment.user}: {comment.comment}</Text>
             </View>
           ))}
 
@@ -262,18 +269,17 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     marginVertical: 10,
-  
   },
   originalPrice: {
     fontSize: 18,
-    color:Colors.ORANGE,
+    color: Colors.ORANGE,
     textDecorationLine: "line-through",
   },
   finalPrice: {
     fontSize: 20,
     fontWeight: "bold",
     marginVertical: 5,
-    color:Colors.PINK,
+    color: Colors.PINK,
   },
   details: {
     fontSize: 16,
@@ -312,17 +318,15 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "white",
     fontWeight: "bold",
-    fontSize:15
+    fontSize: 15,
   },
- commentsContainer: {
+  commentsContainer: {
     marginVertical: 10,
-    
   },
   commentsTitleContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 10,
-    
   },
   commentIcon: {
     marginRight: 5,
@@ -359,14 +363,11 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     alignItems: "center",
-    marginBottom:100,
-  
-   
+    marginBottom: 100,
   },
   addButtonText: {
     color: "white",
     fontWeight: "bold",
-   
   },
 });
 

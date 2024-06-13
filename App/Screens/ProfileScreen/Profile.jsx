@@ -10,6 +10,7 @@ const menuItems = [
   { id: '1', title: 'تعديل الملف الشخصي', icon: 'edit', requiresAuth: true },
   { id: '2', title: 'قائمة المفضلة', icon: 'heart', requiresAuth: true },
   { id: '3', title: 'عربة التسوق', icon: 'shopping-cart', requiresAuth: true },
+  { id: '4', title: 'الصفحة الرئيسية', icon: 'home', requiresAuth: false }, // Added home item
   { id: '5', title: 'تواصل معنا', icon: 'phone', requiresAuth: false },
 ];
 
@@ -41,8 +42,14 @@ const Profile = ({ navigation }) => {
     );
   };
 
+  const handleHomeNavigation = () => {
+    navigation.navigate('Home');
+  };
+
   return (
+    
     <View style={styles.container}>
+      
       <View style={styles.logoContainer}>
         <Image source={require('../../../assets/logo/logo.jpg')} style={styles.logo} />
         <Text style={styles.title}>الملف الشخصي</Text>
@@ -68,6 +75,8 @@ const Profile = ({ navigation }) => {
                   navigation.navigate('Cart');
                 } else if (item.title === 'قائمة المفضلة') {
                   navigation.navigate('WishList');
+                } else if (item.title === 'الصفحة الرئيسية') { // Handle home navigation
+                  handleHomeNavigation();
                 }
               }}
             >
@@ -182,7 +191,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   logoutButton: {
-    backgroundColor: Colors.BLUE,
+    backgroundColor: Colors.PINK,
     borderRadius: 20,
     paddingVertical: 13,
     justifyContent: 'center',
@@ -192,7 +201,7 @@ const styles = StyleSheet.create({
     marginTop: 40,
   },
   loginButton: {
-    backgroundColor: Colors.ORANGE,
+    backgroundColor: Colors.PINK,
     borderRadius: 20,
     paddingVertical: 13,
     justifyContent: 'center',

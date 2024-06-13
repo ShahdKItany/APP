@@ -12,11 +12,22 @@ import {
   Platform,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useSelector } from "react-redux"; // Import useSelector from React Redux
+import { useSelector } from "react-redux";
 import IconAntDesign from "react-native-vector-icons/AntDesign";
 import axios from "axios";
 import Colors from "../../Common/Utils/Colors";
-import { selectToken } from "../../ReduxAndAsyncStorage/BookSlice"; // Import selector for token
+import { selectToken } from "../../ReduxAndAsyncStorage/BookSlice";
+
+// Mock function for getUserFromToken
+const getUserFromToken = (token) => {
+  // Replace this with your logic to decode token and get user data
+  return {
+    username: "mockUser",
+    email: "mock@example.com",
+    phone: "1234567890",
+    password: "hashedPassword", // Replace with actual hashed password
+  };
+};
 
 const EditProfile = () => {
   const navigation = useNavigation();
@@ -28,25 +39,27 @@ const EditProfile = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [isEditMode, setIsEditMode] = useState(false);
-  const token = useSelector(selectToken); // Use useSelector to get the token from the Redux store
+  const [changePasswordMode, setChangePasswordMode] = useState(false);
+  const [userData, setUserData] = useState(null);
+  const token = useSelector(selectToken);
 
   useEffect(() => {
-    // Fetch user data from backend
     const fetchUserData = async () => {
       try {
-        const response = await axios.get("https://ecommercebackend-jzct.onrender.com/auth", {
-          headers: {
-            authorization: `AmanGRAD__${token}`,
-          },
-        });
-        const userData = response.data;
-        console.log(userData);
+        const response = await axios.get(
+          "https://ecommercebackend-jzct.onrender.com/user/profile",
+          {
+            headers: {
+              authorization: `AmanGRAD__${token}`,
+            },
+          }
+        );
+        const userData = response.data.user;
+        console.log("User Data:", userData);
+        setUserData(userData);
         setEmail(userData.email);
-       
-        setPhoneNumber(userData.phoneNumber);
-        
+        setPhoneNumber(userData.phone);
         setUserName(userData.username);
-     
         setPassword("");
         setConfirmPassword("");
       } catch (error) {
@@ -59,58 +72,76 @@ const EditProfile = () => {
     }
   }, [token]);
 
-  console.log("Token:", token); // Print the token in the console
-
   const handleToggleEditMode = () => {
     setIsEditMode(!isEditMode);
+    setChangePasswordMode(false);
+  };
+
+  const handleToggleChangePassword = () => {
+    setChangePasswordMode(!changePasswordMode);
   };
 
   const handleSaveProfile = async () => {
-    if (!validateEmail(email)) {
-      Alert.alert("Invalid email address");
+    if (!currentPassword) {
+      Alert.alert("الرجاء إدخال كلمة المرور الحالية");
       return;
     }
-    if (password.length < 8) {
-      Alert.alert("Password must be at least 8 characters long");
+  
+    if (changePasswordMode && password !== confirmPassword) {
+      Alert.alert("كلمة المرور وتأكيد كلمة المرور غير متطابقين");
       return;
     }
-    if (password !== confirmPassword) {
-      Alert.alert("Passwords do not match");
-      return;
-    }
-
-    const profileData = {
-      username,
-      email,
-      phoneNumber,
-      password,
-    };
-
+  
     try {
-      let url = "https://ecommercebackend-jzct.onrender.com/auth/update";
-      if (!isEditMode) {
-        url = "https://ecommercebackend-jzct.onrender.com/auth/changePassword";
-        profileData.oldPassword = currentPassword;
+      // Get user data from token
+      const user = getUserFromToken(token);
+  
+      if (!user) {
+        Alert.alert("لم يتم العثور على المستخدم");
+        return;
       }
-
-      const response = await axios.patch(url, profileData, {
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `AmanGRAD__${token}`,
-        },
-      });
-
-      if (response.status === 200) {
-        Alert.alert("Profile updated successfully!");
-        setIsEditMode(false);
-      } else {
-        Alert.alert("Failed to update profile", response.data.message);
+  
+      // Check if current password matches
+      const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+  
+      if (!isPasswordValid) {
+        Alert.alert("كلمة المرور الحالية غير صحيحة");
+        return;
       }
+  
+      // Prepare the updated profile data
+      const updatedData = {
+        username,
+        email,
+        phone: phoneNumber,
+      };
+  
+      if (changePasswordMode) {
+        updatedData.password = password;
+      }
+  
+      // Save profile changes
+      await axios.put(
+        "https://ecommercebackend-jzct.onrender.com/user/profile",
+        updatedData,
+        {
+          headers: {
+            authorization: `AmanGRAD__${token}`,
+          },
+        }
+      );
+  
+      Alert.alert("تم حفظ التغييرات بنجاح");
+      setIsEditMode(false);
+      setChangePasswordMode(false);
+      setCurrentPassword("");
+      setPassword("");
+      setConfirmPassword("");
     } catch (error) {
-      Alert.alert("An error occurred", error.message);
+      Alert.alert("حدث خطأ أثناء حفظ التغييرات");
     }
   };
-
+  
   const validateEmail = (email) => {
     const re =
       /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -145,7 +176,7 @@ const EditProfile = () => {
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            placeholder="الاسم"
+            placeholder={userData ? userData.username : "الاسم"}
             keyboardType="default"
             autoCapitalize="none"
             value={username}
@@ -154,7 +185,7 @@ const EditProfile = () => {
           />
           <TextInput
             style={styles.input}
-            placeholder="البريد الالكتروني"
+            placeholder={userData ? userData.email : "البريد الالكتروني"}
             keyboardType="email-address"
             autoCapitalize="none"
             value={email}
@@ -172,15 +203,24 @@ const EditProfile = () => {
             }
             editable={isEditMode}
           />
-          {isEditMode && (
+          <TextInput
+            style={styles.input}
+            placeholder="كلمة المرور الحالية"
+            secureTextEntry
+            value={currentPassword}
+            onChangeText={setCurrentPassword}
+          />
+          {isEditMode && !changePasswordMode && (
+            <TouchableOpacity
+              style={styles.changePasswordContainer}
+              onPress={handleToggleChangePassword}
+            >
+              <IconAntDesign name="lock" size={20} color={Colors.PINK} />
+              <Text style={styles.changePasswordText}>تغيير كلمة المرور</Text>
+            </TouchableOpacity>
+          )}
+          {changePasswordMode && (
             <>
-              <TextInput
-                style={styles.input}
-                placeholder="كلمة المرور الحالية"
-                secureTextEntry
-                value={currentPassword}
-                onChangeText={setCurrentPassword}
-              />
               <TextInput
                 style={styles.input}
                 placeholder="كلمة المرور الجديدة"
@@ -198,19 +238,26 @@ const EditProfile = () => {
             </>
           )}
         </View>
-
         <TouchableOpacity
           style={styles.button}
           onPress={isEditMode ? handleSaveProfile : handleToggleEditMode}
         >
-          <Text style={styles.buttonText}>{isEditMode ? "حفظ" : "تعديل"}</Text>
+          <View style={styles.buttonContent}>
+            <IconAntDesign
+              name={isEditMode ? "save" : "edit"}
+              size={24}
+              color="white"
+              style={styles.buttonIcon}
+            />
+            <Text style={styles.buttonText}>
+              {isEditMode ? "   حفظ " : "تعديل"}
+            </Text>
+          </View>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 };
-
-
 
 const styles = StyleSheet.create({
   container: {
@@ -220,8 +267,8 @@ const styles = StyleSheet.create({
   scrollView: {
     flexGrow: 1,
     alignItems: "center",
-    justifyContent: "center",
-    padding: 16
+    justifyContent    : "center",
+    padding: 16,
   },
   headerContainer: {
     width: "100%",
@@ -270,15 +317,32 @@ const styles = StyleSheet.create({
     height: 40,
     backgroundColor: Colors.ORANGE,
     borderRadius: 20,
-    alignItems: "center",
     justifyContent: "center",
-    margin: 10,
-    marginTop: 60,
+    alignItems: "center",
+    marginVertical: 20,
   },
   buttonText: {
-    fontSize: 18,
-    color: "white", // Ensure the text is white
+    color: "white",
     fontWeight: "bold",
+    fontSize: 20,
+  },
+  buttonIcon: {
+    marginRight: 5,
+  },
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  changePasswordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  changePasswordText: {
+    color: Colors.PINK,
+    marginLeft: 5,
+    fontSize: 17,
+    textDecorationLine: "underline",
   },
 });
 

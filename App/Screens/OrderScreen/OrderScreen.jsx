@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+/*import React, { useState } from 'react';
 import { View, ScrollView, Text, TextInput, TouchableOpacity, Alert, Image, StyleSheet, KeyboardAvoidingView } from 'react-native'; 
 import { useDispatch, useSelector } from 'react-redux';
 import { removeFromCart, selectBooksInCart, clearCart } from '../../ReduxAndAsyncStorage/BookSlice';
@@ -155,13 +156,13 @@ const OrderScreen = ({ navigation }) => {
     <View style={styles.container}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
         <ScrollView>
-          {/* Title */}
+        
           <View style={styles.titleContainer}>
             <MaterialCommunityIcons name="clipboard-outline" size={24} color={Colors.WHITE} style={styles.titleIcon} />
             <Text style={styles.title}>ملخص الطلب</Text>
           </View>
 
-          {/* Display books with images */}
+        
           <View style={styles.booksContainer}>
             {books && books.map((item, index) => (
               <View key={index}>
@@ -180,7 +181,7 @@ const OrderScreen = ({ navigation }) => {
             ))}
           </View>
 
-          {/* Region selection */}
+         
           <View style={styles.inputContainer}>
             <TouchableOpacity onPress={() => setRegionPickerOpen(!regionPickerOpen)}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -208,7 +209,7 @@ const OrderScreen = ({ navigation }) => {
             </View>
           )}
 
-          {/* City selection */}
+     
           <View style={styles.inputContainer}>
             <TouchableOpacity onPress={() => setCityPickerOpen(!cityPickerOpen)}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -236,7 +237,7 @@ const OrderScreen = ({ navigation }) => {
             </View>
           )}
 
-          {/* Town selection */}
+       
           <View style={styles.inputContainer}>
             <TouchableOpacity onPress={() => setTownPickerOpen(!townPickerOpen)}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -263,7 +264,7 @@ const OrderScreen = ({ navigation }) => {
             </View>
           )}
 
-          {/* Street input */}
+         
           <Text style={styles.label}>الحي أو الشارع:</Text>
           <TextInput
             placeholder="الحي أو الشارع"
@@ -272,7 +273,7 @@ const OrderScreen = ({ navigation }) => {
             style={styles.input}
           />
 
-          {/* Phone number input */}
+       
           <Text style={styles.label}>أدخل رقم الهاتف:</Text>
           <TextInput
             placeholder="رقم الهاتف"
@@ -282,7 +283,7 @@ const OrderScreen = ({ navigation }) => {
             keyboardType="phone-pad"
           />
 
-          {/* Discount code input */}
+        
           <Text style={styles.label}>أدخل كود الخصم:</Text>
           <TextInput
             placeholder="كود الخصم"
@@ -291,7 +292,7 @@ const OrderScreen = ({ navigation }) => {
             style={styles.input}
           />
 
-          {/* Display prices */}
+      
           <View style={styles.priceContainer}>
             <Text style={styles.textRight}>التوصيل:</Text>
             <Text>{deliveryCharge} شيكل</Text>
@@ -309,13 +310,12 @@ const OrderScreen = ({ navigation }) => {
 
           <View style={styles.divider} />
 
-          {/* Total price display */}
+          
           <View style={styles.priceContainer}>
             <Text style={styles.textRight}>المجموع الكلي (شامل التوصيل):</Text>
             <Text style={[styles.totalPriceText, { fontWeight: 'bold' }]}>{totalPriceAfterDiscount} شيكل</Text>
           </View>
 
-          {/* Purchase button */}
           <TouchableOpacity
             style={styles.button}
             onPress={handlePurchase}
@@ -456,3 +456,45 @@ const styles = StyleSheet.create({
 });
 
 export default OrderScreen;
+*/
+
+
+
+
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+
+const OrderScreen = () => {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.header}>Order Screen</Text>
+      <Text style={styles.text}>Your order details go here.</Text>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  text: {
+    fontSize: 18,
+    textAlign: 'center',
+    color: '#333',
+  },
+});
+
+export default OrderScreen;
+
+
+
+
+

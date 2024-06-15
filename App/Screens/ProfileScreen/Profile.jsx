@@ -5,6 +5,7 @@ import Colors from '../../Common/Utils/Colors';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearToken } from '../../ReduxAndAsyncStorage/Actions'; // Import the clearToken action
 import { selectToken } from '../../ReduxAndAsyncStorage/BookSlice'; // Import selector for token
+import { useNavigation } from '@react-navigation/native'; // Import useNavigation hook
 
 const menuItems = [
   { id: '1', title: 'تعديل الملف الشخصي', icon: 'edit', requiresAuth: true },
@@ -12,12 +13,14 @@ const menuItems = [
   { id: '3', title: 'عربة التسوق', icon: 'shopping-cart', requiresAuth: true },
   { id: '4', title: 'الصفحة الرئيسية', icon: 'home', requiresAuth: false }, // Added home item
   { id: '5', title: 'تواصل معنا', icon: 'phone', requiresAuth: false },
+  { id: '6', title: 'جميع الطلبات', icon: 'file-text', requiresAuth: true }, // Added order screen item
 ];
 
-const Profile = ({ navigation }) => {
+const Profile = () => {
   const [showOptions, setShowOptions] = useState(false);
   const dispatch = useDispatch(); // Get dispatch function from redux
   const token = useSelector(selectToken); // Get the token from the Redux store
+  const navigation = useNavigation(); // Initialize useNavigation hook
 
   const handleLogout = () => {
     // Function to handle logout
@@ -46,10 +49,13 @@ const Profile = ({ navigation }) => {
     navigation.navigate('Home');
   };
 
+  
+  const handleOrderScreenNavigation = () => {
+    navigation.navigate('OrderScreen');
+  };
+
   return (
-    
     <View style={styles.container}>
-      
       <View style={styles.logoContainer}>
         <Image source={require('../../../assets/logo/logo.jpg')} style={styles.logo} />
         <Text style={styles.title}>الملف الشخصي</Text>
@@ -77,6 +83,8 @@ const Profile = ({ navigation }) => {
                   navigation.navigate('WishList');
                 } else if (item.title === 'الصفحة الرئيسية') { // Handle home navigation
                   handleHomeNavigation();
+                } else if (item.title === 'جميع الطلبات') { // Handle order screen navigation
+                  handleOrderScreenNavigation();
                 }
               }}
             >

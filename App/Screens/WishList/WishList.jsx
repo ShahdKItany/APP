@@ -1,91 +1,119 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, ScrollView } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useEffect, useState } from 'react';
 import {
-  removeFromCart,
-  incrementQuantity,
-  decrementQuantity,
-  selectBooksInCart,
-  selectTotalPrice,
-} from '../../ReduxAndAsyncStorage/BookSlice';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faHeart } from '@fortawesome/free-solid-svg-icons'; // Import the heart icon
-import Colors from '../../Common/Utils/Colors';
-import Footer from '../../Common/Footer/Footer';
-import IconAntDesign from 'react-native-vector-icons/AntDesign';
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+  Alert,
+} from 'react-native';
+import axios from 'axios';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectToken } from '../../ReduxAndAsyncStorage/BookSlice';
+import { removeToken } from '../../ReduxAndAsyncStorage/Storage';
 
-const WishList = ({ navigation }) => {
+const Wishlist = () => {
+  const [wishlist, setWishlist] = useState([]);
+  const token = useSelector(selectToken);
   const dispatch = useDispatch();
 
-  const books = useSelector(selectBooksInCart);
+  useEffect(() => {
+    fetchWishlist();
+  }, []);
 
-  const renderCartItem = (item, index) => {
-    const confirmDelete = () => {
-      Alert.alert(
-        'تأكيد الحذف',
-        'هل أنت متأكد أنك تريد حذف هذا العنصر؟',
-        [
-          {
-            text: 'إلغاء',
-            style: 'cancel',
+  const fetchWishlist = async () => {
+    try {
+      const response = await axios.get(
+        'https://ecommercebackend-jzct.onrender.com/wishlist/',
+        {
+          headers: {
+            Authorization: `AmanGRAD__${token}`,
           },
-          {
-            text: 'حذف',
-            onPress: () => dispatch(removeFromCart(item.id)),
-            style: 'destructive',
-          },
-        ],
-        { cancelable: false }
+        }
       );
-    };
 
-    return (
-      <View key={index} style={styles.bookDetails}>
-        <Image source={item.source} style={styles.bookImage} />
-        <View style={styles.bookContent}>
-          <Text style={styles.bookTitle}>{item.title}</Text>
-          <View style={styles.bookInfo}>
-            <View style={styles.buttonsContainer}>
-              <TouchableOpacity style={styles.removeButton} onPress={confirmDelete}>
-                <Text style={styles.buttonText}>حذف</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.quantityButton} onPress={() => dispatch(incrementQuantity(item.id))}>
-                <Text style={styles.buttonText}>+</Text>
-              </TouchableOpacity>
-              <Text style={styles.bookQuantity}>الكمية: {item.quantity}</Text>
-              <TouchableOpacity style={styles.quantityButton} onPress={() => dispatch(decrementQuantity(item.id))}>
-                <Text style={styles.buttonText}>-</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-          <Text style={styles.bookPrice}>السعر: {(parseFloat(item.price) * item.quantity).toFixed(2)} ₪</Text>
-        </View>
-      </View>
-    );
+      if (response.status === 200) {
+        setWishlist(response.data);
+      } else {
+        throw new Error(`Failed to fetch wishlist. Status code: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error fetching wishlist:', error);
+      Alert.alert('Failed to fetch wishlist. Please try again later.');
+    }
   };
+
+  const addToWishlist = async (bookId) => {
+    try {
+      const response = await axios.post(
+        'https://ecommercebackend-jzct.onrender.com/wishlist/',
+        { bookId },
+        {
+          headers: {
+            Authorization: `AmanGRAD__${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        Alert.alert('Book added to wishlist successfully!');
+        fetchWishlist(); // Refresh wishlist after adding
+      } else {
+        throw new Error(`Failed to add book to wishlist. Status code: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error adding book to wishlist:', error);
+      Alert.alert('Failed to add book to wishlist. Please try again later.');
+    }
+  };
+
+  const removeFromWishlist = async (bookId) => {
+    try {
+      const response = await axios.put(
+        `https://ecommercebackend-jzct.onrender.com/wishlist/${bookId}`,
+        {},
+        {
+          headers: {
+            Authorization: `AmanGRAD__${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        Alert.alert('Book removed from wishlist successfully!');
+        fetchWishlist(); // Refresh wishlist after removal
+      } else {
+        throw new Error(`Failed to remove book from wishlist. Status code: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error removing book from wishlist:', error);
+      Alert.alert('Failed to remove book from wishlist. Please try again later.');
+    }
+  };
+
+  const renderWishlistItem = ({ item }) => (
+    <View style={styles.wishlistItem}>
+      <Text style={styles.title}>{item.title}</Text>
+      <TouchableOpacity
+        style={styles.removeButton}
+        onPress={() => removeFromWishlist(item.id)}
+      >
+        <Text style={styles.removeButtonText}>Remove</Text>
+      </TouchableOpacity>
+    </View>
+  );
 
   return (
     <View style={styles.container}>
-      <ScrollView>
-        <View style={styles.content}>
-          <View style={[styles.header, { backgroundColor: '#f93a8f' }]}>
-            {/* <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Profile')}>
-              <IconAntDesign name="arrowleft" size={25} color={Colors.WHITE} style={styles.backIcon} />
-            </TouchableOpacity> */}
-            <FontAwesomeIcon icon={faHeart} style={styles.buttonIcon} /> 
-            <Text style={styles.headerText}> قائمة المفضلة </Text>
-          </View>
-
-          {books.length > 0 ? (
-            <View>
-              {books.map((item, index) => renderCartItem(item, index))}
-            </View>
-          ) : (
-            <Text style={styles.emptyCart}> لم تقم بإضافة شيء بعد</Text>
-          )}
-        </View>
-      </ScrollView>
-      <Footer />
+      <FlatList
+        data={wishlist}
+        renderItem={renderWishlistItem}
+        keyExtractor={(item) => item.id}
+        ListEmptyComponent={() => (
+          <Text style={styles.emptyText}>Your wishlist is empty.</Text>
+        )}
+      />
     </View>
   );
 };
@@ -93,126 +121,34 @@ const WishList = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
-    paddingTop: 50,
-  },
-  content: {
-    flex: 1,
     paddingHorizontal: 20,
+    paddingTop: 20,
   },
-  emptyCart: {
-    textAlign: 'center',
-    marginTop: 50,
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  header: {
+  wishlistItem: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 15,
-    justifyContent: 'center',
-  },
-  headerText: {
-    fontSize: 20,
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  bookDetails: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
-    paddingHorizontal: 20,
-  },
-  bookImage: {
-    width: 100,
-    height: 150,
-    marginRight: 10,
-    borderWidth: 1,
-    borderColor: Colors.BLUE,
-  },
-  bookContent: {
-    flex: 1,
-  },
-  bookTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    paddingVertical: 10,
     marginBottom: 10,
-    textAlign: 'right',
   },
-  bookInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  bookPrice: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    textAlign: 'right',
-    marginTop: 18,
-  },
-  bookQuantity: {
-    fontSize: 17,
-    color: '#888',
-    textAlign: 'right',
-    padding: 5,
-  },
-  buttonsContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-  },
-  quantityButton: {
-    backgroundColor: '#3498db',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-    marginLeft: 5,
+  title: {
+    fontSize: 18,
   },
   removeButton: {
-    backgroundColor: '#e74c3c',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
+    backgroundColor: '#ff6347',
+    padding: 8,
     borderRadius: 5,
-    marginLeft: 50,
   },
-  buttonText: {
+  removeButtonText: {
     color: 'white',
-  },
-  totalAmountContainer: {
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  totalAmountText: {
-    fontSize: 18,
     fontWeight: 'bold',
   },
-  checkoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.ORANGE,
-    paddingVertical: 10,
-    borderRadius: 5,
-    marginTop: 20,
-    marginBottom    : 80,
-  },
-  buttonIcon: {
-    marginRight: 10,
-    color: 'white',
-    fontSize: 22,
-    padding: 10,
-  },
-  checkoutButtonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  backIcon: {
-    marginRight: 140,
+  emptyText: {
+    fontSize: 16,
+    textAlign: 'center',
   },
 });
 
-export default WishList;
-
+export default Wishlist;

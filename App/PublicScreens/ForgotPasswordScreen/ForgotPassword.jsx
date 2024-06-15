@@ -1,212 +1,3 @@
-// import React, { useState } from 'react';
-// import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, KeyboardAvoidingView, Platform } from 'react-native';
-// import { useNavigation } from '@react-navigation/native';
-// import Icon from 'react-native-vector-icons/FontAwesome';
-// import axios from 'axios';
-// import Colors from '../../Common/Utils/Colors';
-
-// const ForgotPassword = () => {
-//   const navigation = useNavigation();
-//   const [email, setEmail] = useState('');
-//   const [password, setPassword] = useState('');
-//   //const [confirmPassword, setConfirmPassword] = useState('');
-//   const [verificationCode, setVerificationCode] = useState('');
-//   const [error, setError] = useState('');
-//   const [isCodeSent, setIsCodeSent] = useState(false);
-
-//   const handleRequestVerificationCode = () => {
-//     if (email === '') {
-//       setError('الرجاء إدخال بريدك الإلكتروني');
-//     } else {
-//       setError('');
-//       setIsCodeSent(true);
-//     }
-//   };
-
-//   const handleResetPassword = () => {
-//     if (password === '' || verificationCode === '' ) {
-//       setError('الرجاء إدخال كلمة المرور الجديدة والكود');
-//     } 
-    
-//     // else if (password !== confirmPassword) {
-//     //   setError('تأكيد كلمة المرور غير متطابقة');
-//     // } 
-    
-//     else if (!isValidPassword(password)) {
-//       setError('يجب أن تحتوي كلمة المرور على الأقل  على 8 أحرف وأرقام');
-//     } 
-    
-//     else {
-//       axios.post(' https://ecommercebackend-jzct.onrender.com/auth/forgetPassword', { email, password, verificationCode })
-//         .then(response => {
-//           navigation.navigate('ResetPasswordSuccess');
-//         })
-//         .catch(error => {
-//           setError('فشل في إعادة تعيين كلمة المرور');
-//         });
-//     }
-//   };
-
-//   const isValidPassword = (password) => {
-//     // Password should be at least 8 characters long and contain both letters and numbers
-//     return /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/.test(password);
-//   };
-
-//   return (
-//     <KeyboardAvoidingView
-//       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-//       style={styles.container}
-//     >
-//       <View style={styles.inner}>
-//         <Image source={require('../../../assets/logo/logo.jpg')} style={styles.logo} />
-
-//         <Text style={styles.title}>إعادة تعين كلمة المرور</Text>
-//         {error !== '' && <Text style={styles.error}>{error}</Text>}
-
-//         <View style={styles.inputContainer}>
-//           <Icon name="envelope" size={20} color="#0abae4" style={styles.icon} />
-//           <TextInput
-//             style={styles.input}
-//             placeholder="أدخل  رقم الهاتف أو البريد الالكتروني"
-//             value={email}
-//             onChangeText={setEmail}
-//           />
-//         </View>
-
-//         {isCodeSent && (
-//           <>
-//             <View style={styles.inputContainer}>
-//               <Icon name="lock" size={20} color="#0abae4" style={styles.icon} />
-//               <TextInput
-//                 style={styles.input}
-//                 placeholder="أدخل كلمة المرور الجديدة"
-//                 secureTextEntry={true}
-//                 value={password}
-//                 onChangeText={setPassword}
-//               />
-//             </View>
-//             {/* <View style={styles.inputContainer}>
-//               <Icon name="lock" size={20} color="#0abae4" style={styles.icon} />
-//               <TextInput
-//                 style={styles.input}
-//                 placeholder="تأكيد كلمة المرور"
-//                 secureTextEntry={true}
-//                 value={confirmPassword}
-//                 onChangeText={setConfirmPassword}
-//               />
-//             </View> */}
-//             <View style={styles.inputContainer}>
-//               <Icon name="key" size={20} color="#0abae4" style={styles.icon} />
-//               <TextInput
-//                 style={styles.input}
-//                 placeholder="ادخل الكود هنا"
-//                 value={verificationCode}
-//                 onChangeText={setVerificationCode}
-//               />
-//             </View>
-//           </>
-//         )}
-
-//         {!isCodeSent && (
-//           <TouchableOpacity style={styles.button} onPress={handleRequestVerificationCode}>
-//             <Text style={styles.buttonText}>تلقي الكود</Text>
-//           </TouchableOpacity>
-//         )}
-
-//         {isCodeSent && (
-//           <TouchableOpacity style={styles.button} onPress={handleResetPassword}>
-//             <Text style={styles.buttonText}> تأكيد  </Text>
-//           </TouchableOpacity>
-//         )}
-//       </View>
-//     </KeyboardAvoidingView>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: 'white',
-//     padding: 50,
-//   },
-//   inner: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-//   icon: {
-//     marginRight: 10,
-//   },
-//   input: {
-//     height: 40,
-//     flex: 1,
-//     textAlign: 'right',
-//   },
-//   logo: {
-//     width: 150,
-//     height: 150,
-//     borderRadius: 100,
-//     resizeMode: 'contain',
-//     borderWidth: 1,
-//     borderColor: '#FFA000',
-//     marginBottom: 20,
-//   },
-//   title: {
-//     fontSize: 24,
-//     fontWeight: 'bold',
-//     color: '#ffa500',
-//     marginVertical: 20,
-//   },
-// error: {
-//   fontSize: 16,
-//   color:Colors.PINK,
-//   marginVertical: 10,
-//   textAlign: 'center', // Align text in the center
-// },
-
-//   inputContainer: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     borderWidth: 1,
-//     borderColor: '#0abae4',
-//     borderRadius: 10,
-//     marginVertical: 10,
-//     padding: 5,
-//     width: 300,
-//   },
-//   button: {
-//     width: '70%',
-//     height: 40,
-//     backgroundColor:Colors.ORANGE,
-//     borderRadius: 20,
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//     marginVertical: 10,
-//   },
-//   buttonText: {
-//     fontSize: 20,
-//     color:Colors.WHITE,
-//     fontWeight: 'bold',
-//   },
-// });
-
-// export default ForgotPassword;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -322,47 +113,50 @@ const ForgotPassword = () => {
     if (password === '' || verificationCode === '') {
       setError('الرجاء إدخال كلمة المرور الجديدة والكود');   //enter new password and code
       console.log('Error: Password or verification code is empty');
-    } else if (!isValidPassword(password)) {
+      return;
+    }
+
+    if (!isValidPassword(password)) {
       setError('يجب أن تحتوي كلمة المرور على الأقل على 8 أحرف وأرقام'); //Password must contain at least 8 letters and numbers'
       console.log('Error: Password does not meet criteria');
-    } else {
-      setError('');
-      setLoading(true);
-      console.log('Resetting password...');
-  
-      let attempts = 0;
-      const maxAttempts = 3;
-      const retryDelay = 1000; // 1 second
-  
-      while (attempts < maxAttempts) {
-        try {
-          attempts++;
-          console.log(`Attempt ${attempts} to reset password...`);
-          await axios.patch('https://ecommercebackend-jzct.onrender.com/auth/forgetPassword', { email, password, code: verificationCode });
-          console.log('Success: Password reset');
-          navigation.navigate('ResetPasswordSuccess');
-          setLoading(false);
-          return; // Exit the loop and function after successful reset
-        } catch (error) {
-          if (error.response && error.response.status === 502) {
-            console.log(`Error: 502 Bad Gateway, retrying attempt ${attempts}...`);
-            if (attempts < maxAttempts) {
-              await new Promise(resolve => setTimeout(resolve, retryDelay * attempts)); // Exponential backoff
-            } else {
-              console.log('Max attempts reached, could not reset password.');
-              setError('فشل في إعادة تعيين كلمة المرور'); //Failed to reset password'
-            }
+      return;
+    }
+
+    setError('');
+    setLoading(true);
+    console.log('Resetting password...');
+
+    let attempts = 0;
+    const maxAttempts = 3;
+    const retryDelay = 1000; // 1 second
+
+    while (attempts < maxAttempts) {
+      try {
+        attempts++;
+        console.log(`Attempt ${attempts} to reset password...`);
+        await axios.patch('https://ecommercebackend-jzct.onrender.com/auth/forgetPassword', { email, password, code: verificationCode });
+        console.log('Success: Password reset');
+        navigation.navigate('ResetPasswordSuccess');
+        setLoading(false);
+        return; // Exit the loop and function after successful reset
+      } catch (error) {
+        if (error.response && (error.response.status === 502 || error.response.status === 503)) {
+          console.log(`Error: ${error.response.status} ${error.response.data.message}, retrying attempt ${attempts}...`);
+          if (attempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, retryDelay * attempts)); // Exponential backoff
           } else {
-            console.log('Error: Failed to reset password', error);
-            setError('فشل في إعادة تعيين كلمة المرور');//Failed to reset password'
-            break; // Exit the loop if not a 502 error
+            console.log('Max attempts reached, could not reset password.');
+            setError('فشل في إعادة تعيين كلمة المرور');
           }
+        } else {
+          console.log('Error: Failed to reset password', error);
+          setError('فشل في إعادة تعيين كلمة المرور');
+          break; // Exit the loop if not a 502 or 503 error
         }
       }
-      setLoading(false);
     }
+    setLoading(false);
   };
-  
 
   const isValidPassword = (password) => {
     const valid = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/.test(password);
@@ -377,8 +171,8 @@ const ForgotPassword = () => {
     >
       <View style={styles.inner}>
         <Image source={require('../../../assets/logo/logo.jpg')} style={styles.logo} />
-            {/* Password Reset */}
-        <Text style={styles.title}>إعادة تعيين كلمة المرور</Text> 
+        {/* Password Reset */}
+        <Text style={styles.title}>إعادة تعيين كلمة المرور</Text>
         {error !== '' && <Text style={styles.error}>{error}</Text>}
 
         <View style={styles.inputContainer}>

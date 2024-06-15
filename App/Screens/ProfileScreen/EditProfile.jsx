@@ -18,17 +18,6 @@ import axios from "axios";
 import Colors from "../../Common/Utils/Colors";
 import { selectToken } from "../../ReduxAndAsyncStorage/BookSlice";
 
-// Mock function for getUserFromToken
-const getUserFromToken = (token) => {
-  // Replace this with your logic to decode token and get user data
-  return {
-    username: "mockUser",
-    email: "mock@example.com",
-    phone: "1234567890",
-    password: "hashedPassword", // Replace with actual hashed password
-  };
-};
-
 const EditProfile = () => {
   const navigation = useNavigation();
   const scrollViewRef = useRef();
@@ -36,10 +25,7 @@ const EditProfile = () => {
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [currentPassword, setCurrentPassword] = useState("");
   const [isEditMode, setIsEditMode] = useState(false);
-  const [changePasswordMode, setChangePasswordMode] = useState(false);
   const [userData, setUserData] = useState(null);
   const token = useSelector(selectToken);
 
@@ -60,10 +46,8 @@ const EditProfile = () => {
         setEmail(userData.email);
         setPhoneNumber(userData.phone);
         setUserName(userData.username);
-        setPassword("");
-        setConfirmPassword("");
       } catch (error) {
-        //Alert.alert("Failed to fetch user data", error.message);
+        Alert.alert("Failed to fetch user data", error.message);
       }
     };
 
@@ -74,55 +58,53 @@ const EditProfile = () => {
 
   const handleToggleEditMode = () => {
     setIsEditMode(!isEditMode);
-    setChangePasswordMode(false);
-  };
-
-  const handleToggleChangePassword = () => {
-    setChangePasswordMode(!changePasswordMode);
   };
 
   const handleSaveProfile = async () => {
-    if (!currentPassword) {
-      Alert.alert("الرجاء إدخال كلمة المرور الحالية");
+    if (!password) {
+      Alert.alert("الرجاء إدخال كلمة المرور الحالية لتأكيد التغييرات");
       return;
     }
   
-    if (changePasswordMode && password !== confirmPassword) {
-      Alert.alert("كلمة المرور وتأكيد كلمة المرور غير متطابقين");
-      return;
-    }
-  
+    // Ensure current password is correct
     try {
-      // Get user data from token
-      const user = getUserFromToken(token);
+      const response = await axios.post(
+        "https://ecommercebackend-jzct.onrender.com/auth/verifyPassword",
+        {
+          password: password,
+        },
+        {
+          headers: {
+            authorization: `AmanGRAD__${token}`,
+          },
+        }
+      );
   
-      if (!user) {
-        Alert.alert("لم يتم العثور على المستخدم");
-        return;
-      }
-  
-      // Check if current password matches
-      const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
-  
-      if (!isPasswordValid) {
+      if (!response.data.success) {
         Alert.alert("كلمة المرور الحالية غير صحيحة");
         return;
       }
+    } catch (error) {
+      Alert.alert("حدث خطأ أثناء التحقق من كلمة المرور الحالية");
+      return;
+    }
   
-      // Prepare the updated profile data
-      const updatedData = {
-        username,
-        email,
-        phone: phoneNumber,
-      };
+    // Password verified, proceed with updating profile
+    const updatedData = {};
+    if (username && username !== userData.username) {
+      updatedData.username = username;
+    }
+    if (email && email !== userData.email) {
+      updatedData.email = email;
+    }
+    if (phoneNumber && phoneNumber !== userData.phone) {
+      updatedData.phone = phoneNumber;
+    }
+    updatedData.password = password;
   
-      if (changePasswordMode) {
-        updatedData.password = password;
-      }
-  
-      // Save profile changes
-      await axios.put(
-        "https://ecommercebackend-jzct.onrender.com/user/profile",
+    try {
+      await axios.patch(
+        "https://ecommercebackend-jzct.onrender.com/auth/update",
         updatedData,
         {
           headers: {
@@ -133,20 +115,11 @@ const EditProfile = () => {
   
       Alert.alert("تم حفظ التغييرات بنجاح");
       setIsEditMode(false);
-      setChangePasswordMode(false);
-      setCurrentPassword("");
-      setPassword("");
-      setConfirmPassword("");
     } catch (error) {
-      Alert.alert("حدث خطأ أثناء حفظ التغييرات");
+      Alert.alert("حدث خطأ أثناء حفظ التغييرات", error.response?.data?.message || error.message);
     }
   };
   
-  const validateEmail = (email) => {
-    const re =
-      /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(email);
-  };
 
   return (
     <KeyboardAvoidingView
@@ -203,38 +176,24 @@ const EditProfile = () => {
             }
             editable={isEditMode}
           />
-          <TextInput
-            style={styles.input}
-            placeholder="كلمة المرور الحالية"
-            secureTextEntry
-            value={currentPassword}
-            onChangeText={setCurrentPassword}
-          />
-          {isEditMode && !changePasswordMode && (
-            <TouchableOpacity
-              style={styles.changePasswordContainer}
-              onPress={handleToggleChangePassword}
-            >
-              <IconAntDesign name="lock" size={20} color={Colors.PINK} />
-              <Text style={styles.changePasswordText}>تغيير كلمة المرور</Text>
-            </TouchableOpacity>
-          )}
-          {changePasswordMode && (
+          {isEditMode && (
             <>
               <TextInput
                 style={styles.input}
-                placeholder="كلمة المرور الجديدة"
+                placeholder="كلمة المرور الحالية"
+                keyboardType="default"
                 secureTextEntry
                 value={password}
                 onChangeText={setPassword}
+                editable={isEditMode}
               />
-              <TextInput
-                style={styles.input}
-                placeholder="تأكيد كلمة المرور"
-                secureTextEntry
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-              />
+              <TouchableOpacity
+                style={styles.changePasswordContainer}
+                onPress={() => navigation.navigate("ChangePassword")}
+              >
+                <IconAntDesign name="lock" size={20} color={Colors.PINK} />
+                <Text style={styles.changePasswordText}>تغيير كلمة المرور</Text>
+              </TouchableOpacity>
             </>
           )}
         </View>
@@ -245,12 +204,12 @@ const EditProfile = () => {
           <View style={styles.buttonContent}>
             <IconAntDesign
               name={isEditMode ? "save" : "edit"}
-              size={24}
+              size={20}
               color="white"
               style={styles.buttonIcon}
             />
             <Text style={styles.buttonText}>
-              {isEditMode ? "   حفظ " : "تعديل"}
+              {isEditMode ? "حفظ" : "تعديل"}
             </Text>
           </View>
         </TouchableOpacity>
@@ -262,23 +221,19 @@ const EditProfile = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: "#fff",
   },
   scrollView: {
     flexGrow: 1,
+    justifyContent: "center",
     alignItems: "center",
-    justifyContent    : "center",
-    padding: 16,
   },
   headerContainer: {
     width: "100%",
-    alignItems: "flex-start",
+    height: 50,
   },
   header: {
-    alignSelf: "flex-start",
-    marginTop: 30,
-    marginBottom: 10,
-    padding: 16,
+    margin: 10,
   },
   logoContainer: {
     alignItems: "center",
@@ -347,3 +302,4 @@ const styles = StyleSheet.create({
 });
 
 export default EditProfile;
+

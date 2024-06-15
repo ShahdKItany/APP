@@ -1,9 +1,10 @@
+// store.js
+
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import { persistStore, persistReducer } from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE } from 'redux-persist';
-import BookSlice from './BookSlice';
-import WishlistReducer from '../Screens/WishList/WishlistReducer';
+import bookSlice from './BookSlice';
 
 const persistConfig = {
   key: 'root',
@@ -12,8 +13,7 @@ const persistConfig = {
 };
 
 const rootReducer = combineReducers({
-  books: BookSlice,
-  wishlist: WishlistReducer,
+  books: bookSlice,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -31,4 +31,5 @@ export const store = configureStore({
 export const persistor = persistStore(store);
 
 export default store;
+
 

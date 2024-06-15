@@ -31,7 +31,7 @@ import OrderScreen from "./App/Screens/OrderScreen/OrderScreen";
 import BooksByCategory from "./App/Screens/CategoriesScreen/BooksByCategory";
 import BookItem from "./App/Screens/CategoriesScreen/BookItem";
 import CartItem from './App/Screens/CartScreen/CartItem';
-
+import ChangePassword from './App/Screens/ProfileScreen/ChangePassword';
 
 
 
@@ -129,6 +129,7 @@ const App = () => {
               })}
             />
             <Stack.Screen name="OrderScreen" component={OrderScreen} />
+            <Stack.Screen name="ChangePassword" component={ChangePassword} />
 
           </Stack.Navigator>
         </NavigationContainer>

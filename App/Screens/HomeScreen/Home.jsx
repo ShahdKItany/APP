@@ -301,8 +301,8 @@ const Home = () => {
   };
 
   const handleBookPress = (item) => {
-    console.log('Book pressed:', item);
-    const { _id, title, price, description, mainImage, subImages, Discount } = item;
+    console.log('________Book pressed:', item);
+    const { _id, title, price, description, mainImage, subImages, Discount,reviews } = item;
     const mainImageUrl = mainImage?.secure_url || null;
     const subImagesUrls = subImages.map((image) => image.secure_url);
     const finalPrice = price * ((100 - Discount) / 100); // Corrected final price calculation
@@ -316,6 +316,7 @@ const Home = () => {
       Discount,
       price,
       finalPrice,
+      reviews,
     });
   };
 

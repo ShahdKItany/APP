@@ -1,25 +1,18 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import axios from 'axios';
-import {
-  clearCart,
-  selectBooksInCart,
-  selectTotalPrice,
-  setCart,
-  selectToken,
-  saveToken,
-} from '../../ReduxAndAsyncStorage/BookSlice';
-import Colors from '../../Common/Utils/Colors';
-import Footer from '../../Common/Footer/Footer';
-import CartItem from './CartItem';
+import { getToken } from '../../ReduxAndAsyncStorage/Storage';
+import CartItem from './CartItem'; 
 
 const Cart = ({ navigation }) => {
-  const dispatch = useDispatch();
-  const books = useSelector(selectBooksInCart) || [];
-  const totalPrice = useSelector(selectTotalPrice) || 0;
-  const token = useSelector(selectToken);
-  
+  const [books, setBooks] = useState([]);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchTokenFromStorage();
+  }, []);
 
   useEffect(() => {
     if (token) {
@@ -27,20 +20,31 @@ const Cart = ({ navigation }) => {
     }
   }, [token]);
 
-  const clearCartAPI = async () => {
+  const fetchTokenFromStorage = async () => {
     try {
-      const response = await axios.delete('https://ecommercebackend-jzct.onrender.com/cart/', {
+      const userToken = await getToken();
+      setToken(userToken);
+      console.log('Retrieved token: ', userToken);
+    } catch (error) {
+      console.error('Error fetching token:', error);
+    }
+  };
+
+  const getBookDetails = async (bookId) => {
+    try {
+      const response = await axios.get(`https://ecommercebackend-jzct.onrender.com/books/${bookId}`, {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `AmanGRAD__${token}`
         }
       });
-
-      if (response.status === 200) {
-        dispatch(clearCart());
-      }
+      return {
+        title: response.data.title,
+        price: response.data.price,
+        mainImage: response.data.mainImage,
+      };
     } catch (error) {
-      console.error('Error clearing cart:', error.message);
+      console.error(`Error fetching details for bookId ${bookId}:`, error.message);
+      return {}; // يمكنك إرجاع قيمة فارغة أو تحديد قيمة افتراضية للتفاصيل هنا
     }
   };
 
@@ -49,164 +53,178 @@ const Cart = ({ navigation }) => {
       const response = await axios.get('https://ecommercebackend-jzct.onrender.com/cart/', {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `AmanGRAD__${token}`
+          authorization: `AmanGRAD__${token}`
+        }
+      });
+
+      console.log('response.data :   ', response.data);
+      console.log('message :   ', response.data.message);
+      console.log('books : ', response.data.cart.books);
+      
+      if (response.data.message === 'success') {
+        const cartData = response.data.cart.books || [];
+        console.log('________CartData   :  ', cartData);
+        
+        // Fetch details for each book in the cart
+        const booksWithDetails = await Promise.all(cartData.map(async (book) => {
+          const bookDetails = await getBookDetails(book.bookId);
+          console.log('bookID : ', book.bookId);
+          return { ...book, ...bookDetails };
+        }));
+        
+        setBooks(booksWithDetails);
+        setTotalPrice(response.data.totalPrice || 0);
+      } else {
+        console.error('Failed to fetch cart data:', response.status);
+      }
+    } catch (error) {
+      console.error('Error fetching cart data:', error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRemoveItem = async (id) => {
+    try {
+      const response = await axios.delete(`https://ecommercebackend-jzct.onrender.com/cart/${id}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `AmanGRAD__${token}`
         }
       });
 
       if (response.status === 200) {
-        dispatch(setCart(response.data));
-
-        const cartData = response.data.cart;
-        const getBookDetails = async (bookId) => {
-          try {
-            const response = await axios.get(`https://ecommercebackend-jzct.onrender.com/book/${bookId}`, {
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `AmanGRAD__${token}`
-              }
-            });
-        
-            if (response.status === 200) {
-              const bookDetails = response.data;
-              console.log('Title:', bookDetails.book.title);
-              console.log('Price:', bookDetails.book.price);
-              console.log('Main Image:', bookDetails.book.mainImage);
-            } else {
-              console.error('Failed to fetch book details');
-            }
-          } catch (error) {
-            console.error('Error fetching book details:', error.message);
-          }
-        };
-        
-        if (cartData && cartData.books && cartData.books.length > 0) {
-          for (const book of cartData.books) {
-            await getBookDetails(book.bookId);
-          }
-        }
+        setBooks((prevBooks) => prevBooks.filter((book) => book._id !== id));
+        // Update total price after removing item
+        const totalPriceAfterRemove = totalPrice - books.find(book => book._id === id).price;
+        setTotalPrice(totalPriceAfterRemove);
+        alert('Item removed from cart successfully!');
       } else {
-        console.error('Failed to fetch cart data');
+        console.error('Failed to remove item from cart:', response.status);
       }
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        Alert.alert(
-          'Authentication error',
-          'The login session has expired. Please log in again.',
-          [
-            {
-              text: '(okay)موافق',
-              onPress: () => {
-                dispatch(saveToken(''));
-                navigation.navigate('Login');
-              },
-            },
-          ],
-          { cancelable: false }
-        );
-      } else {
-        console.error('Error:', error.message);
-      }
+      console.error('Error removing item from cart:', error.message);
     }
   };
 
-  const handleClearCart = () => {
-    Alert.alert(
-      'Confirm deletion',
-      'Are you sure you want to delete all items from the shopping cart?',
-      [
-        {
-          text: 'لا',
-          onPress: () => console.log('Cancel Pressed'),
-          style: 'cancel',
-        },
-        {
-          text: 'نعم',
-          onPress: () => clearCartAPI(),
-        },
-      ],
-      { cancelable: false }
-    );
+  const handleClearCart = async () => {
+    try {
+      const response = await axios.delete('https://ecommercebackend-jzct.onrender.com/cart/', {
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `AmanGRAD__${token}`
+        }
+      });
+
+      if (response.status === 200) {
+        setBooks([]);
+        setTotalPrice(0);
+        alert('Cart cleared successfully!');
+      } else {
+        console.error('Failed to clear cart:', response.status);
+      }
+    } catch (error) {
+      console.error('Error clearing cart:', error.message);
+    }
   };
+
+  if (!token) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.emptyCartText}>Please log in to view your cart!</Text>
+      </View>
+    );
+  }
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+
+  if (!Array.isArray(books) || books.length === 0) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.emptyCartText}>Your Cart is Empty. Add some books to your cart!</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollView}>
-        {token ? (
-          <>
-            {books.length === 0 ? (
-              <Text style={styles.emptyCartText}>
-                عربة التسوق فارغة!
-                Your shopping cart is empty!
-              </Text>
-            ) : (
-              <>
-                {books.map((book) => (
-                  <CartItem key={book.bookId} book={book} />
-                ))}
-                <View style={styles.totalContainer}>
-                  <Text style={styles.totalText}>المجموع(total): </Text>
-                  <Text style={styles.totalPrice}>₪{totalPrice.toFixed(2)}</Text>
-                </View>
-                <TouchableOpacity style={styles.clearButton} onPress={handleClearCart}>
-                  <Text style={styles.clearButtonText}>Delete all</Text>
-                </TouchableOpacity>
-              </>
-            )}
-          </>
-        ) : (
-          <Text style={styles.emptyCartText}>
-            يرجى تسجيل الدخول لعرض عربة التسوق!
-            Please log in to view your cart!
-          </Text>
-        )}
+        {books.map((book) => (
+          <CartItem key={book.bookId} book={book} token={token} onRemove={handleRemoveItem} />
+        ))}
+        <View style={styles.totalContainer}>
+          <Text style={styles.totalText}>المجموع (Total): </Text>
+          <Text style={styles.totalPrice}>₪{totalPrice.toFixed(2)}</Text>
+        </View>
+        <TouchableOpacity style={styles.clearButton} onPress={handleClearCart}>
+          <Text style={styles.clearButtonText}>Delete all</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.orderButton} onPress={() => navigation.navigate('Order')}>
+          <Text style={styles.orderButtonText}>Order Now</Text>
+        </TouchableOpacity>
       </ScrollView>
-      <Footer />
     </View>
   );
-  
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.white,
-  },
-  scrollView: {
-    flexGrow: 1,
-    padding: 16,
+    paddingHorizontal: 20,
+    paddingTop: 20,
   },
   emptyCartText: {
     fontSize: 18,
     textAlign: 'center',
-    marginVertical: 20,
-    marginTop:300,
+    marginTop: 20,
+  },
+  scrollView: {
+    flexGrow: 1,
   },
   totalContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginVertical: 20,
-    paddingHorizontal: 10,
+    marginTop: 10,
   },
   totalText: {
-    fontSize: 20,
     fontWeight: 'bold',
+    fontSize:   18,
   },
   totalPrice: {
-    fontSize: 20,
-    color: Colors.primary,
+    fontSize: 18,
   },
   clearButton: {
-    backgroundColor: Colors.red,
-    padding: 10,
+    backgroundColor: '#ff6347',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 5,
+    marginTop: 20,
     alignItems: 'center',
   },
   clearButtonText: {
-    color: Colors.white,
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  orderButton: {
+    backgroundColor: '#4169e1',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginTop: 10,
+    alignItems: 'center',
+  },
+  orderButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
     fontSize: 16,
   },
 });
 
 export default Cart;
-

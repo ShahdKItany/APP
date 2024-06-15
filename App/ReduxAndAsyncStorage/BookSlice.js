@@ -1,18 +1,24 @@
-import { createSlice, createAsyncThunk, createAction } from '@reduxjs/toolkit';
-import { Alert } from 'react-native';
-import axios from 'axios';
 
-// Async thunk to fetch book details
+//  App\ReduxAndAsyncStorage\BookSlice.js
+import { createSlice, createAsyncThunk, createAction } from '@reduxjs/toolkit';
+import axios from 'axios';
+import { Alert } from 'react-native';
+
 export const fetchBookDetails = createAsyncThunk(
   'books/fetchBookDetails',
   async ({ bookId, token }) => {
-    const response = await axios.get(`https://ecommercebackend-jzct.onrender.com/book/${bookId}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `AmanGRAD__${token}`,
-      },
-    });
-    return response.data.book;
+    try {
+      const response = await axios.get(`https://ecommercebackend-jzct.onrender.com/book/${bookId}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `AmanGRAD__${token}`
+        },
+      });
+      return response.data.book;
+    } catch (error) {
+      console.error('Error fetching book details:', error);
+      throw error;
+    }
   }
 );
 
@@ -20,29 +26,30 @@ export const addToCart = createAsyncThunk(
   'books/addToCart',
   async (bookData, { getState, dispatch }) => {
     const state = getState();
-    const existingBook = state.books.booksInCart.find(book => book.id === bookData.id);
+    const existingBook = state.books.booksInCart.find(book => book.BookID === bookData.BookID);
     if (existingBook) {
       Alert.alert('الكتاب موجود بالفعل في العربة');
-      return;
+      return; // Exit early if book already in cart
     }
-    const { BookID, title, price, mainImage, quantity } = bookData;
-    dispatch(addToCartSuccess({ BookID, title, price, mainImage, quantity }));
+    dispatch(addBookToCart(bookData));
   }
 );
 
-export const addToCartSuccess = createAction('books/addToCartSuccess');
-
-const initialState = {
-  booksInCart: [],
-  totalPrice: 0,
-  token: '',
-  username: '',
-  loading: true,
-};
+const addBookToCart = createAction('books/addBookToCart', (bookData) => {
+  return {
+    payload: bookData
+  };
+});
 
 const bookSlice = createSlice({
   name: 'books',
-  initialState,
+  initialState: {
+    booksInCart: [],
+    totalPrice: 0,
+    token: '',
+    username: '',
+    loading: true,
+  },
   reducers: {
     removeFromCart: (state, action) => {
       const removedBook = state.booksInCart.find(book => book.BookID === action.payload);
@@ -82,36 +89,31 @@ const bookSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(addToCart.fulfilled, (state, action) => {});
-    builder.addCase(addToCartSuccess, (state, action) => {
-      state.booksInCart.push(action.payload);
-      state.totalPrice += action.payload.price * action.payload.quantity;
-    });
-    builder.addCase(fetchBookDetails.fulfilled, (state, action) => {
-      const bookIndex = state.booksInCart.findIndex(book => book.BookID === action.payload.BookID);
-      if (bookIndex >= 0) {
-        state.booksInCart[bookIndex] = {
-          ...state.booksInCart[bookIndex],
-          ...action.payload,
-        };
-      }
-    });
+    builder
+      .addCase(addToCart.fulfilled, (state, action) => {})
+      .addCase(fetchBookDetails.fulfilled, (state, action) => {
+        const bookIndex = state.booksInCart.findIndex(book => book.BookID === action.payload.BookID);
+        if (bookIndex >= 0) {
+          state.booksInCart[bookIndex] = {
+            ...state.booksInCart[bookIndex],
+            ...action.payload,
+          };
+        }
+      })
+      .addCase(addBookToCart, (state, action) => {
+        state.booksInCart.push(action.payload);
+        state.totalPrice += action.payload.price * action.payload.quantity;
+      })
+      .addCase(fetchBookDetails.rejected, (state, action) => {
+        console.error('Error fetching book details:', action.error.message);
+      });
   },
 });
 
-export const {
-  removeFromCart,
-  incrementQuantity,
-  decrementQuantity,
-  clearCart,
-  saveToken,
-  saveUsername,
-  setCart,
-} = bookSlice.actions;
+export const { removeFromCart, incrementQuantity, decrementQuantity, clearCart, saveToken, saveUsername, setCart } = bookSlice.actions;
 
-export const selectBooksInCart = (state) => state.books.booksInCart;
-export const selectTotalPrice = (state) => state.books.totalPrice;
-export const selectToken = (state) => state.books.token;
-export const selectUsername = (state) => state.books.username;
+export const selectBooksInCart = state => state.books.booksInCart;
+export const selectTotalPrice = state => state.books.totalPrice;
+export const selectToken = state => state.books.token;
 
 export default bookSlice.reducer;

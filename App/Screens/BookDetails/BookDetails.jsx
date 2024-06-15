@@ -1,6 +1,4 @@
 
-
-
 import React, { useState, useRef, useEffect } from "react";
 import {
   View,
@@ -23,44 +21,51 @@ import Swiper from 'react-native-swiper';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 
-const BookDetails = ({ route }) => {
-  const { title, price, finalPrice, description, mainImage, subImages, id } = route.params;
-  const [comment, setComment] = useState("");
-  const [comments, setComments] = useState([]); // State to hold comments
-  const [isInWishlist, setIsInWishlist] = useState(false);
-  const [rating, setRating] = useState(0);
+const StarIcon = ({ size = 30, color = Colors.GRAY }) => (
+  <FontAwesomeIcon icon={faStar} size={size} color={color} />
+);
 
+const BookDetails = ({ route }) => {
+  const { title, price, finalPrice, description, mainImage, subImages, id ,reviews } = route.params;
+  //const [reviews, setReviews] = useState([]);
+  const [comment,setComment]=useState('');
+  const [isInWishlist, setIsInWishlist] = useState(false); // State to track if book is in wishlist
+  const [rating, setRating] = useState(0);
   const commentInputRef = useRef(null);
   const scrollViewRef = useRef(null);
-
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const token = useSelector(selectToken);
 
- 
-
   useEffect(() => {
-    fetchComments();
+    checkWishlistStatus(); // Check if book is already in the wishlist
+   
+    console.log(reviews);
   }, []);
-  
-  const fetchComments = async () => {
+
+  const checkWishlistStatus = async () => {
     try {
-      const response = await axios.get(`https://ecommercebackend-jzct.onrender.com/book/${id}/reviews`);
-      
+      const response = await axios.get(
+        `https://ecommercebackend-jzct.onrender.com/wishlist/${id}`,
+        {
+          headers: {
+            Authorization: `AmanGRAD__${token}`,
+          },
+        }
+      );
+
       if (response.status === 200) {
-        const fetchedComments = response.data;
-        setComments(fetchedComments);
+        setIsInWishlist(true); // Book is already in wishlist
+      } else if (response.status === 404) {
+        setIsInWishlist(false); // Book is not in wishlist
       } else {
-        throw new Error(`Failed to fetch comments. Status code: ${response.status}`);
+        throw new Error(`Failed to check wishlist status. Status code: ${response.status}`);
       }
     } catch (error) {
-      console.error("Error fetching comments:", error);
-      Alert.alert("Failed to fetch comments. Please try again later.");
+      //console.error('Error checking wishlist status:', error);
     }
   };
-  
-  
-  
+
   const handleAddToCart = async () => {
     try {
       if (!token) {
@@ -80,7 +85,7 @@ const BookDetails = ({ route }) => {
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `AmanGRAD__${token}`
+            authorization: `AmanGRAD__${token}`
           }
         }
       );
@@ -101,23 +106,85 @@ const BookDetails = ({ route }) => {
     }
   };
 
-  const handleAddToFavorites = () => {
+  const handleAddToFavorites = async () => {
+    if (!token) {
+      Alert.alert(
+        'يرجى تسجيل الدخول لإضافة الكتب إلى المفضلة',
+        '',
+        [{ text: 'موافق', style: 'default' }]
+      );
+      return;
+    }
+
     if (isInWishlist) {
-      Alert.alert("الكتاب موجود بالفعل في المفضلة!");
+      // Already in wishlist, perform remove operation
+      removeFromWishlist(id);
     } else {
-      setIsInWishlist(true);
-      Alert.alert("تمت إضافة الكتاب إلى المفضلة!", "", [{ text: 'موافق', style: 'default' }], { cancelable: false });
+      // Not in wishlist, perform add operation
+      addToWishlist(id);
     }
   };
 
+  const addToWishlist = async (bookId) => {
+    try {
+      const response = await axios.post(
+        'https://ecommercebackend-jzct.onrender.com/wishlist/',
+        { bookId },
+        {
+          headers: {
+            Authorization: `AmanGRAD__${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        setIsInWishlist(true); // Update state to reflect book is now in wishlist
+        Alert.alert('تمت إضافة الكتاب إلى المفضلة بنجاح!');
+      } else {
+        throw new Error(`Failed to add book to wishlist. Status code: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error adding book to wishlist:', error);
+      Alert.alert('فشل في إضافة الكتاب إلى المفضلة. الرجاء المحاولة مرة أخرى لاحقًا.');
+    }
+  };
+
+  const removeFromWishlist = async (bookId) => {
+    try {
+      const response = await axios.delete(
+        `https://ecommercebackend-jzct.onrender.com/wishlist/${bookId}`,
+        {
+          headers: {
+            Authorization: `AmanGRAD__${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        setIsInWishlist(false); // Update state to reflect book is no longer in wishlist
+        Alert.alert('تمت إزالة الكتاب من المفضلة بنجاح!');
+      } else {
+        throw new Error(`Failed to remove book from wishlist. Status code: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error removing book from wishlist:', error);
+      Alert.alert('فشل في إزالة الكتاب من المفضلة. الرجاء المحاولة مرة أخرى لاحقًا.');
+    }
+  };
+
+  
   const handleAddComment = async () => {
     try {
       if (comment.trim() === "") {
-        Alert.alert("Please enter a comment before submitting!");
+        Alert.alert("الرجاء إدخال تعليق قبل الإرسال!");
         return;
       }
   
+      console.log('-------------rating',rating);
+      console.log('comment',comment);
       const response = await axios.post(
+
         `https://ecommercebackend-jzct.onrender.com/book/${id}/review`,
         {
           comment,
@@ -126,29 +193,29 @@ const BookDetails = ({ route }) => {
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `AmanGRAD__${token}`
+            authorization: `AmanGRAD__${token}`,
           }
         }
       );
-  
-      if (response.status === 200) {
-        const newReview = response.data;
-        setComments([...comments, newReview]);
-        setComment("");
-        Alert.alert("Comment added successfully!");
-      } else {
-        throw new Error(`Failed to add comment. Status code: ${response.status}`);
+ 
+      if (response.status === 201) {
+       
+        Alert.alert("تمت إضافة التعليق بنجاح!");
+      } 
+      
+      else {
+        throw new Error(`فشل في إضافة التعليق.  : ${response.status}`);
       }
     } catch (error) {
-      console.error("Error adding comment:", error);
-      Alert.alert("Failed to add comment. Please try again later.");
+      console.error("خطأ في إضافة التعليق:", error);
+
+      Alert.alert("فشل في إضافة التعليق. الرجاء المحاولة مرة أخرى لاحقًا.");
     }
   };
   
-
   const handleStarPress = (index) => {
     setRating(index + 1);
-    Alert.alert(`تم تقييم الكتاب بـ ${index + 1} نجوم`);
+     Alert.alert(`تم تقييم الكتاب بـ ${index + 1} نجمة/نجوم`);
   };
 
   const scrollToCommentInput = () => {
@@ -186,20 +253,6 @@ const BookDetails = ({ route }) => {
 
         <Text style={styles.details}>{description}</Text>
 
-        <View style={styles.ratingContainer}>
-          <View style={styles.starContainer}>
-            {[...Array(5)].map((_, index) => (
-              <TouchableOpacity key={index} onPress={() => handleStarPress(index)}>
-                <FontAwesomeIcon
-                  icon={faStar}
-                  size={30}
-                  color={index < rating ? Colors.YELLOW :                  Colors.GRAY}
-                  style={styles.star}
-                />
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={handleAddToCart}>
@@ -209,7 +262,7 @@ const BookDetails = ({ route }) => {
 
           <TouchableOpacity style={styles.button} onPress={handleAddToFavorites}>
             <FontAwesomeIcon icon={faHeart} style={styles.buttonIcon} />
-            <Text style={styles.buttonText}>أضف إلى المفضلة</Text>
+            <Text style={styles.buttonText}>{isInWishlist ? 'إزالة من المفضلة' : 'أضف إلى المفضلة'}</Text>
           </TouchableOpacity>
         </View>
 
@@ -220,11 +273,15 @@ const BookDetails = ({ route }) => {
           </View>
 
           {/* Render all comments */}
-          {comments.map((comment, index) => (
+          {reviews.map((review, index) => (
+            <>  
             <View key={index} style={styles.commentContainer}>
               <FontAwesomeIcon icon={faUser} style={styles.userIcon} />
-              <Text style={styles.commentText}>{comment.user}: {comment.comment}</Text>
+              <Text style={styles.commentText}>{review.userId.username}: {review.comment}</Text>
+
             </View>
+
+      </>
           ))}
 
           <TextInput
@@ -235,6 +292,23 @@ const BookDetails = ({ route }) => {
             onChangeText={setComment}
             onFocus={scrollToCommentInput}
           />
+                
+        <View style={styles.ratingContainer}>
+        <View style={styles.starContainer}>
+          {[...Array(5)].map((_, index) => (
+           
+            <TouchableOpacity key={index} onPress={() => handleStarPress(index)}>
+              
+              <StarIcon
+                size={30}
+                color={index < rating ? Colors.YELLOW : Colors.GRAY}
+                style={styles.star}
+              />
+            </TouchableOpacity>
+          ))}
+        </View>
+       
+      </View>
           <TouchableOpacity style={styles.addButton} onPress={handleAddComment}>
             <Text style={styles.addButtonText}>أضف تعليق</Text>
           </TouchableOpacity>

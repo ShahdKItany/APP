@@ -1,44 +1,55 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
-import Colors from '../../Common/Utils/Colors';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
-const CartItem = ({ book, details }) => {
+const CartItem = ({ book, token, onRemove }) => {
+  const navigation = useNavigation();
+
+  const handlePress = () => {
+    navigation.navigate('BookDetails', book);
+  };
+
   return (
-    <View style={styles.container}>
-      <Image source={{ uri: details.mainImage }} style={styles.image} />
-      <View style={styles.detailsContainer}>
-        <Text style={styles.title}>{details.title}</Text>
-        <Text style={styles.price}>Price: {details.price}</Text>
+    <TouchableOpacity onPress={handlePress} style={styles.container}>
+      <Image source={{ uri: book.mainImage }} style={styles.image} />
+      <View style={styles.info}>
+        <Text style={styles.title}>{book.title}</Text>
+        <Text style={styles.price}>₪{book.price}</Text>
+        <TouchableOpacity onPress={() => onRemove(book._id)} style={styles.removeButton}>
+          <Text style={styles.removeButtonText}>Remove</Text>
+        </TouchableOpacity>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    alignItems: 'center',
+    padding: 10,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray,
-    paddingVertical: 10,
-    marginBottom: 10,
+    borderBottomColor: '#ccc',
   },
   image: {
     width: 80,
-    height: 120,
-    resizeMode: 'cover',
-    marginRight: 10,
+    height: 80,
   },
-  detailsContainer: {
-    flex: 1,
+  info: {
+    marginLeft: 10,
+    justifyContent: 'center',
   },
   title: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 18,
   },
   price: {
-    fontSize: 14,
-    color: Colors.darkGray,
+    fontSize: 16,
+    color: '#888',
+  },
+  removeButton: {
+    marginTop: 10,
+  },
+  removeButtonText: {
+    color: 'red',
   },
 });
 

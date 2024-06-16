@@ -2,59 +2,62 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { MaterialCommunityIcons } from 'react-native-vector-icons';
 import axios from 'axios';
-
 const CartItem = ({ book, token, onRemove }) => {
   const { _id, title, price, mainImage, quantity } = book;
   const [itemQuantity, setItemQuantity] = useState(quantity);
 
-  const increaseQuantity = async () => {
+  const increaseQuantity = async (id) => {
     try {
-      const response = await axios.put(
-        `https://ecommercebackend-jzct.onrender.com/cart/increaseQty/${_id}`,
-        { quantity: 1 },
+      const response = await axios.post(
+        `https://ecommercebackend-jzct.onrender.com/cart/increaseQty/${id}`,
+        {},
         {
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `AmanGRAD__${token}`,
+            authorization: `AmanGRAD__${token}`,
           },
         }
       );
+
+      console.log('Increase quantity response:', response);
 
       if (response.data.message === 'success') {
         setItemQuantity(prevQuantity => prevQuantity + 1);
         console.log('Quantity increased successfully');
       } else {
-        console.error('Failed to increase quantity:', response.status);
+        console.error('Failed to increase quantity:', response.data);
         Alert.alert('Error', 'Failed to increase quantity');
       }
     } catch (error) {
-      console.error('Error increasing quantity:', error.message);
+      console.error('Error increasing quantity:', error.response ? error.response.data : error.message);
       Alert.alert('Error', 'Failed to increase quantity');
     }
   };
 
-  const decreaseQuantity = async () => {
+  const decreaseQuantity = async (id) => {
     try {
-      const response = await axios.put(
-        `https://ecommercebackend-jzct.onrender.com/cart/decreaseQty/${_id}`,
-        { quantity: 1 },
+      const response = await axios.post(
+        `https://ecommercebackend-jzct.onrender.com/cart/decreaseQty/${id}`,
+        {},
         {
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `AmanGRAD__${token}`,
+            authorization: `AmanGRAD__${token}`,
           },
         }
       );
 
+      console.log('Decrease quantity response:', response);
+
       if (response.data.message === 'success') {
-        setItemQuantity(prevQuantity => Math.max(1, prevQuantity - 1)); // Ensure quantity doesn't go below 1
+        setItemQuantity(prevQuantity => Math.max(1, prevQuantity - 1));
         console.log('Quantity decreased successfully');
       } else {
-        console.error('Failed to decrease quantity:', response.status);
+        console.error('Failed to decrease quantity:', response.data);
         Alert.alert('Error', 'Failed to decrease quantity');
       }
     } catch (error) {
-      console.error('Error decreasing quantity:', error.message);
+      console.error('Error decreasing quantity:', error.response ? error.response.data : error.message);
       Alert.alert('Error', 'Failed to decrease quantity');
     }
   };
@@ -74,6 +77,7 @@ const CartItem = ({ book, token, onRemove }) => {
             try {
               const response = await axios.put(
                 `https://ecommercebackend-jzct.onrender.com/cart/${_id}`,
+                {},
                 {
                   headers: {
                     'Content-Type': 'application/json',
@@ -82,13 +86,13 @@ const CartItem = ({ book, token, onRemove }) => {
                 }
               );
 
-              console.log('Delete request response:', response); // Log response for debugging
+              console.log('Delete request response:', response);
 
               if (response.data.message === 'success') {
-                onRemove(); // Call the parent function to remove the item from state
+                onRemove();
                 Alert.alert('Success', 'Item removed from cart successfully!');
               } else {
-                console.error('Failed to remove item from cart:', response.message);
+                console.error('Failed to remove item from cart:', response.status);
                 Alert.alert('Error', 'Failed to remove item from cart');
               }
             } catch (error) {
@@ -110,14 +114,14 @@ const CartItem = ({ book, token, onRemove }) => {
         <View style={styles.infoBottom}>
           <Text style={styles.price}>₪{price}</Text>
           <View style={styles.actionButtons}>
-            <TouchableOpacity style={styles.removeButton} onPress={handleRemove}>
+            <TouchableOpacity style={styles.removeButton} onPress={() => handleRemove(_id)}>
               <MaterialCommunityIcons name="delete" size={27} color="#f93a8f" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton} onPress={decreaseQuantity}>
+            <TouchableOpacity style={styles.actionButton} onPress={() => decreaseQuantity(_id)}>
               <MaterialCommunityIcons name="minus" size={20} color="black" />
             </TouchableOpacity>
             <Text style={styles.quantity}>{itemQuantity}</Text>
-            <TouchableOpacity style={styles.actionButton} onPress={increaseQuantity}>
+            <TouchableOpacity style={styles.actionButton} onPress={() => increaseQuantity(_id)}>
               <MaterialCommunityIcons name="plus" size={20} color="black" />
             </TouchableOpacity>
           </View>
@@ -127,63 +131,56 @@ const CartItem = ({ book, token, onRemove }) => {
   );
 };
 
+
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    marginVertical: 10,
+    backgroundColor: '#fff',
+    borderRadius: 5,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+    elevation: 5,
   },
   image: {
     width: 80,
     height: 80,
-    borderRadius: 10,
+    borderRadius: 5,
   },
   info: {
-    marginRight: 10,
-    justifyContent: 'center',
     flex: 1,
+    marginLeft: 10,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
   },
   infoBottom: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 5,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'right',
+    justifyContent: 'space-between',
   },
   price: {
     fontSize: 16,
     color: '#888',
-    textAlign: 'right',
   },
   actionButtons: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   actionButton: {
-    backgroundColor: '#D6DBDF',
-    padding: 5,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 10,
+    marginHorizontal: 5,
   },
   quantity: {
-    fontSize: 17,
-    marginHorizontal: 10,
+    fontSize: 16,
     fontWeight: 'bold',
   },
   removeButton: {
-    backgroundColor: 'transparent',
-    padding: 10,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 10,
+    marginRight: 10,
   },
 });
 

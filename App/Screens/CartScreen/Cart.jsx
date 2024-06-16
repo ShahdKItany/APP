@@ -40,9 +40,7 @@ const Cart = ({ navigation }) => {
         },
       });
 
-      console.log('******************response: ', response.data);
-      console.log('*****************ID : ', response.data.book._id);
-      console.log('image : ', response.data.book.mainImage.secure_url);
+      console.log('Book details response:', response.data);
 
       return {
         title: response.data.book.title,
@@ -63,6 +61,8 @@ const Cart = ({ navigation }) => {
           authorization: `AmanGRAD__${token}`,
         },
       });
+
+      console.log('Cart data response:', response.data);
 
       if (response.data.message === 'success') {
         const cartData = response.data.cart.books || [];
@@ -90,8 +90,6 @@ const Cart = ({ navigation }) => {
     }
   };
 
-
-/*
   const handleRemoveItem = async (id) => {
     Alert.alert(
       'Confirm Deletion',
@@ -115,6 +113,8 @@ const Cart = ({ navigation }) => {
                   },
                 }
               );
+
+              console.log('Delete request response:', response);
 
               if (response.data.message === 'success') {
                 // Update state to remove the book from cart
@@ -142,35 +142,29 @@ const Cart = ({ navigation }) => {
       { cancelable: true }
     );
   };
-*/
 
-const handleClearCart = async () => {
-  try {
-    const response = await axios.put('https://ecommercebackend-jzct.onrender.com/cart/', {}, {
-      headers: {
-        'Content-Type': 'application/json',
-        authorization: `AmanGRAD__${token}`,
-      },
-    });
+  const handleClearCart = async () => {
+    try {
+      const response = await axios.put('https://ecommercebackend-jzct.onrender.com/cart/', {}, {
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `AmanGRAD__${token}`,
+        },
+      });
 
-    if (response.data.message === 'success') {
-      setBooks([]);
-      setTotalPrice(0);
-      Alert.alert('Success', 'Cart cleared successfully!');
-    } else {
-      console.error('Failed to clear cart:', response.status);
+      if (response.data.message === 'success') {
+        setBooks([]);
+        setTotalPrice(0);
+        Alert.alert('Success', 'Cart cleared successfully!');
+      } else {
+        console.error('Failed to clear cart:', response.status);
+        Alert.alert('Error', 'Failed to clear cart');
+      }
+    } catch (error) {
+      console.error('Error clearing cart:', error.message);
       Alert.alert('Error', 'Failed to clear cart');
     }
-  } catch (error) {
-    console.error('Error clearing cart:', error.message);
-    Alert.alert('Error', 'Failed to clear cart');
-  }
-};
-
-
-
-
-
+  };
 
   if (!token) {
     return (
@@ -185,9 +179,7 @@ const handleClearCart = async () => {
         <View style={styles.container}>
           <View style={styles.header}>
             <MaterialCommunityIcons name="cart" size={35} color="#f93a8f" />
-            <Text style={[styles.headerText, { color: 'black', fontSize: 33 }]}>
-              عربة التسوق
-            </Text>
+            <Text style={[styles.headerText, { color: 'black', fontSize: 33 }]}>عربة التسوق</Text>
           </View>
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#FFA500" />
@@ -204,14 +196,10 @@ const handleClearCart = async () => {
         <View style={styles.container}>
           <View style={styles.header}>
             <MaterialCommunityIcons name="cart" size={35} color="#f93a8f" />
-            <Text style={[styles.headerText, { color: 'black', fontSize: 33 }]}>
-              عربة التسوق
-            </Text>
+            <Text style={[styles.headerText, { color: 'black', fontSize: 33 }]}>عربة التسوق</Text>
           </View>
           <View style={styles.emptyCartContainer}>
-            <Text style={styles.emptyCartText}>
-              العربة فارغة، قم بإضافة الكتب!
-            </Text>
+            <Text style={styles.emptyCartText}>العربة فارغة، قم بإضافة الكتب!</Text>
           </View>
         </View>
         <Footer />
@@ -229,19 +217,18 @@ const handleClearCart = async () => {
         <View style={styles.separator} />
         <ScrollView contentContainerStyle={styles.scrollView}>
           {books.map((book) => (
-            <CartItem key={book.bookId} book={book} token={token} onRemove={() => handleRemoveItem(book._id)} />
+            <CartItem key={book._id} book={book} token={token} onRemove={() => handleRemoveItem(book._id)} />
           ))}
 
           <View style={styles.totalContainer}>
-          <Text style={styles.totalPrice}>₪{totalPrice.toFixed(2)}</Text>
-            <Text style={styles.totalText}>المجموع :</Text>
-          
+            <Text style={styles.totalText}>المجموع:</Text>
+            <Text style={styles.totalPrice}>₪{totalPrice.toFixed(2)}</Text>
           </View>
           <TouchableOpacity style={styles.clearButton} onPress={handleClearCart}>
-            <Text style={styles.clearButtonText}>حذف الكل  </Text>
+            <Text style={styles.clearButtonText}>حذف الكل</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.orderButton} onPress={() => navigation.navigate('OrderScreen')}>
-            <Text style={styles.orderButtonText}> اطلب الان</Text>
+            <Text style={styles.orderButtonText}>اطلب الآن</Text>
           </TouchableOpacity>
         </ScrollView>
       </View>
@@ -277,7 +264,7 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontSize: 20,
-    marginRight: 10,
+    marginRight:    10,
   },
   loadingContainer: {
     flex: 1,
@@ -293,13 +280,15 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   totalContainer: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     justifyContent: 'space-between',
     marginTop: 10,
+    alignItems: 'center',
   },
   totalText: {
     fontWeight: 'bold',
     fontSize: 18,
+    marginRight: 10,
   },
   totalPrice: {
     fontSize: 18,
@@ -323,7 +312,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 5,
     marginTop: 10,
-    marginBottom: 90,
+    marginBottom: 90, // Adjust as needed
     alignItems: 'center',
   },
   orderButtonText: {

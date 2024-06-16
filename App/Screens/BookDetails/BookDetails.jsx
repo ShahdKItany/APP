@@ -137,19 +137,20 @@ const BookDetails = ({ route }) => {
           },
         }
       );
-
+  
       if (response.status === 200) {
-        setIsInWishlist(true); // Update state to reflect book is now in wishlist
+        // قم بتحديث الحالة لتعكس أن الكتاب الآن في قائمة المفضلة
+        setIsInWishlist(true);
         Alert.alert('تمت إضافة الكتاب إلى المفضلة بنجاح!');
       } else {
-        throw new Error(`Failed to add book to wishlist. Status code: ${response.status}`);
+        throw new Error(`فشل في إضافة الكتاب إلى المفضلة. الرمز الناتج: ${response.status}`);
       }
     } catch (error) {
-      console.error('Error adding book to wishlist:', error);
+      console.error('خطأ في إضافة الكتاب إلى المفضلة:', error);
       Alert.alert('فشل في إضافة الكتاب إلى المفضلة. الرجاء المحاولة مرة أخرى لاحقًا.');
     }
   };
-
+  
   const removeFromWishlist = async (bookId) => {
     try {
       const response = await axios.delete(

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Colors from '../Utils/Colors';
@@ -18,6 +18,15 @@ const Header = ({ title }) => {
       <TouchableOpacity style={styles.profileContainer} onPress={handleProfilePress}>
         <Icon name="user" size={40} color={Colors.WHITE} />
       </TouchableOpacity>
+
+      {/* Middle with search input */}
+      <View style={styles.middleContainer}>
+        <TextInput
+          placeholder="ابحث هنا ..."
+          placeholderTextColor={Colors.WHITE}
+          style={styles.searchInput}
+        />
+      </View>
 
       {/* Left side with logo and title */}
       <View style={styles.leftContainer}>
@@ -64,6 +73,23 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 20,
     marginTop: 22,
+  },
+  middleContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  searchInput: {
+    backgroundColor: Colors.BLUE,
+    color: Colors.WHITE,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    marginTop:35,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: Colors.WHITE,
+    width: '90%',
+    fontSize: 16,
+    textAlign: 'right',
   },
 });
 

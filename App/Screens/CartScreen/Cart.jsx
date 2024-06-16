@@ -5,6 +5,7 @@ import { getToken } from '../../ReduxAndAsyncStorage/Storage';
 import CartItem from './CartItem';
 import Footer from '../../Common/Footer/Footer';
 import { MaterialCommunityIcons } from 'react-native-vector-icons';
+import Colors from '../../Common/Utils/Colors';
 
 const Cart = ({ navigation }) => {
   const [books, setBooks] = useState([]);
@@ -221,13 +222,14 @@ const Cart = ({ navigation }) => {
           ))}
 
           <View style={styles.totalContainer}>
-            <Text style={styles.totalText}>المجموع:</Text>
+         
             <Text style={styles.totalPrice}>₪{totalPrice.toFixed(2)}</Text>
+            <Text style={styles.totalText}>المجموع:</Text>
           </View>
           <TouchableOpacity style={styles.clearButton} onPress={handleClearCart}>
             <Text style={styles.clearButtonText}>حذف الكل</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.orderButton} onPress={() => navigation.navigate('OrderScreen')}>
+          <TouchableOpacity style={styles.orderButton} onPress={() => navigation.navigate('OrderScreen', { cartItems: books, totalPrice: totalPrice })}>
             <Text style={styles.orderButtonText}>اطلب الآن</Text>
           </TouchableOpacity>
         </ScrollView>
@@ -256,69 +258,69 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   header: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
-    marginTop: 40,
-    marginRight: 15,
+    justifyContent: 'center',
+    marginTop:30
+
   },
   headerText: {
-    fontSize: 20,
-    marginRight:    10,
+    marginLeft: 10,
+    textAlign: 'center',
+
+
+  },
+  scrollView: {
+    paddingBottom: 20,
+  },
+  totalContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#ccc',
+    marginTop: 10,
+  },
+  totalText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  totalPrice: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  clearButton: {
+    backgroundColor:Colors.GRAY,
+    paddingVertical: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  clearButtonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  orderButton: {
+    backgroundColor:Colors.PINK,
+    paddingVertical: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  orderButtonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#ccc',
+    marginVertical: 10,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  separator: {
-    height: 1,
-    backgroundColor: '#f0f0f0',
-    marginVertical: 10,
-  },
-  scrollView: {
-    flexGrow: 1,
-  },
-  totalContainer: {
-    flexDirection: 'row-reverse',
-    justifyContent: 'space-between',
-    marginTop: 10,
-    alignItems: 'center',
-  },
-  totalText: {
-    fontWeight: 'bold',
-    fontSize: 18,
-    marginRight: 10,
-  },
-  totalPrice: {
-    fontSize: 18,
-  },
-  clearButton: {
-    backgroundColor: '#D6DBDF',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  clearButtonText: {
-    color: 'black',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  orderButton: {
-    backgroundColor: '#f93a8f',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    marginTop: 10,
-    marginBottom: 90, // Adjust as needed
-    alignItems: 'center',
-  },
-  orderButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
   },
 });
 

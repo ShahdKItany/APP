@@ -1,120 +1,196 @@
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  FlatList,
-  Alert,
-} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import axios from 'axios';
-import { useSelector, useDispatch } from 'react-redux';
-import { selectToken } from '../../ReduxAndAsyncStorage/BookSlice';
-import { removeToken } from '../../ReduxAndAsyncStorage/Storage';
+import { getToken } from '../../ReduxAndAsyncStorage/Storage';
+import WishlistItem from './WhishListItem';
+import Footer from '../../Common/Footer/Footer';
+import { MaterialCommunityIcons } from 'react-native-vector-icons';
+import Colors from '../../Common/Utils/Colors';
 
 const Wishlist = () => {
-  const [wishlist, setWishlist] = useState([]);
-  const token = useSelector(selectToken);
-  const dispatch = useDispatch();
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(null);
 
   useEffect(() => {
-    fetchWishlist();
+    fetchTokenFromStorage();
   }, []);
+
+  useEffect(() => {
+    if (token) {
+      fetchWishlist();
+    }
+  }, [token]);
+
+  const fetchTokenFromStorage = async () => {
+    try {
+      const userToken = await getToken();
+      setToken(userToken);
+      console.log('Retrieved token:', userToken);
+    } catch (error) {
+      console.error('Error fetching token:', error);
+    }
+  };
 
   const fetchWishlist = async () => {
     try {
-      const response = await axios.get(
-        'https://ecommercebackend-jzct.onrender.com/wishlist/',
-        {
-          headers: {
-            Authorization: `AmanGRAD__${token}`,
-          },
-        }
-      );
+      const response = await axios.get('https://ecommercebackend-jzct.onrender.com/wishlist/', {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `AmanGRAD__${token}`,
+        },
+      });
 
-      if (response.status === 200) {
-        setWishlist(response.data);
+      console.log('Wishlist data response:', response.data);
+
+      if (response.data.message === 'success') {
+        const wishList = response.data.wishList;
+        if (wishList && wishList.books && Array.isArray(wishList.books)) {
+          // Fetch details for each book in the wishlist
+          const booksWithDetails = await Promise.all(wishList.books.map(async (book) => {
+            const bookDetails = await getBookDetails(book.bookId);
+            return { ...book, ...bookDetails };
+          }));
+
+          setBooks(booksWithDetails);
+        } else {
+          setBooks([]); // If no books are found or the structure is unexpected, set empty array
+        }
       } else {
-        throw new Error(`Failed to fetch wishlist. Status code: ${response.status}`);
+        console.error('Failed to fetch wishlist:', response.status);
+        Alert.alert('Error', 'Failed to fetch wishlist');
       }
     } catch (error) {
-      console.error('Error fetching wishlist:', error);
-      Alert.alert('Failed to fetch wishlist. Please try again later.');
+      console.error('Error fetching wishlist:', error.message);
+      Alert.alert('Error', 'Failed to fetch wishlist');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const addToWishlist = async (bookId) => {
+  const getBookDetails = async (bookId) => {
     try {
-      const response = await axios.post(
-        'https://ecommercebackend-jzct.onrender.com/wishlist/',
-        { bookId },
-        {
-          headers: {
-            Authorization: `AmanGRAD__${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const response = await axios.get(`https://ecommercebackend-jzct.onrender.com/book/${bookId}`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-      if (response.status === 200) {
-        Alert.alert('Book added to wishlist successfully!');
-        fetchWishlist(); // Refresh wishlist after adding
-      } else {
-        throw new Error(`Failed to add book to wishlist. Status code: ${response.status}`);
-      }
+      console.log('Book details response:', response.data);
+
+      return {
+        title: response.data.book.title,
+        price: response.data.book.finalPrice,
+        mainImage: response.data.book.mainImage.secure_url,
+      };
     } catch (error) {
-      console.error('Error adding book to wishlist:', error);
-      Alert.alert('Failed to add book to wishlist. Please try again later.');
+      console.error(`Error fetching details for bookId ${bookId}:`, error.message);
+      return {};
     }
   };
 
-  const removeFromWishlist = async (bookId) => {
+  const handleRemoveFromWishlist = async (bookId) => {
     try {
-      const response = await axios.put(
-        `https://ecommercebackend-jzct.onrender.com/wishlist/${bookId}`,
-        {},
-        {
-          headers: {
-            Authorization: `AmanGRAD__${token}`,
-          },
-        }
-      );
+      const response = await axios.delete(`https://ecommercebackend-jzct.onrender.com/wishlist/${bookId}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `AmanGRAD__${token}`,
+        },
+      });
 
-      if (response.status === 200) {
-        Alert.alert('Book removed from wishlist successfully!');
-        fetchWishlist(); // Refresh wishlist after removal
+      console.log('Remove from wishlist response:', response);
+
+      if (response.data.message === 'success') {
+        setBooks((prevBooks) => prevBooks.filter((book) => book._id !== bookId));
+        Alert.alert('Success', 'Item removed from wishlist successfully!');
       } else {
-        throw new Error(`Failed to remove book from wishlist. Status code: ${response.status}`);
+        console.error('Failed to remove item from wishlist:', response.status);
+        Alert.alert('Error', 'Failed to remove item from wishlist');
       }
     } catch (error) {
-      console.error('Error removing book from wishlist:', error);
-      Alert.alert('Failed to remove book from wishlist. Please try again later.');
+      console.error('Error removing item from wishlist:', error.message);
+      Alert.alert('Error', 'Failed to remove item from wishlist');
     }
   };
 
-  const renderWishlistItem = ({ item }) => (
-    <View style={styles.wishlistItem}>
-      <Text style={styles.title}>{item.title}</Text>
-      <TouchableOpacity
-        style={styles.removeButton}
-        onPress={() => removeFromWishlist(item.id)}
-      >
-        <Text style={styles.removeButtonText}>Remove</Text>
-      </TouchableOpacity>
-    </View>
-  );
+  const handleClearWishlist = async () => {
+    try {
+      const response = await axios.put('https://ecommercebackend-jzct.onrender.com/wishlist/', {}, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `AmanGRAD__${token}`,
+        },
+      });
+
+      if (response.data.message === 'success') {
+        setBooks([]);
+        Alert.alert('Success', 'Wishlist cleared successfully!');
+      } else {
+        console.error('Failed to clear wishlist:', response.status);
+        Alert.alert('Error', 'Failed to clear wishlist');
+      }
+    } catch (error) {
+      console.error('Error clearing wishlist:', error.message);
+      Alert.alert('Error', 'Failed to clear wishlist');
+    }
+  };
+
+  if (!token) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.emptyText}>Please log in to view your wishlist!</Text>
+        <Footer />
+      </View>
+    );
+  }
+
+  if (loading) {
+    return (
+      <>  
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color={Colors.PINK} />
+      </View>
+      <Footer/>
+      </>
+    );
+  }
+
+  if (books.length === 0) {
+    return (
+      <> 
+      <View style={styles.container}>
+        <Text style={styles.emptyText}>Your wishlist is empty!</Text>
+       
+      </View>
+       <Footer/>
+       </>
+    );
+  }
 
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={wishlist}
-        renderItem={renderWishlistItem}
-        keyExtractor={(item) => item.id}
-        ListEmptyComponent={() => (
-          <Text style={styles.emptyText}>Your wishlist is empty.</Text>
-        )}
-      />
-    </View>
+    <>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <MaterialCommunityIcons name="heart" size={35} color={Colors.PINK} />
+          <Text style={styles.headerText}>قائمة المفضلة</Text>
+        </View>
+        <ScrollView contentContainerStyle={styles.scrollView}>
+          {books.map((book) => (
+            <WishlistItem
+              key={book._id}
+              book={book}
+              token={token}
+              onRemove={() => handleRemoveFromWishlist(book._id)}
+            />
+          ))}
+            <TouchableOpacity style={styles.clearButton} onPress={handleClearWishlist}>
+          <Text style={styles.clearButtonText}>حذف الكل</Text>
+        </TouchableOpacity>
+        </ScrollView>
+      
+      </View>
+      <Footer />
+    </>
   );
 };
 
@@ -123,31 +199,38 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 20,
+    backgroundColor: 'white',
   },
-  wishlistItem: {
+  header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    paddingVertical: 10,
     marginBottom: 10,
+    marginTop: 40,
   },
-  title: {
-    fontSize: 18,
-  },
-  removeButton: {
-    backgroundColor: '#ff6347',
-    padding: 8,
-    borderRadius: 5,
-  },
-  removeButtonText: {
-    color: 'white',
+  headerText: {
+    fontSize: 24,
     fontWeight: 'bold',
+    marginLeft: 10,
+  },
+  scrollView: {
+    paddingBottom: 20,
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: 18,
     textAlign: 'center',
+    marginTop: 200,
+  },
+  clearButton: {
+    backgroundColor: Colors.ORANGE,
+    paddingVertical: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  clearButtonText: {
+    color: 'black',
+    fontSize: 16,
   },
 });
 

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { MaterialCommunityIcons } from 'react-native-vector-icons';
 import axios from 'axios';
+import Colors from '../../Common/Utils/Colors';
+
 const CartItem = ({ book, token, onRemove }) => {
   const { _id, title, price, mainImage, quantity } = book;
   const [itemQuantity, setItemQuantity] = useState(quantity);
@@ -174,10 +176,17 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     marginHorizontal: 5,
+    backgroundColor:Colors.GRAY, // Blue background color
+    borderRadius: 20, // Circular background
+    padding: 3,
+    marginLeft:9
   },
   quantity: {
     fontSize: 16,
     fontWeight: 'bold',
+    marginLeft:9
+    
+
   },
   removeButton: {
     marginRight: 10,

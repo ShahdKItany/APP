@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
@@ -63,6 +64,9 @@ const ChangePassword = ({ navigation }) => {
       style={styles.container}
       keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
     >
+    
+    
+      <View style={styles.contentContainer}>
       <View style={styles.headerContainer}>
         <TouchableOpacity
           style={styles.header}
@@ -71,8 +75,12 @@ const ChangePassword = ({ navigation }) => {
           <IconAntDesign name="arrowleft" size={25} color="black" />
         </TouchableOpacity>
       </View>
-
-      <View style={styles.contentContainer}>
+      <View style={styles.logoContainer}>
+          <Image
+            source={require("../../../assets/logo/logo.jpg")}
+            style={styles.logo}
+          />
+        </View>
         <Text style={styles.title}>تغيير كلمة المرور</Text>
 
         <TextInput
@@ -123,7 +131,7 @@ const styles = StyleSheet.create({
     height: 50,
   },
   header: {
-    margin: 10,
+    marginLeft: 50,
   },
   contentContainer: {
     flex: 1,
@@ -163,6 +171,18 @@ const styles = StyleSheet.create({
   buttonContent: {
     flexDirection: "row",
     alignItems: "center",
+  },
+  logoContainer: {
+    alignItems: "center",
+    marginVertical: 20,
+  },
+  logo: {
+    width: 150,
+    height: 150,
+    borderRadius: 100,
+    resizeMode: "contain",
+    borderWidth: 1,
+    borderColor: "#FFA000",
   },
 });
 

@@ -1,41 +1,22 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
-import { MaterialCommunityIcons } from 'react-native-vector-icons';
-import { useNavigation } from '@react-navigation/native'; // Import useNavigation hook here
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import Colors from '../../Common/Utils/Colors';
+import { MaterialCommunityIcons } from 'react-native-vector-icons';
 
-const WishlistItem = ({ book, token, onRemove }) => {
-  const { title, price, mainImage, _id } = book;
-  const navigation = useNavigation(); // Get navigation object using useNavigation hook
-
-  const handleRemove = async () => {
-    // Implement removal logic
-  };
-
-  const handlePress = () => {
-    navigation.navigate('BookDetails', {
-      title: book.title,
-      price: book.price,
-      finalPrice: book.finalPrice,
-      description: book.description,
-      mainImage: book.mainImage,
-      subImages: book.subImages,
-      id: book._id,
-      reviews: book.reviews,
-    });
-  };
+const WishlistItem = ({ book, onPress}) => {
+  const { title, price, mainImage } = book;
 
   return (
-    <TouchableOpacity style={styles.container} onPress={handlePress}>
-      <Image source={{ uri: mainImage }} style={styles.image} />
-      <View style={styles.info}>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.price}>₪{price}</Text>
-        <TouchableOpacity style={styles.removeButton} onPress={handleRemove}>
-          <MaterialCommunityIcons name="delete" size={27} color="#f93a8f" />
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
+    <View style={styles.container}>
+      <TouchableOpacity style={styles.bookInfo} onPress={onPress}>
+        <Image source={{ uri: mainImage }} style={styles.image} resizeMode="cover" />
+        <View style={styles.info}>
+          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.price}>₪{price}</Text>
+        </View>
+      </TouchableOpacity>
+     
+    </View>
   );
 };
 
@@ -44,13 +25,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 10,
     marginVertical: 10,
-    backgroundColor: '#fff',
+    backgroundColor: Colors.WHITE,
     borderRadius: 5,
-    shadowColor: '#000',
+    shadowColor: Colors.BLACK,
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 8,
     elevation: 5,
+    justifyContent: 'space-between',
+  },
+  bookInfo: {
+    flexDirection: 'row',
+    flex: 1,
   },
   image: {
     width: 80,
@@ -66,16 +52,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 5,
+textAlign:'right'
   },
   price: {
     fontSize: 16,
-    color: '#888',
+    color: Colors.BLUE,
+    marginRight:10,
+    textAlign:'right'
+
   },
-  removeButton: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-  },
+
 });
 
 export default WishlistItem;
+

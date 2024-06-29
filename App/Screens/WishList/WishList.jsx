@@ -28,7 +28,6 @@ const Wishlist = () => {
     try {
       const userToken = await getToken();
       setToken(userToken);
-      console.log('Retrieved token:', userToken);
     } catch (error) {
       console.error('Error fetching token:', error);
     }
@@ -43,12 +42,9 @@ const Wishlist = () => {
         },
       });
 
-      console.log('Wishlist data response:', response.data);
-
       if (response.data.message === 'success') {
         const wishList = response.data.wishList;
         if (wishList && wishList.books && Array.isArray(wishList.books)) {
-          // Fetch details for each book in the wishlist
           const booksWithDetails = await Promise.all(wishList.books.map(async (book) => {
             const bookDetails = await getBookDetails(book.bookId);
             return { ...book, ...bookDetails };
@@ -56,7 +52,7 @@ const Wishlist = () => {
 
           setBooks(booksWithDetails);
         } else {
-          setBooks([]); // If no books are found or the structure is unexpected, set empty array
+          setBooks([]);
         }
       } else {
         console.error('Failed to fetch wishlist:', response.status);
@@ -78,8 +74,6 @@ const Wishlist = () => {
         },
       });
 
-      console.log('Book details response:', response.data);
-
       return {
         title: response.data.book.title,
         price: response.data.book.finalPrice,
@@ -91,6 +85,33 @@ const Wishlist = () => {
     }
   };
 
+  // const handleBookPress = (item) => {
+  //   const { _id, title, price, description, mainImage, subImages, Discount, reviews } = item;
+  //   const mainImageUrl = mainImage?.secure_url || null;
+  //   const subImagesUrls = subImages && Array.isArray(subImages)
+  //     ? subImages.map((image) => image.secure_url)
+  //     : [];
+
+  //   const finalPrice = price * ((100 - Discount) / 100);
+
+  //   navigation.navigate('BookDetails', {
+  //     id: _id,
+  //     title,
+  //     description,
+  //     mainImage: mainImageUrl,
+  //     subImages: subImagesUrls,
+  //     Discount,
+  //     price,
+  //     finalPrice,
+  //     reviews,
+  //   });
+  // };
+
+  const handleAddToCart = (book) => {
+    // Add the book to the cart
+    console.log('Adding to cart:', book);
+  };
+
   const handleRemoveFromWishlist = async (bookId) => {
     try {
       const response = await axios.delete(`https://ecommercebackend-jzct.onrender.com/wishlist/${bookId}`, {
@@ -100,18 +121,16 @@ const Wishlist = () => {
         },
       });
 
-      console.log('Remove from wishlist response:', response);
-
       if (response.data.message === 'success') {
-        setBooks((prevBooks) => prevBooks.filter((book) => book._id !== bookId));
-        Alert.alert('Success', 'Item removed from wishlist successfully!');
+        setBooks(books.filter(book => book._id !== bookId));
+        Alert.alert('Success', 'Book removed from wishlist successfully!');
       } else {
-        console.error('Failed to remove item from wishlist:', response.status);
-        Alert.alert('Error', 'Failed to remove item from wishlist');
+        console.error('Failed to remove book from wishlist:', response.status);
+        Alert.alert('Error', 'Failed to remove book from wishlist');
       }
     } catch (error) {
-      console.error('Error removing item from wishlist:', error.message);
-      Alert.alert('Error', 'Failed to remove item from wishlist');
+      console.error('Error removing book from wishlist:', error.message);
+      Alert.alert('Error', 'Failed to remove book from wishlist');
     }
   };
 
@@ -126,7 +145,7 @@ const Wishlist = () => {
 
       if (response.data.message === 'success') {
         setBooks([]);
-        Alert.alert('Success', 'Wishlist cleared successfully!');
+        Alert.alert('تم حذف قائمة المفضلة بنجاح!');
       } else {
         console.error('Failed to clear wishlist:', response.status);
         Alert.alert('Error', 'Failed to clear wishlist');
@@ -139,31 +158,48 @@ const Wishlist = () => {
 
   if (!token) {
     return (
+      <>  
       <View style={styles.container}>
-        <Text style={styles.emptyText}>Please log in to view your wishlist!</Text>
-        <Footer />
+        <Text style={styles.emptyText}>الرجاء تسجيل الدخول لعرض قائمة المفضلة الخاصة بك!</Text>
       </View>
+      <Footer />
+      </>
     );
   }
 
   if (loading) {
     return (
+      <> 
       <View style={styles.container}>
+        <View style={styles.header}>
+          <MaterialCommunityIcons name="heart" size={35} color={Colors.PINK} />
+          <Text style={styles.headerText}>قائمة المفضلة</Text>
+        </View>
         <ActivityIndicator size="large" color={Colors.PINK} />
+      
       </View>
+      <Footer />
+      </>
     );
   }
 
   if (books.length === 0) {
     return (
+      <> 
       <View style={styles.container}>
-        <Text style={styles.emptyText}>Your wishlist is empty!</Text>
-        <Footer />
+        <View style={styles.header}>
+          <MaterialCommunityIcons name="heart" size={35} color={Colors.PINK} />
+          <Text style={styles.headerText}>قائمة المفضلة</Text>
+        </View>
+        <Text style={styles.emptyText}>قائمة المفضلة فارغة, قم بإضافة كتب!</Text>
       </View>
+      <Footer />
+      </>
     );
   }
 
   return (
+    <> 
     <View style={styles.container}>
       <View style={styles.header}>
         <MaterialCommunityIcons name="heart" size={35} color={Colors.PINK} />
@@ -174,17 +210,19 @@ const Wishlist = () => {
           <WishlistItem
             key={book._id}
             book={book}
-            token={token}
-            onRemove={() => handleRemoveFromWishlist(book._id)}
-            navigation={navigation}
+            // onPress={() => handleBookPress(book)}
+            onAddToCart={() => handleAddToCart(book)}
+            onRemoveFromWishlist={() => handleRemoveFromWishlist(book._id)}
           />
         ))}
         <TouchableOpacity style={styles.clearButton} onPress={handleClearWishlist}>
           <Text style={styles.clearButtonText}>حذف الكل</Text>
         </TouchableOpacity>
       </ScrollView>
-      <Footer />
+     
     </View>
+    <Footer />
+      </>
   );
 };
 
@@ -218,15 +256,15 @@ const styles = StyleSheet.create({
   clearButton: {
     backgroundColor: Colors.ORANGE,
     paddingVertical: 10,
-    borderRadius: 5,
+    borderRadius: 18,
     alignItems: 'center',
     marginTop: 10,
   },
   clearButtonText: {
-    color: 'black',
-    fontSize: 16,
+    color: Colors.WHITE,
+    fontSize: 19,
+    fontWeight: 'bold',
   },
 });
 
 export default Wishlist;
-

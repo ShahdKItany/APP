@@ -16,13 +16,12 @@ const BooksByCategory = ({ route }) => {
   useEffect(() => {
     fetchBooksByCategory();
   }, []);
-  
 
   const fetchBooksByCategory = () => {
     axios.get(`https://ecommercebackend-jzct.onrender.com/category/books/${categoryId}`)
       .then((response) => {
         const { data } = response;
-        console.log("Fetched Books:", data.books); // Print fetched data
+        console.log("******Fetched Books:", data.books); // Print fetched data
         setBooks(data.books);
         setLoading(false);
       })
@@ -32,70 +31,65 @@ const BooksByCategory = ({ route }) => {
       });
   };
 
-  const handleBookPress = (book) => {
-    const { _id, title, price, description, mainImage, subImages, Discount } = book;
+  const handleBookPress = (item) => {
+    console.log('________Book pressed:', item);
+    const { _id, title, price, description, mainImage, subImages, Discount, reviews } = item;
     const mainImageUrl = mainImage?.secure_url || null;
-    const subImagesUrls = subImages.map((image) => image.secure_url);
+    const subImagesUrls = subImages && Array.isArray(subImages)
+      ? subImages.map((image) => image.secure_url)
+      : [];
+  
     const finalPrice = price * ((100 - Discount) / 100);
   
-    console.log("Selected Book:", book);
-    
-    if (mainImageUrl) {
-      navigation.navigate('BookDetails', {
-        id: _id,
-        title,
-        description,
-        mainImage: mainImageUrl,
-        subImages: subImagesUrls,
-        Discount,
-        price,
-        finalPrice,
-      });
-    } else {
-      // Handle error loading image
-      console.error("Error loading image for book:", book);
-      // Optionally, display a placeholder image or show an error message
-    }
+    navigation.navigate('BookDetails', {
+      id: _id,
+      title,
+      description,
+      mainImage: mainImageUrl,
+      subImages: subImagesUrls,
+      Discount,
+      price,
+      finalPrice,
+      reviews,
+    });
   };
-  
 
   return (
-    <>  
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Categories')}>
-          <IconAntDesign name="arrowleft" size={25} color={Colors.ORANGE} />
-        </TouchableOpacity>
-        <Text style={[styles.categoryName, { color: Colors.BLACK }]}>{categoryName}</Text>
-        <Image
-          source={{ uri: categoryImage }}
-          style={styles.categoryImage}
-          onError={(error) => console.error("Error loading image:", error)}
-        />
+    <>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Categories')}>
+            <IconAntDesign name="arrowleft" size={25} color={Colors.ORANGE} />
+          </TouchableOpacity>
+          <Text style={[styles.categoryName, { color: Colors.BLACK }]}>{categoryName}</Text>
+          <Image
+            source={{ uri: categoryImage }}
+            style={styles.categoryImage}
+            onError={(error) => console.error("Error loading image:", error)}
+          />
+        </View>
+
+        {loading ? (
+          <ActivityIndicator size="large" color={Colors.PINK} />
+        ) : (
+          <FlatList
+            data={books}
+            renderItem={({ item }) => (
+              <BookItem
+                title={item.title}
+                price={item.finalPrice}
+                description={item.description}
+                mainImage={item.mainImage.secure_url}
+                onPress={() => handleBookPress(item)} // Ensure onPress is correctly handled
+              />
+            )}
+            keyExtractor={(item) => item._id}
+            numColumns={2}
+            contentContainerStyle={styles.flatListContent}
+          />
+        )}
       </View>
-
-      {loading ? (
-        <ActivityIndicator size="large" color={Colors.PINK} />
-      ) : (
-        <FlatList
-          data={books}
-          renderItem={({ item }) => (
-            <BookItem
-              title={item.title}
-              price={item.finalPrice}
-              description={item.description}
-              mainImage={item.mainImage.secure_url}
-              onPress={() => handleBookPress(item)}
-            />
-          )}
-          keyExtractor={(item) => item._id}
-          numColumns={2}
-          contentContainerStyle={styles.flatListContent}
-        />
-      )}
-    </View>
-    <Footer />
-
+      <Footer />
     </>
   );
 };
@@ -104,7 +98,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginTop: 60,
-    marginBottom:100
+    marginBottom: 100,
   },
   header: {
     flexDirection: "row",
@@ -135,4 +129,3 @@ const styles = StyleSheet.create({
 });
 
 export default BooksByCategory;
-

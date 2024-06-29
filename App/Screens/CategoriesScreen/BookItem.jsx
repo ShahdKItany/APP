@@ -2,10 +2,10 @@ import React from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import Colors from "../../Common/Utils/Colors";
 
-const BookItem = ({ title, price, description, mainImage, onPress }) => {
+const BookItem = ({ title, price,  mainImage, onPress }) => {
   return (
     <TouchableOpacity style={styles.container} onPress={onPress}>
-      <Image source={{ uri: mainImage }} style={styles.image} onError={(error) => console.error("Error loading image:", error)} />
+      <Image source={{ uri: mainImage }} style={styles.image} />
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.price}>₪{price}</Text>
     </TouchableOpacity>

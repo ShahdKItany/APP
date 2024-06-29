@@ -13,7 +13,7 @@ const menuItems = [
   { id: '3', title: 'عربة التسوق', icon: 'shopping-cart', requiresAuth: true },
   { id: '4', title: 'الصفحة الرئيسية', icon: 'home', requiresAuth: false }, // Added home item
   { id: '5', title: 'تواصل معنا', icon: 'phone', requiresAuth: false },
-  { id: '6', title: 'جميع الطلبات', icon: 'file-text', requiresAuth: true }, // Added order screen item
+  // { id: '6', title: 'جميع الطلبات', icon: 'file-text', requiresAuth: true }, // Added order screen item
 ];
 
 const Profile = () => {

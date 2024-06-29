@@ -37,9 +37,9 @@ const Cart = ({ navigation }) => {
     try {
       const userToken = await getToken();
       setToken(userToken);
-      console.log('Retrieved token:', userToken);
+      //console.log('Retrieved token:', userToken);
     } catch (error) {
-      console.error('Error fetching token:', error);
+      //console.error('Error fetching token:', error);
     }
   };
 
@@ -51,7 +51,7 @@ const Cart = ({ navigation }) => {
         },
       });
 
-      console.log('Book details response:', response.data);
+      //console.log('Book details response:', response.data);
 
       return {
         title: response.data.book.title,
@@ -59,7 +59,7 @@ const Cart = ({ navigation }) => {
         mainImage: response.data.book.mainImage.secure_url,
       };
     } catch (error) {
-      console.error(`Error fetching details for bookId ${bookId}:`, error.message);
+      //console.error(`Error fetching details for bookId ${bookId}:`, error.message);
       return {};
     }
   };
@@ -73,7 +73,7 @@ const Cart = ({ navigation }) => {
         },
       });
 
-      console.log('Cart data response:', response.data);
+     // console.log('Cart data response:', response.data);
 
       if (response.data.message === 'success') {
         const cartData = response.data.cart.books || [];
@@ -90,7 +90,7 @@ const Cart = ({ navigation }) => {
         const total = booksWithDetails.reduce((sum, book) => sum + book.price * book.quantity, 0);
         setTotalPrice(total);
       } else {
-        console.error('Failed to fetch cart data:', response.status);
+        //console.error('Failed to fetch cart data:', response.status);
         Alert.alert('Error', 'Failed to fetch cart data');
       }
     } catch (error) {
@@ -165,11 +165,11 @@ const Cart = ({ navigation }) => {
 
               Alert.alert('نجاح', 'تم إزالة العنصر من السلة بنجاح!');
             } else {
-              console.error('فشل في إزالة العنصر من السلة:', response.status);
+             // console.error('فشل في إزالة العنصر من السلة:', response.status);
               Alert.alert('خطأ', 'فشل في إزالة العنصر من السلة');
             }
           } catch (error) {
-            console.error('خطأ في إزالة العنصر من السلة:', error.message);
+           // console.error('خطأ في إزالة العنصر من السلة:', error.message);
             Alert.alert('خطأ', 'فشل في إزالة العنصر من السلة');
           }
         },
@@ -206,7 +206,8 @@ const Cart = ({ navigation }) => {
   if (!token) {
     return (
       <View style={styles.container}>
-        <Text style={styles.emptyCartText}>Please log in to view your cart!</Text>
+        <Text style={styles.emptyCartText}>الرجاء تسجيل الدخول لعرض سلة التسوق الخاصة بك!
+        </Text>
       </View>
     );
   }
@@ -297,6 +298,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: 'black', // Set text color to #D6DBDF
     textAlign: 'center',
+    marginTop:50
   },
   header: {
     flexDirection: 'row',

@@ -1,3 +1,13 @@
+
+
+
+
+
+
+
+
+
+
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import axios from 'axios';
@@ -71,7 +81,7 @@ const Cart = ({ navigation }) => {
         // Fetch details for each book in the cart
         const booksWithDetails = await Promise.all(cartData.map(async (book) => {
           const bookDetails = await getBookDetails(book.bookId);
-          return { ...book, ...bookDetails };
+          return { ...book, ...bookDetails, quantity: 1 }; // Set initial quantity to 1
         }));
 
         setBooks(booksWithDetails);
@@ -91,59 +101,85 @@ const Cart = ({ navigation }) => {
     }
   };
 
-  const handleRemoveItem = async (id) => {
-    Alert.alert(
-      'Confirm Deletion',
-      'Are you sure you want to remove this item from the cart?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Delete',
-          onPress: async () => {
-            try {
-              const response = await axios.put(
-                `https://ecommercebackend-jzct.onrender.com/cart/${id}`,
-                {}, // Empty object as request body
-                {
-                  headers: {
-                    'Content-Type': 'application/json',
-                    authorization: `AmanGRAD__${token}`,
-                  },
-                }
-              );
-
-              console.log('Delete request response:', response);
-
-              if (response.data.message === 'success') {
-                // Update state to remove the book from cart
-                setBooks((prevBooks) => prevBooks.filter((book) => book._id !== id));
-
-                // Update total price after removing item
-                const removedBook = books.find((book) => book._id === id);
-                if (removedBook) {
-                  const totalPriceAfterRemove = totalPrice - removedBook.price * removedBook.quantity;
-                  setTotalPrice(totalPriceAfterRemove);
-                }
-
-                Alert.alert('Success', 'Item removed from cart successfully!');
-              } else {
-                console.error('Failed to remove item from cart:', response.status);
-                Alert.alert('Error', 'Failed to remove item from cart');
-              }
-            } catch (error) {
-              console.error('Error removing item from cart:', error.message);
-              Alert.alert('Error', 'Failed to remove item from cart');
-            }
-          },
-        },
-      ],
-      { cancelable: true }
-    );
+  const handleIncrementQuantity = (id) => {
+    const updatedBooks = books.map((book) => {
+      if (book._id === id) {
+        return { ...book, quantity: book.quantity + 1 };
+      }
+      return book;
+    });
+    setBooks(updatedBooks);
+    calculateTotalPrice(updatedBooks);
   };
 
+  const handleDecrementQuantity = (id) => {
+    const updatedBooks = books.map((book) => {
+      if (book._id === id && book.quantity > 1) {
+        return { ...book, quantity: book.quantity - 1 };
+      }
+      return book;
+    });
+    setBooks(updatedBooks);
+    calculateTotalPrice(updatedBooks);
+  };
+
+  const calculateTotalPrice = (books) => {
+    const total = books.reduce((sum, book) => sum + book.price * book.quantity, 0);
+    setTotalPrice(total);
+  };
+
+ const handleRemoveItem = async (id) => {
+  Alert.alert(
+    'تأكيد الحذف',
+    'هل أنت متأكد أنك تريد إزالة هذا العنصر من السلة؟',
+    [
+      {
+        text: 'إلغاء',
+        style: 'cancel',
+      },
+      {
+        text: 'حذف',
+        onPress: async () => {
+          try {
+            const response = await axios.put(
+              `https://ecommercebackend-jzct.onrender.com/cart/${id}`,
+              {}, // جسم الطلب فارغ
+              {
+                headers: {
+                  'Content-Type': 'application/json',
+                  authorization: `AmanGRAD__${token}`,
+                },
+              }
+            );
+
+            if (response.data.message === 'success') {
+              // تحديث الحالة لإزالة الكتاب من السلة
+              setBooks((prevBooks) => prevBooks.filter((book) => book._id !== id));
+
+              // تحديث السعر الإجمالي بعد إزالة العنصر
+              const removedBook = books.find((book) => book._id === id);
+              if (removedBook) {
+                const totalPriceAfterRemove = totalPrice - removedBook.price * removedBook.quantity;
+                setTotalPrice(totalPriceAfterRemove);
+              }
+
+              Alert.alert('نجاح', 'تم إزالة العنصر من السلة بنجاح!');
+            } else {
+              console.error('فشل في إزالة العنصر من السلة:', response.status);
+              Alert.alert('خطأ', 'فشل في إزالة العنصر من السلة');
+            }
+          } catch (error) {
+            console.error('خطأ في إزالة العنصر من السلة:', error.message);
+            Alert.alert('خطأ', 'فشل في إزالة العنصر من السلة');
+          }
+        },
+      },
+    ],
+    { cancelable: true }
+  );
+};
+
+  
   const handleClearCart = async () => {
     try {
       const response = await axios.put('https://ecommercebackend-jzct.onrender.com/cart/', {}, {
@@ -156,17 +192,17 @@ const Cart = ({ navigation }) => {
       if (response.data.message === 'success') {
         setBooks([]);
         setTotalPrice(0);
-        Alert.alert('Success', 'Cart cleared successfully!');
+        Alert.alert( 'تم إفراغ السلة بنجاح!');
       } else {
-        console.error('Failed to clear cart:', response.status);
-        Alert.alert('Error', 'Failed to clear cart');
+        console.error('فشل في إفراغ السلة:', response.status);
+        Alert.alert( 'فشل في إفراغ السلة');
       }
-    } catch (error) {
-      console.error('Error clearing cart:', error.message);
-      Alert.alert('Error', 'Failed to clear cart');
-    }
-  };
-
+      } catch (error) {
+      console.error('خطأ في إفراغ السلة:', error.message);
+      Alert.alert( 'فشل في إفراغ السلة');
+      }
+      };
+      
   if (!token) {
     return (
       <View style={styles.container}>
@@ -218,11 +254,16 @@ const Cart = ({ navigation }) => {
         <View style={styles.separator} />
         <ScrollView contentContainerStyle={styles.scrollView}>
           {books.map((book) => (
-            <CartItem key={book._id} book={book} token={token} onRemove={() => handleRemoveItem(book._id)} />
+            <CartItem
+              key={book._id}
+              book={book}
+              onRemove={() => handleRemoveItem(book._id)}
+              onIncrement={() => handleIncrementQuantity(book._id)}
+              onDecrement={() => handleDecrementQuantity(book._id)}
+            />
           ))}
 
           <View style={styles.totalContainer}>
-         
             <Text style={styles.totalPrice}>₪{totalPrice.toFixed(2)}</Text>
             <Text style={styles.totalText}>المجموع:</Text>
           </View>
@@ -261,14 +302,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop:30
-
+    marginTop: 30,
   },
   headerText: {
     marginLeft: 10,
     textAlign: 'center',
-
-
   },
   scrollView: {
     paddingBottom: 20,
@@ -291,7 +329,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   clearButton: {
-    backgroundColor:Colors.GRAY,
+    backgroundColor: Colors.GRAY,
     paddingVertical: 10,
     borderRadius: 5,
     alignItems: 'center',
@@ -302,7 +340,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   orderButton: {
-    backgroundColor:Colors.PINK,
+    backgroundColor: Colors.PINK,
     paddingVertical: 10,
     borderRadius: 5,
     alignItems: 'center',

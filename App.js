@@ -32,7 +32,8 @@ import BooksByCategory from "./App/Screens/CategoriesScreen/BooksByCategory";
 import BookItem from "./App/Screens/CategoriesScreen/BookItem";
 import CartItem from './App/Screens/CartScreen/CartItem';
 import ChangePassword from './App/Screens/ProfileScreen/ChangePassword';
-
+import OrderConfirmationScreen from './App/Screens/OrderScreen/OrderConfirmationScreen';
+import BookSearchScreen from "./App/Common/Header/BookSearchScreen";
 
 
 
@@ -113,7 +114,8 @@ const App = () => {
               component={BookDetails}
               options={{ footer: () => <Footer /> }}
             />
-          
+                         <Stack.Screen name="BookSearchScreen" component={BookSearchScreen} />
+
             <Stack.Screen
               name="Cart"
               component={Cart}
@@ -128,7 +130,8 @@ const App = () => {
                 footer: () => <Footer navigation={navigation} />,
               })}
             />
-            <Stack.Screen name="OrderScreen" component={OrderScreen} />
+        <Stack.Screen name="OrderScreen" component={OrderScreen} />
+        <Stack.Screen name="OrderConfirmationScreen" component={OrderConfirmationScreen} />
             <Stack.Screen name="ChangePassword" component={ChangePassword} />
 
           </Stack.Navigator>

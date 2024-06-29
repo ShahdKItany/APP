@@ -16,6 +16,7 @@ const BooksByCategory = ({ route }) => {
   useEffect(() => {
     fetchBooksByCategory();
   }, []);
+  
 
   const fetchBooksByCategory = () => {
     axios.get(`https://ecommercebackend-jzct.onrender.com/category/books/${categoryId}`)
@@ -59,12 +60,13 @@ const BooksByCategory = ({ route }) => {
   
 
   return (
+    <>  
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Categories')}>
           <IconAntDesign name="arrowleft" size={25} color={Colors.ORANGE} />
         </TouchableOpacity>
-        <Text style={[styles.categoryName, { color: Colors.PINK }]}>{categoryName}</Text>
+        <Text style={[styles.categoryName, { color: Colors.BLACK }]}>{categoryName}</Text>
         <Image
           source={{ uri: categoryImage }}
           style={styles.categoryImage}
@@ -91,8 +93,10 @@ const BooksByCategory = ({ route }) => {
           contentContainerStyle={styles.flatListContent}
         />
       )}
-      <Footer />
     </View>
+    <Footer />
+
+    </>
   );
 };
 
@@ -100,6 +104,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginTop: 60,
+    marginBottom:100
   },
   header: {
     flexDirection: "row",

@@ -1,156 +1,3 @@
-// // Categories.js
-
-// import React from 'react';
-// import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
-// import { useNavigation } from '@react-navigation/native';
-
-// import Footer from '../../Common/Footer/Footer';
-// import Colors from '../../Common/Utils/Colors';
-
-// const Categories = () => {
-//   const navigation = useNavigation();
-
-//   const handlePress = (screenName) => {
-//     switch (screenName) {
-//       case 'From0To2':
-//         navigation.navigate('From0To2'); 
-//         break;
-//       case 'From2To4':
-//         navigation.navigate('From2To4');
-//         break;
-//       case 'From3To6':
-//         navigation.navigate('From3To6'); 
-//         break;
-//       case 'From9To12':
-//         navigation.navigate('From9To12'); 
-//         break;
-//       case 'YoungAdults':
-//         navigation.navigate('YoungAdults'); 
-//         break;
-//       case 'InteractiveBooks':
-//         navigation.navigate('InteractiveBooks'); 
-//         break;
-//       default:
-//         break;
-//     }
-//   };
-
-//   return (
-//     <SafeAreaView style={styles.container}>
-//       <ScrollView>
-//         <View style={styles.logoContainer}>
-//           <Image source={require('../../../assets/logo/logo.jpg')} style={styles.logo} />
-//           <Text style={styles.title}>التصنيفات</Text>
-//         </View>
-//         <View style={styles.content}>
-//           <TouchableOpacity style={styles.button1} onPress={() => handlePress('From0To2')}>
-//             <Text style={styles.buttonText}>من الولادة  الى 2 سنة</Text>
-//           </TouchableOpacity>
-//           <TouchableOpacity style={styles.button2} onPress={() => handlePress('From2To4')}>
-//             <Text style={styles.buttonText}>من سن 2 الى 4 سنوات</Text>
-//           </TouchableOpacity>
-//           <TouchableOpacity style={styles.button1} onPress={() => handlePress('From3To6')}>
-//             <Text style={styles.buttonText}>من سن 3 الى 6 سنوات</Text>
-//           </TouchableOpacity>
-//           <TouchableOpacity style={styles.button2} onPress={() => handlePress('From9To12')}>
-//             <Text style={styles.buttonText}>من سن 9 الى 12 سنة</Text>
-//           </TouchableOpacity>
-//           <TouchableOpacity style={styles.button1} onPress={() => handlePress('YoungAdults')}>
-//             <Text style={styles.buttonText}>يافعين</Text>
-//           </TouchableOpacity>
-//           <TouchableOpacity style={styles.button2} onPress={() => handlePress('InteractiveBooks')}>
-//             <Text style={styles.buttonText}>كتب تفاعلية</Text>
-//           </TouchableOpacity>
-//         </View>
-//       </ScrollView>
-//       <Footer />
-//     </SafeAreaView>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#fff',
-//   },
-//   content: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     paddingHorizontal: 20,
-//   },
-//   button1: {
-//     paddingVertical: 12,
-//     borderRadius: 10,
-//     marginVertical: 6,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     backgroundColor: '#0abae4',
-//   },
-//   button2: {
-//     paddingVertical: 12,
-//     borderRadius: 10,
-//     marginVertical: 6,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     backgroundColor: '#FF922B',
-//   },
-//   buttonText: {
-//     fontSize: 18,
-//     color: '#fff',
-//     textAlign: 'center',
-//   },
-//   logoContainer: {
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-//   logo: {
-//     width: 150,
-//     height: 150,
-//     borderRadius: 100,
-//     resizeMode: 'contain',
-//     borderWidth: 1,
-//     borderColor: Colors.PINK,
-//     marginBottom: 40,
-//     marginTop: 50
-//   },
-//   title: {
-//     fontSize: 24,
-//     fontWeight: 'bold',
-//     marginTop: 1,
-//     marginBottom: 40,
-//     color: Colors.BLACK,
-//   },
-// });
-
-// export default Categories;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 import React, { useState, useEffect } from 'react';
 import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, ActivityIndicator } from 'react-native';
@@ -172,7 +19,14 @@ const Categories = () => {
   const fetchCategories = () => {
     axios.get('https://ecommercebackend-jzct.onrender.com/category/active')
       .then(response => {
-        setCategories(response.data.categories);
+        const allCategories = response.data.categories;
+        const specialCategoryIndex = allCategories.findIndex(category => category.name === "من الولادة - سنتين");
+        if (specialCategoryIndex !== -1) {
+          const specialCategory = allCategories.splice(specialCategoryIndex, 1)[0];
+          setCategories([specialCategory, ...allCategories]);
+        } else {
+          setCategories(allCategories);
+        }
         setLoading(false);
       })
       .catch(error => {
@@ -283,9 +137,9 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 40,
     fontWeight: 'bold',
-    color: Colors.BLUE,
+    color: Colors.BLACK,
     fontFamily: 'Arial', // Add any font family you prefer
-   marginTop:40,
+    marginTop:40,
     marginEnd:10,
     alignItems:'center'
   },

@@ -1,57 +1,32 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { MaterialCommunityIcons } from 'react-native-vector-icons';
-import axios from 'axios';
+import { useNavigation } from '@react-navigation/native'; // Import useNavigation hook here
 import Colors from '../../Common/Utils/Colors';
 
 const WishlistItem = ({ book, token, onRemove }) => {
-  const { _id, title, price, mainImage } = book;
+  const { title, price, mainImage, _id } = book;
+  const navigation = useNavigation(); // Get navigation object using useNavigation hook
 
   const handleRemove = async () => {
-    Alert.alert(
-      'Confirm Removal',
-      'Are you sure you want to remove this item from your wishlist?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Remove',
-          onPress: async () => {
-            try {
-              const response = await axios.delete(
-                `https://ecommercebackend-jzct.onrender.com/wishlist/${_id}`,
-                {
-                  headers: {
-                    'Content-Type': 'application/json',
-                    authorization: `AmanGRAD__${token}`,
-                  },
-                }
-              );
+    // Implement removal logic
+  };
 
-              console.log('Remove from wishlist response:', response);
-
-              if (response.data.message === 'success') {
-                onRemove();
-                Alert.alert('Success', 'Item removed from wishlist successfully!');
-              } else {
-                console.error('Failed to remove item from wishlist:', response.status);
-                Alert.alert('Error', 'Failed to remove item from wishlist');
-              }
-            } catch (error) {
-              console.error('Error removing item from wishlist:', error.message);
-              Alert.alert('Error', 'Failed to remove item from wishlist');
-            }
-          },
-        },
-      ],
-      { cancelable: true }
-    );
+  const handlePress = () => {
+    navigation.navigate('BookDetails', {
+      title: book.title,
+      price: book.price,
+      finalPrice: book.finalPrice,
+      description: book.description,
+      mainImage: book.mainImage,
+      subImages: book.subImages,
+      id: book._id,
+      reviews: book.reviews,
+    });
   };
 
   return (
-    <View style={styles.container}>
+    <TouchableOpacity style={styles.container} onPress={handlePress}>
       <Image source={{ uri: mainImage }} style={styles.image} />
       <View style={styles.info}>
         <Text style={styles.title}>{title}</Text>
@@ -60,7 +35,7 @@ const WishlistItem = ({ book, token, onRemove }) => {
           <MaterialCommunityIcons name="delete" size={27} color="#f93a8f" />
         </TouchableOpacity>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

@@ -264,12 +264,8 @@ const styles = StyleSheet.create({
 export default Home;
 
 */
-
-
-
-
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import Header from '../../Common/Header/Header';
@@ -282,6 +278,7 @@ const Home = () => {
   const navigation = useNavigation();
   const [books, setBooks] = useState([]);
   const [isLoading, setIsLoading] = useState(true); // State to track loading status
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchBooks();
@@ -292,8 +289,9 @@ const Home = () => {
     try {
       const response = await axios.get('https://ecommercebackend-jzct.onrender.com/book/Active');
       setBooks(response.data.books);
+      console.log(response.data);
     } catch (error) {
-      console.error('Error fetching books:', error);
+      //console.error('Error fetching books:', error);
       // Handle error here, such as displaying an error message to the user
     } finally {
       setIsLoading(false); // Set loading status to false after books are fetched
@@ -301,8 +299,8 @@ const Home = () => {
   };
 
   const handleBookPress = (item) => {
-    console.log('________Book pressed:', item);
-    const { _id, title, price, description, mainImage, subImages, Discount,reviews } = item;
+   // console.log('________Book pressed:', item);
+    const { _id, title, price, description, mainImage, subImages, Discount, reviews } = item;
     const mainImageUrl = mainImage?.secure_url || null;
     const subImagesUrls = subImages.map((image) => image.secure_url);
     const finalPrice = price * ((100 - Discount) / 100); // Corrected final price calculation
@@ -337,6 +335,11 @@ const Home = () => {
     } else {
       return 0; // No discount, so return 0 percentage
     }
+  };
+
+  const clearSearch = () => {
+    setSearchTerm('');
+    fetchBooks(); // Fetch all books again
   };
 
   const renderBookItem = ({ item }) => {
@@ -380,16 +383,34 @@ const Home = () => {
     );
   };
 
+  const filteredBooks = books.filter(book => book.title.includes(searchTerm.trim()));
+
   return (
     <View style={{ flex: 1 }}>
       <Header />
       <Navbar />
+      <View style={{ paddingHorizontal: 10 }}>
+        <View style={styles.searchContainer}>
+          <Icon name="search" size={20} color={Colors.ORANGE} style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="ابحث عن اسم الكتاب ..."
+            onChangeText={setSearchTerm}
+            value={searchTerm}
+          />
+          {searchTerm.length > 0 && (
+            <TouchableOpacity onPress={clearSearch}>
+              <Icon name="times-circle" size={20} color={Colors.ORANGE} style={styles.clearIcon} />
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
       <View style={{ flex: 1, paddingHorizontal: 10, marginBottom: 50 }}>
         {isLoading ? ( // Show activity indicator if loading
           <ActivityIndicator size="large" color={Colors.ORANGE} style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} />
         ) : (
           <FlatList
-            data={books}
+            data={searchTerm ? filteredBooks : books}
             renderItem={renderBookItem}
             keyExtractor={(item) => item._id}
             numColumns={2}
@@ -503,6 +524,29 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: Colors.PINK,
     fontWeight: 'bold',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',  // تعيين خلفية اللون الأبيض هنا
+    borderColor: '#fff',
+    borderWidth: 1,
+    borderRadius: 8,
+    width: '95%',
+    alignSelf: 'flex-end',
+    marginRight: 10,
+  },
+  searchIcon: {
+    marginLeft: 10,
+  },
+  searchInput: {
+    flex: 1,
+    height: 40,
+    paddingHorizontal: 10,
+    textAlign: 'center', // لجعل النص يتجه إلى اليمين
+  },
+  clearIcon: {
+    marginRight: 10,
   },
 });
 

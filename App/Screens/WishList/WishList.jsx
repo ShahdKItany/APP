@@ -6,11 +6,13 @@ import WishlistItem from './WhishListItem';
 import Footer from '../../Common/Footer/Footer';
 import { MaterialCommunityIcons } from 'react-native-vector-icons';
 import Colors from '../../Common/Utils/Colors';
+import { useNavigation } from '@react-navigation/native';
 
 const Wishlist = () => {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(null);
+  const navigation = useNavigation();
 
   useEffect(() => {
     fetchTokenFromStorage();
@@ -146,51 +148,43 @@ const Wishlist = () => {
 
   if (loading) {
     return (
-      <>  
       <View style={styles.container}>
         <ActivityIndicator size="large" color={Colors.PINK} />
       </View>
-      <Footer/>
-      </>
     );
   }
 
   if (books.length === 0) {
     return (
-      <> 
       <View style={styles.container}>
         <Text style={styles.emptyText}>Your wishlist is empty!</Text>
-       
+        <Footer />
       </View>
-       <Footer/>
-       </>
     );
   }
 
   return (
-    <>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <MaterialCommunityIcons name="heart" size={35} color={Colors.PINK} />
-          <Text style={styles.headerText}>قائمة المفضلة</Text>
-        </View>
-        <ScrollView contentContainerStyle={styles.scrollView}>
-          {books.map((book) => (
-            <WishlistItem
-              key={book._id}
-              book={book}
-              token={token}
-              onRemove={() => handleRemoveFromWishlist(book._id)}
-            />
-          ))}
-            <TouchableOpacity style={styles.clearButton} onPress={handleClearWishlist}>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <MaterialCommunityIcons name="heart" size={35} color={Colors.PINK} />
+        <Text style={styles.headerText}>قائمة المفضلة</Text>
+      </View>
+      <ScrollView contentContainerStyle={styles.scrollView}>
+        {books.map((book) => (
+          <WishlistItem
+            key={book._id}
+            book={book}
+            token={token}
+            onRemove={() => handleRemoveFromWishlist(book._id)}
+            navigation={navigation}
+          />
+        ))}
+        <TouchableOpacity style={styles.clearButton} onPress={handleClearWishlist}>
           <Text style={styles.clearButtonText}>حذف الكل</Text>
         </TouchableOpacity>
-        </ScrollView>
-      
-      </View>
+      </ScrollView>
       <Footer />
-    </>
+    </View>
   );
 };
 
@@ -235,3 +229,4 @@ const styles = StyleSheet.create({
 });
 
 export default Wishlist;
+

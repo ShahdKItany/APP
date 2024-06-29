@@ -26,7 +26,7 @@ const StarIcon = ({ size = 30, color = Colors.GRAY }) => (
 );
 
 const BookDetails = ({ route }) => {
-  const { title, price, finalPrice, description, mainImage, subImages, id ,reviews } = route.params;
+  const { title, price, finalPrice, description, mainImage, subImages, id, reviews } = route.params?.book || {};
   //const [reviews, setReviews] = useState([]);
   const [comment,setComment]=useState('');
   const [isInWishlist, setIsInWishlist] = useState(false); // State to track if book is in wishlist
@@ -294,22 +294,7 @@ const BookDetails = ({ route }) => {
             onFocus={scrollToCommentInput}
           />
                 
-        <View style={styles.ratingContainer}>
-        <View style={styles.starContainer}>
-          {[...Array(5)].map((_, index) => (
-           
-            <TouchableOpacity key={index} onPress={() => handleStarPress(index)}>
-              
-              <StarIcon
-                size={30}
-                color={index < rating ? Colors.YELLOW : Colors.GRAY}
-                style={styles.star}
-              />
-            </TouchableOpacity>
-          ))}
-        </View>
-       
-      </View>
+     
           <TouchableOpacity style={styles.addButton} onPress={handleAddComment}>
             <Text style={styles.addButtonText}>أضف تعليق</Text>
           </TouchableOpacity>

@@ -21,18 +21,18 @@ const BooksByCategory = ({ route }) => {
     axios.get(`https://ecommercebackend-jzct.onrender.com/category/books/${categoryId}`)
       .then((response) => {
         const { data } = response;
-        console.log("******Fetched Books:", data.books); // Print fetched data
+       // console.log("******Fetched Books:", data.books); // Print fetched data
         setBooks(data.books);
         setLoading(false);
       })
       .catch((error) => {
-        console.error("Error fetching books by category:", error);
+        //console.error("Error fetching books by category:", error);
         setLoading(false);
       });
   };
 
   const handleBookPress = (item) => {
-    console.log('________Book pressed:', item);
+   // console.log('________Book pressed:', item);
     const { _id, title, price, description, mainImage, subImages, Discount, reviews } = item;
     const mainImageUrl = mainImage?.secure_url || null;
     const subImagesUrls = subImages && Array.isArray(subImages)

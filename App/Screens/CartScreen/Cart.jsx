@@ -205,10 +205,19 @@ const Cart = ({ navigation }) => {
       
   if (!token) {
     return (
+      <> 
+      
       <View style={styles.container}>
+
+      <View style={styles.header}>
+            <MaterialCommunityIcons name="cart" size={35} color="#f93a8f" />
+            <Text style={[styles.headerText, { color: 'black', fontSize: 33 }]}>عربة التسوق</Text>
+          </View>
         <Text style={styles.emptyCartText}>الرجاء تسجيل الدخول لعرض سلة التسوق الخاصة بك!
         </Text>
       </View>
+      <Footer />
+      </>
     );
   }
   if (loading) {
@@ -298,7 +307,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: 'black', // Set text color to #D6DBDF
     textAlign: 'center',
-    marginTop:50
+    marginTop:150
   },
   header: {
     flexDirection: 'row',

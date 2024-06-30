@@ -28,7 +28,7 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
       phone: phoneNumber,
     };
   
-    console.log('Sending order:', orderData); // Log order data before sending
+   // console.log('Sending order:', orderData); // Log order data before sending
   
     try {
       // Send POST request to your backend endpoint
@@ -42,8 +42,8 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
       });
   
       // Log response details for debugging
-      console.log('Response status:', response.status);
-      console.log('Response OK:', response.ok);
+     // console.log('Response status:', response.status);
+     // console.log('Response OK:', response.ok);
   
       if (response.ok) {
         Alert.alert(' شكرأ لك , تم إرسال طلبك بنجاح ');
@@ -52,15 +52,15 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
         // Handle specific error cases
         if (response.status === 400) {
           const errorData = await response.json(); // Parse error response JSON if available
-          console.error('Bad Request Error:', errorData);
+          //console.error('Bad Request Error:', errorData);
           Alert.alert('حدث خطأ في الطلب. الرجاء التحقق من البيانات والمحاولة مرة أخرى.');
         } else {
-          console.error('Unexpected Error:', response.statusText);
+          //console.error('Unexpected Error:', response.statusText);
           Alert.alert('حدث خطأ غير متوقع أثناء إكمال الطلب. حاول مرة أخرى.');
         }
       }
     } catch (error) {
-      console.error('Error sending order:', error);
+      //console.error('Error sending order:', error);
       Alert.alert('حدث خطأ أثناء إكمال الطلب. حاول مرة أخرى.');
     }
   };

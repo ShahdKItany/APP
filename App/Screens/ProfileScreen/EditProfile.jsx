@@ -41,7 +41,7 @@ const EditProfile = () => {
           }
         );
         const userData = response.data.user;
-        console.log("User Data:", userData);
+       // console.log("User Data:", userData);
         setUserData(userData);
         setEmail(userData.email);
         setPhoneNumber(userData.phone);

@@ -16,7 +16,7 @@ export const fetchBookDetails = createAsyncThunk(
       });
       return response.data.book;
     } catch (error) {
-      console.error('Error fetching book details:', error);
+     // console.error('Error fetching book details:', error);
       throw error;
     }
   }

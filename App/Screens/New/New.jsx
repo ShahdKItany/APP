@@ -24,7 +24,7 @@ const New = () => {
       setNewBooks(filteredBooks);
       setIsLoading(false); // Set loading to false once books are fetched
     } catch (error) {
-      console.error("Error fetching books:", error);
+      //console.error("Error fetching books:", error);
       setIsLoading(false); // Set loading to false in case of error
     }
   };

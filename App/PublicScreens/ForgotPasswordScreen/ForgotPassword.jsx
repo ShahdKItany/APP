@@ -1,56 +1,5 @@
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, KeyboardAvoidingView, Platform, ActivityIndicator, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -70,39 +19,39 @@ const ForgotPassword = () => {
   const handleRequestVerificationCode = async () => {
     if (email === '') {
       setError('الرجاء إدخال بريدك الإلكتروني');  //enter your email
-      console.log('Error: Email is empty');
+    //  console.log('Error: Email is empty');
     } else {
       setError('');
       setLoading(true);
-      console.log('Sending verification code...');
+     // console.log('Sending verification code...');
 
       let timeoutId = setTimeout(() => {
         setLoading(false);
-        setError('There was a problem sending the code, please try again');
-        console.log('Error: Timeout - Verification code not sent');
-        Alert.alert('There was a problem sending the code, please try again');
+        setError('حدثت مشكلة أثناء إرسال الرمز، يرجى المحاولة مرة أخرى');
+       // console.log('Error: Timeout - Verification code not sent');
+        Alert.alert('حدثت مشكلة أثناء إرسال الرمز، يرجى المحاولة مرة أخرى');
       }, 10000); // 10 seconds
 
       try {
         const response = await axios.patch('https://ecommercebackend-jzct.onrender.com/auth/sendCode', { email });
-        console.log('Response:', response.data); // Log the response data
+        //console.log('Response:', response.data); // Log the response data
         clearTimeout(timeoutId);
         setIsCodeSent(true);
-        console.log('Success: Verification code sent');
-        Alert.alert('The code has been sent successfully');
+       //console.log('Success: Verification code sent');
+        Alert.alert('تم إرسال الرمز بنجاح');
       } catch (error) {
         clearTimeout(timeoutId);
         if (error.response) {
-          console.log('Error data:', error.response.data);
-          console.log('Error status:', error.response.status);
-          console.log('Error headers:', error.response.headers);
+         // console.log('Error data:', error.response.data);
+        //  console.log('Error status:', error.response.status);
+          //console.log('Error headers:', error.response.headers);
         } else if (error.request) {
-          console.log('Error request:', error.request);
+          //console.log('Error request:', error.request);
         } else {
-          console.log('Error message:', error.message);
+          //console.log('Error message:', error.message);
         }
         setError('Failed to send the code, please try again.');
-        console.log('Error: Failed to send verification code', error);
+        //console.log('Error: Failed to send verification code', error);
       } finally {
         setLoading(false);
       }
@@ -112,19 +61,19 @@ const ForgotPassword = () => {
   const handleResetPassword = async () => {
     if (password === '' || verificationCode === '') {
       setError('الرجاء إدخال كلمة المرور الجديدة والكود');   //enter new password and code
-      console.log('Error: Password or verification code is empty');
+     // console.log('Error: Password or verification code is empty');
       return;
     }
 
     if (!isValidPassword(password)) {
       setError('يجب أن تحتوي كلمة المرور على الأقل على 8 أحرف وأرقام'); //Password must contain at least 8 letters and numbers'
-      console.log('Error: Password does not meet criteria');
+      //console.log('Error: Password does not meet criteria');
       return;
     }
 
     setError('');
     setLoading(true);
-    console.log('Resetting password...');
+    //console.log('Resetting password...');
 
     let attempts = 0;
     const maxAttempts = 3;
@@ -133,23 +82,23 @@ const ForgotPassword = () => {
     while (attempts < maxAttempts) {
       try {
         attempts++;
-        console.log(`Attempt ${attempts} to reset password...`);
+      //  console.log(`Attempt ${attempts} to reset password...`);
         await axios.patch('https://ecommercebackend-jzct.onrender.com/auth/forgetPassword', { email, password, code: verificationCode });
-        console.log('Success: Password reset');
+       // console.log('Success: Password reset');
         navigation.navigate('ResetPasswordSuccess');
         setLoading(false);
         return; // Exit the loop and function after successful reset
       } catch (error) {
         if (error.response && (error.response.status === 502 || error.response.status === 503)) {
-          console.log(`Error: ${error.response.status} ${error.response.data.message}, retrying attempt ${attempts}...`);
+         // console.log(`Error: ${error.response.status} ${error.response.data.message}, retrying attempt ${attempts}...`);
           if (attempts < maxAttempts) {
             await new Promise(resolve => setTimeout(resolve, retryDelay * attempts)); // Exponential backoff
           } else {
-            console.log('Max attempts reached, could not reset password.');
+            //console.log('Max attempts reached, could not reset password.');
             setError('فشل في إعادة تعيين كلمة المرور');
           }
         } else {
-          console.log('Error: Failed to reset password', error);
+         // console.log('Error: Failed to reset password', error);
           setError('فشل في إعادة تعيين كلمة المرور');
           break; // Exit the loop if not a 502 or 503 error
         }
@@ -160,7 +109,7 @@ const ForgotPassword = () => {
 
   const isValidPassword = (password) => {
     const valid = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/.test(password);
-    console.log('Password validation:', valid);
+   // console.log('Password validation:', valid);
     return valid;
   };
 

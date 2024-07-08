@@ -5,7 +5,7 @@ import Colors from '../Utils/Colors';
 
 const Navbar = () => {
   const navigation = useNavigation(); 
-  const [activeTab, setActiveTab] = useState('Home'); // تعيين الحالة النشطة بالابتداء
+  const [activeTab, setActiveTab] = useState(''); // تعيين الحالة النشطة بالابتداء
 
   const tabs = [
     { id: 'New', title: 'جديد', screen: 'New' },
@@ -13,9 +13,8 @@ const Navbar = () => {
     { id: 'Home', title: 'الكل', screen: 'Home' },
   ];
 
-  const handleTabPress = (tabId, screenName) => {
-    // تحديث الحالة النشطة عند الضغط على الزر
-    setActiveTab(tabId);
+  const handleTabPress = ( screenName) => {
+  
     // توجيه المستخدم إلى الشاشة المناسبة بناءً على الزر الذي تم الضغط عليه
     navigation.navigate(screenName);
   };
@@ -51,7 +50,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
     paddingVertical: 10,
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
   },
   tabItem: {
     paddingHorizontal: 20,

@@ -1,28 +1,19 @@
 
-
-
-
-
-
-
-
-
-
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import axios from 'axios';
 import { getToken } from '../../ReduxAndAsyncStorage/Storage';
-import CartItem from './CartItem';
-import Footer from '../../Common/Footer/Footer';
+import CartItem from './CartItem'; // استيراد مكون CartItem
 import { MaterialCommunityIcons } from 'react-native-vector-icons';
 import Colors from '../../Common/Utils/Colors';
+import Footer from '../../Common/Footer/Footer';
 
 const Cart = ({ navigation }) => {
   const [books, setBooks] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
-
+ 
   useEffect(() => {
     fetchTokenFromStorage();
   }, []);
@@ -37,9 +28,9 @@ const Cart = ({ navigation }) => {
     try {
       const userToken = await getToken();
       setToken(userToken);
-      //console.log('Retrieved token:', userToken);
+  
     } catch (error) {
-      //console.error('Error fetching token:', error);
+     
     }
   };
 
@@ -51,7 +42,6 @@ const Cart = ({ navigation }) => {
         },
       });
 
-      //console.log('Book details response:', response.data);
 
       return {
         title: response.data.book.title,
@@ -59,7 +49,6 @@ const Cart = ({ navigation }) => {
         mainImage: response.data.book.mainImage.secure_url,
       };
     } catch (error) {
-      //console.error(`Error fetching details for bookId ${bookId}:`, error.message);
       return {};
     }
   };
@@ -73,7 +62,7 @@ const Cart = ({ navigation }) => {
         },
       });
 
-     // console.log('Cart data response:', response.data);
+      //z console.log('Cart data response:', response.data);
 
       if (response.data.message === 'success') {
         const cartData = response.data.cart.books || [];
@@ -128,95 +117,93 @@ const Cart = ({ navigation }) => {
     setTotalPrice(total);
   };
 
- const handleRemoveItem = async (id) => {
-  Alert.alert(
-    'تأكيد الحذف',
-    'هل أنت متأكد أنك تريد إزالة هذا العنصر من السلة؟',
-    [
-      {
-        text: 'إلغاء',
-        style: 'cancel',
-      },
-      {
-        text: 'حذف',
-        onPress: async () => {
-          try {
-            const response = await axios.put(
-              `https://ecommercebackend-jzct.onrender.com/cart/${id}`,
-              {}, // جسم الطلب فارغ
-              {
-                headers: {
-                  'Content-Type': 'application/json',
-                  authorization: `AmanGRAD__${token}`,
-                },
+
+  /*
+  const handleRemoveItem = async (id) => {
+    Alert.alert(
+      'تأكيد الحذف',
+      'هل أنت متأكد أنك تريد إزالة هذا العنصر من السلة؟',
+      [
+        {
+          text: 'إلغاء',
+          style: 'cancel',
+        },
+        {
+          text: 'حذف',
+          onPress: async () => {
+            try {
+              const response = await axios.put(
+                `https://ecommercebackend-jzct.onrender.com/cart/${id}`,
+                {},
+                {
+                  headers: {
+                    'Content-Type': 'application/json',
+                    authorization: `AmanGRAD__${token}`,
+                  },
+                }
+              );
+  
+              if (response.data.message === 'success') {
+                // تحديث الحالة لإزالة الكتاب من السلة
+                setBooks((prevBooks)=>prevBooks.filter((book) => book._id !== id));
+                //setBooks(updatedBooks);
+               // await updateBooksInDatabase(updatedBooks);
+  
+                Alert.alert('نجاح', 'تم إزالة العنصر من السلة بنجاح!');
+              } else {
+                Alert.alert( 'فشل في إزالة العنصر من السلة');
               }
-            );
-
-            if (response.data.message === 'success') {
-              // تحديث الحالة لإزالة الكتاب من السلة
-              setBooks((prevBooks) => prevBooks.filter((book) => book._id !== id));
-
-              // تحديث السعر الإجمالي بعد إزالة العنصر
-              const removedBook = books.find((book) => book._id === id);
-              if (removedBook) {
-                const totalPriceAfterRemove = totalPrice - removedBook.price * removedBook.quantity;
-                setTotalPrice(totalPriceAfterRemove);
-              }
-
-              Alert.alert('نجاح', 'تم إزالة العنصر من السلة بنجاح!');
-            } else {
-             // console.error('فشل في إزالة العنصر من السلة:', response.status);
+            } catch (error) {
               Alert.alert('خطأ', 'فشل في إزالة العنصر من السلة');
             }
-          } catch (error) {
-           // console.error('خطأ في إزالة العنصر من السلة:', error.message);
-            Alert.alert('خطأ', 'فشل في إزالة العنصر من السلة');
-          }
+          },
         },
-      },
-    ],
-    { cancelable: true }
-  );
-};
-
+      ],
+      { cancelable: true }
+    );
+  };
   
+  */
+  
+
   const handleClearCart = async () => {
     try {
-      const response = await axios.put('https://ecommercebackend-jzct.onrender.com/cart/', {}, {
-        headers: {
-          'Content-Type': 'application/json',
-          authorization: `AmanGRAD__${token}`,
-        },
-      });
+      const response = await axios.put(
+        'https://ecommercebackend-jzct.onrender.com/cart/',
+        {},
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            authorization: `AmanGRAD__${token}`,
+          },
+        }
+      );
 
       if (response.data.message === 'success') {
         setBooks([]);
         setTotalPrice(0);
-        Alert.alert( 'تم إفراغ السلة بنجاح!');
+        Alert.alert('تم إفراغ السلة بنجاح!');
       } else {
         console.error('فشل في إفراغ السلة:', response.status);
-        Alert.alert( 'فشل في إفراغ السلة');
+        Alert.alert('فشل في إفراغ السلة');
       }
-      } catch (error) {
+    } catch (error) {
       console.error('خطأ في إفراغ السلة:', error.message);
-      Alert.alert( 'فشل في إفراغ السلة');
-      }
-      };
-      
+      Alert.alert('فشل في إفراغ السلة');
+    }
+  };
+
   if (!token) {
     return (
-      <> 
-      
-      <View style={styles.container}>
-
-      <View style={styles.header}>
+      <>
+        <View style={styles.container}>
+          <View style={styles.header}>
             <MaterialCommunityIcons name="cart" size={35} color="#f93a8f" />
             <Text style={[styles.headerText, { color: 'black', fontSize: 33 }]}>عربة التسوق</Text>
           </View>
-        <Text style={styles.emptyCartText}>الرجاء تسجيل الدخول لعرض سلة التسوق الخاصة بك!
-        </Text>
-      </View>
-      <Footer />
+          <Text style={styles.emptyCartText}>الرجاء تسجيل الدخول لعرض سلة التسوق الخاصة بك!</Text>
+        </View>
+        <Footer />
       </>
     );
   }
@@ -267,7 +254,7 @@ const Cart = ({ navigation }) => {
             <CartItem
               key={book._id}
               book={book}
-              onRemove={() => handleRemoveItem(book._id)}
+              // handleRemoveItem={handleRemoveItem} // تأكد من تمرير handleRemoveItem بشكل صحيح هنا
               onIncrement={() => handleIncrementQuantity(book._id)}
               onDecrement={() => handleDecrementQuantity(book._id)}
             />
@@ -280,7 +267,10 @@ const Cart = ({ navigation }) => {
           <TouchableOpacity style={styles.clearButton} onPress={handleClearCart}>
             <Text style={styles.clearButtonText}>حذف الكل</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.orderButton} onPress={() => navigation.navigate('OrderScreen', { cartItems: books, totalPrice: totalPrice })}>
+          <TouchableOpacity
+            style={styles.orderButton}
+            onPress={() => navigation.navigate('OrderScreen', { cartItems: books, totalPrice: totalPrice })}
+          >
             <Text style={styles.orderButtonText}>اطلب الآن</Text>
           </TouchableOpacity>
         </ScrollView>
@@ -307,7 +297,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: 'black', // Set text color to #D6DBDF
     textAlign: 'center',
-    marginTop:150
+    marginTop: 150,
   },
   header: {
     flexDirection: 'row',

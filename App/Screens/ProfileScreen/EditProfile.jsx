@@ -24,7 +24,6 @@ const EditProfile = () => {
   const [username, setUserName] = useState("");
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [password, setPassword] = useState("");
   const [isEditMode, setIsEditMode] = useState(false);
   const [userData, setUserData] = useState(null);
   const token = useSelector(selectToken);
@@ -41,7 +40,6 @@ const EditProfile = () => {
           }
         );
         const userData = response.data.user;
-       // console.log("User Data:", userData);
         setUserData(userData);
         setEmail(userData.email);
         setPhoneNumber(userData.phone);
@@ -61,35 +59,6 @@ const EditProfile = () => {
   };
 
   const handleSaveProfile = async () => {
-    if (!password) {
-      Alert.alert("الرجاء إدخال كلمة المرور الحالية لتأكيد التغييرات");
-      return;
-    }
-  
-    // Ensure current password is correct
-    try {
-      const response = await axios.post(
-        "https://ecommercebackend-jzct.onrender.com/auth/verifyPassword",
-        {
-          password: password,
-        },
-        {
-          headers: {
-            authorization: `AmanGRAD__${token}`,
-          },
-        }
-      );
-  
-      if (!response.data.success) {
-        Alert.alert("كلمة المرور الحالية غير صحيحة");
-        return;
-      }
-    } catch (error) {
-      Alert.alert("حدث خطأ أثناء التحقق من كلمة المرور الحالية");
-      return;
-    }
-  
-    // Password verified, proceed with updating profile
     const updatedData = {};
     if (username && username !== userData.username) {
       updatedData.username = username;
@@ -100,8 +69,7 @@ const EditProfile = () => {
     if (phoneNumber && phoneNumber !== userData.phone) {
       updatedData.phone = phoneNumber;
     }
-    updatedData.password = password;
-  
+
     try {
       await axios.patch(
         "https://ecommercebackend-jzct.onrender.com/auth/update",
@@ -112,14 +80,16 @@ const EditProfile = () => {
           },
         }
       );
-  
+
       Alert.alert("تم حفظ التغييرات بنجاح");
       setIsEditMode(false);
     } catch (error) {
-      Alert.alert("حدث خطأ أثناء حفظ التغييرات", error.response?.data?.message || error.message);
+      Alert.alert(
+        "حدث خطأ أثناء حفظ التغييرات",
+        error.response?.data?.message || error.message
+      );
     }
   };
-  
 
   return (
     <KeyboardAvoidingView
@@ -147,6 +117,18 @@ const EditProfile = () => {
         <Text style={styles.title}>تعديل الملف الشخصي</Text>
 
         <View style={styles.inputContainer}>
+
+        <TextInput
+            style={[styles.input, styles.disabledInput]}
+            placeholder={userData ? userData.email : "البريد الالكتروني"}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={email}
+            onChangeText={setEmail}
+            editable={false} 
+          />
+
+          
           <TextInput
             style={styles.input}
             placeholder={userData ? userData.username : "الاسم"}
@@ -156,15 +138,7 @@ const EditProfile = () => {
             onChangeText={setUserName}
             editable={isEditMode}
           />
-          <TextInput
-            style={styles.input}
-            placeholder={userData ? userData.email : "البريد الالكتروني"}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            value={email}
-            onChangeText={setEmail}
-            editable={isEditMode}
-          />
+        
           <TextInput
             style={styles.input}
             placeholder="رقم الهاتف"
@@ -176,27 +150,16 @@ const EditProfile = () => {
             }
             editable={isEditMode}
           />
-          {isEditMode && (
-            <>
-              <TextInput
-                style={styles.input}
-                placeholder="كلمة المرور الحالية"
-                keyboardType="default"
-                secureTextEntry
-                value={password}
-                onChangeText={setPassword}
-                editable={isEditMode}
-              />
-              <TouchableOpacity
-                style={styles.changePasswordContainer}
-                onPress={() => navigation.navigate("ChangePassword")}
-              >
-                <IconAntDesign name="lock" size={20} color={Colors.PINK} />
-                <Text style={styles.changePasswordText}>تغيير كلمة المرور</Text>
-              </TouchableOpacity>
-            </>
-          )}
         </View>
+
+        <TouchableOpacity
+          style={styles.changePasswordContainer}
+          onPress={() => navigation.navigate("ChangePassword")}
+        >
+          <IconAntDesign name="lock" size={20} color={Colors.PINK} />
+          <Text style={styles.changePasswordText}>تغيير كلمة المرور</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.button}
           onPress={isEditMode ? handleSaveProfile : handleToggleEditMode}
@@ -231,7 +194,6 @@ const styles = StyleSheet.create({
   headerContainer: {
     width: "100%",
     height: 50,
-    
   },
   header: {
     marginLeft: 50,
@@ -264,9 +226,23 @@ const styles = StyleSheet.create({
     margin: 10,
     padding: 10,
     borderWidth: 1,
-    borderColor: "#0abae4",
+    borderColor:Colors.BLUE,
     borderRadius: 10,
     textAlign: "right",
+  },
+  disabledInput: {
+    borderColor: Colors.GRAY,
+    color: "#736F6E",
+  },
+  changePasswordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  changePasswordText: {
+    color: Colors.PINK,
+    marginLeft: 5,
+    fontSize: 16,
   },
   button: {
     width: "80%",
@@ -289,18 +265,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  changePasswordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 10,
-  },
-  changePasswordText: {
-    color: Colors.PINK,
-    marginLeft: 5,
-    fontSize: 17,
-    textDecorationLine: "underline",
-  },
 });
 
 export default EditProfile;
-

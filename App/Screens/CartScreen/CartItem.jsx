@@ -1,25 +1,9 @@
-
-
-
-
 import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import Colors from '../../Common/Utils/Colors';
 import { MaterialCommunityIcons } from 'react-native-vector-icons';
 
-const CartItem = ({ book, onRemove, onIncrement, onDecrement }) => {
-  const handleRemove = () => {
-    Alert.alert(
-      'تأكيد الحذف',
-      `هل أنت متأكد أنك تريد حذف ${book.title} من عربة التسوق؟`,
-      [
-        { text: 'إلغاء', style: 'cancel' },
-        { text: 'حذف', onPress: onRemove, style: 'destructive' }
-      ],
-      { cancelable: true }
-    );
-  };
-
+const CartItem = ({ book,  onIncrement, onDecrement }) => {
   return (
     <View style={styles.container}>
       <Image source={{ uri: book.mainImage }} style={styles.image} />
@@ -29,17 +13,25 @@ const CartItem = ({ book, onRemove, onIncrement, onDecrement }) => {
           {book.price !== undefined && (
             <Text style={styles.price}>₪{book.price.toFixed(2)}</Text>
           )}
+
+          
           <View style={styles.actionButtons}>
-            <TouchableOpacity style={styles.removeButton} onPress={handleRemove}>
+            {/* <TouchableOpacity style={styles.removeButton} onPress={() => handleRemoveItem(book._id)}>
               <MaterialCommunityIcons name="delete" size={27} color="#f93a8f" />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
+
+
             <TouchableOpacity style={styles.actionButton} onPress={onDecrement} disabled={book.quantity <= 1}>
               <MaterialCommunityIcons name="minus" size={20} color="black" />
             </TouchableOpacity>
+
+
             <Text style={styles.quantity}>{book.quantity}</Text>
             <TouchableOpacity style={styles.actionButton} onPress={onIncrement}>
               <MaterialCommunityIcons name="plus" size={20} color="black" />
             </TouchableOpacity>
+
+
           </View>
         </View>
       </View>
@@ -94,9 +86,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginLeft: 9,
   },
-  removeButton: {
-    marginLeft: 10,
-  },
+  // removeButton: {
+  //   marginLeft: 10,
+  // },
 });
 
 export default CartItem;

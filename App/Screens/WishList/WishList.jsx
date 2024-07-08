@@ -85,55 +85,10 @@ const Wishlist = () => {
     }
   };
 
-  // const handleBookPress = (item) => {
-  //   const { _id, title, price, description, mainImage, subImages, Discount, reviews } = item;
-  //   const mainImageUrl = mainImage?.secure_url || null;
-  //   const subImagesUrls = subImages && Array.isArray(subImages)
-  //     ? subImages.map((image) => image.secure_url)
-  //     : [];
+ 
+ 
 
-  //   const finalPrice = price * ((100 - Discount) / 100);
-
-  //   navigation.navigate('BookDetails', {
-  //     id: _id,
-  //     title,
-  //     description,
-  //     mainImage: mainImageUrl,
-  //     subImages: subImagesUrls,
-  //     Discount,
-  //     price,
-  //     finalPrice,
-  //     reviews,
-  //   });
-  // };
-
-  const handleAddToCart = (book) => {
-    // Add the book to the cart
-    console.log('Adding to cart:', book);
-  };
-
-  const handleRemoveFromWishlist = async (bookId) => {
-    try {
-      const response = await axios.delete(`https://ecommercebackend-jzct.onrender.com/wishlist/${bookId}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `AmanGRAD__${token}`,
-        },
-      });
-
-      if (response.data.message === 'success') {
-        setBooks(books.filter(book => book._id !== bookId));
-        Alert.alert('Success', 'Book removed from wishlist successfully!');
-      } else {
-        console.error('Failed to remove book from wishlist:', response.status);
-        Alert.alert('Error', 'Failed to remove book from wishlist');
-      }
-    } catch (error) {
-      console.error('Error removing book from wishlist:', error.message);
-      Alert.alert('Error', 'Failed to remove book from wishlist');
-    }
-  };
-
+  
   const handleClearWishlist = async () => {
     try {
       const response = await axios.put('https://ecommercebackend-jzct.onrender.com/wishlist/', {}, {
@@ -160,6 +115,9 @@ const Wishlist = () => {
     return (
       <>  
       <View style={styles.container}>
+      <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={{ marginRight: 130 }}>
+            <MaterialCommunityIcons name="arrow-left" size={24} color={Colors.PINK} />
+          </TouchableOpacity>
         <Text style={styles.emptyText}>الرجاء تسجيل الدخول لعرض قائمة المفضلة الخاصة بك!</Text>
       </View>
       <Footer />
@@ -172,12 +130,15 @@ const Wishlist = () => {
       <> 
       <View style={styles.container}>
         <View style={styles.header}>
+       
           <MaterialCommunityIcons name="heart" size={35} color={Colors.PINK} />
           <Text style={styles.headerText}>قائمة المفضلة</Text>
+          
         </View>
         <ActivityIndicator size="large" color={Colors.PINK} />
       
       </View>
+      
       <Footer />
       </>
     );
@@ -188,6 +149,9 @@ const Wishlist = () => {
       <> 
       <View style={styles.container}>
         <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={{ marginRight: 130 }}>
+            <MaterialCommunityIcons name="arrow-left" size={24} color={Colors.PINK} />
+          </TouchableOpacity>
           <MaterialCommunityIcons name="heart" size={35} color={Colors.PINK} />
           <Text style={styles.headerText}>قائمة المفضلة</Text>
         </View>
@@ -202,17 +166,18 @@ const Wishlist = () => {
     <> 
     <View style={styles.container}>
       <View style={styles.header}>
+      <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={{ marginRight: 130 }}>
+            <MaterialCommunityIcons name="arrow-left" size={24} color={Colors.PINK} />
+          </TouchableOpacity>
         <MaterialCommunityIcons name="heart" size={35} color={Colors.PINK} />
         <Text style={styles.headerText}>قائمة المفضلة</Text>
+        
       </View>
       <ScrollView contentContainerStyle={styles.scrollView}>
         {books.map((book) => (
           <WishlistItem
             key={book._id}
             book={book}
-            // onPress={() => handleBookPress(book)}
-            onAddToCart={() => handleAddToCart(book)}
-            onRemoveFromWishlist={() => handleRemoveFromWishlist(book._id)}
           />
         ))}
         <TouchableOpacity style={styles.clearButton} onPress={handleClearWishlist}>

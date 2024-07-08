@@ -51,7 +51,7 @@ const Profile = () => {
 
   
   const handleOrderScreenNavigation = () => {
-    navigation.navigate('BookSearchScreen');
+    navigation.navigate('AllOrders');
   };
 
   return (

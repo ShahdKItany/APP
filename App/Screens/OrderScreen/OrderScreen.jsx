@@ -5,7 +5,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TextInput, TouchableOpacity, Alert,KeyboardAvoidingView } from 'react-native';
 import { MaterialCommunityIcons } from 'react-native-vector-icons';
-import Colors from '../../Common/Utils/Colors'; // Assuming you have a Colors.js file for consistent colors
+import Colors from '../../Common/Utils/Colors'; 
 import { Picker } from '@react-native-picker/picker';
 
 const OrderScreen = ({ route, navigation }) => {
@@ -120,8 +120,12 @@ const OrderScreen = ({ route, navigation }) => {
     <KeyboardAvoidingView style={styles.container}>
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Your existing order summary */}
+       
         <View style={[styles.titleContainer, { alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }]}>
+        <TouchableOpacity onPress={() => navigation.navigate('Cart')} style={{ marginRight: 140 }}>
+    <MaterialCommunityIcons name="arrow-left" size={24} color={Colors.WHITE} />
+</TouchableOpacity>
+
   <MaterialCommunityIcons name="clipboard-outline" size={24} color={Colors.WHITE} style={styles.titleIcon} />
   <Text style={[styles.title, { color: Colors.WHITE }]}>ملخص الطلب</Text>
 </View>

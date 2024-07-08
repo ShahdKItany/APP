@@ -26,6 +26,10 @@ export default function Login() {
     }
     checkUser()
   }, []);
+
+
+
+  
   return (
     <View style={styles.container}>
       <Image

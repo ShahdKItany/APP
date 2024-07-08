@@ -39,7 +39,7 @@ import BookItem from "./App/Screens/CategoriesScreen/BookItem";
 import CartItem from './App/Screens/CartScreen/CartItem';
 import ChangePassword from './App/Screens/ProfileScreen/ChangePassword';
 import OrderConfirmationScreen from './App/Screens/OrderScreen/OrderConfirmationScreen';
-import BookSearchScreen from "./App/Common/Header/BookSearchScreen";
+import AllOrders from "./App/Screens/AllOrders/AllOrders";
 
 
 
@@ -120,7 +120,7 @@ const App = () => {
               component={BookDetails}
               options={{ footer: () => <Footer /> }}
             />
-                         <Stack.Screen name="BookSearchScreen" component={BookSearchScreen} />
+                        
 
             <Stack.Screen
               name="Cart"
@@ -138,7 +138,14 @@ const App = () => {
             />
         <Stack.Screen name="OrderScreen" component={OrderScreen} />
         <Stack.Screen name="OrderConfirmationScreen" component={OrderConfirmationScreen} />
+        
             <Stack.Screen name="ChangePassword" component={ChangePassword} />
+
+            <Stack.Screen
+              name="AllOrders"
+              component={AllOrders}
+              options={{ footer: () => <Footer /> }}
+            />
 
           </Stack.Navigator>
         </NavigationContainer>
